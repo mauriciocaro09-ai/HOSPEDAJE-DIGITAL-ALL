@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosotros - Hospedaje Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { primary: '#0f3d3e', accent: '#ff8a3d' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-white text-gray-800 font-sans antialiased">
+
+    <!-- NAVEGACIÓN -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="landingpage.html" class="flex items-center gap-3 font-bold text-primary tracking-tight">
+                <span class="w-10 h-10 rounded-xl grid place-items-center bg-primary text-white shadow-lg shadow-primary/20">
+                    <i class="fa-solid fa-hotel"></i>
+                </span>
+                <span class="hidden sm:block text-lg">HOSPEDAJE DIGITAL</span>
+            </a>
+
+            <div class="hidden md:flex items-center gap-8 font-medium text-gray-500">
+                <a href="landingpage.html#inicio" class="hover:text-primary transition-colors">Inicio</a>
+                <a href="landingpage.html#habitaciones" class="hover:text-primary transition-colors">Habitaciones</a>
+                <a href="nosotros.html" class="text-primary font-semibold">Nosotros</a>
+                <a href="contacto.html" class="hover:text-primary transition-colors">Contacto</a>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="../login.html" class="px-5 py-2.5 rounded-lg font-semibold text-primary hover:bg-gray-50 transition-all text-sm">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="relative bg-primary overflow-hidden py-24 lg:py-32">
+        <div class="absolute inset-0 opacity-10">
+            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1600"
+                 alt="" class="w-full h-full object-cover">
+        </div>
+        <div class="relative max-w-7xl mx-auto px-6 text-center text-white">
+            <p class="text-accent font-semibold tracking-widest text-sm uppercase mb-4">Quiénes somos</p>
+            <h1 class="text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                Un lugar donde<br><span class="italic">cada detalle importa</span>
+            </h1>
+            <p class="text-lg text-white/70 max-w-2xl mx-auto">
+                Más de una década creando experiencias de hospedaje que los huéspedes recuerdan para siempre.
+            </p>
+        </div>
+    </section>
+
+    <!-- HISTORIA -->
+    <section class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+            <div>
+                <p class="text-accent font-semibold tracking-widest text-sm uppercase mb-3">Nuestra historia</p>
+                <h2 class="text-4xl font-bold text-primary mb-6 leading-tight">
+                    Nacimos con una visión clara
+                </h2>
+                <p class="text-gray-600 leading-relaxed mb-5">
+                    Hospedaje Digital nació con la convicción de que alojarse bien no tiene que ser complicado.
+                    Desde nuestra apertura, nos hemos dedicado a combinar comodidad, tecnología y atención
+                    personalizada para que cada estadía sea una experiencia memorable.
+                </p>
+                <p class="text-gray-600 leading-relaxed">
+                    Ubicados en San Roque, Antioquia, somos el punto de partida ideal para explorar la región,
+                    descansar de la rutina y reconectar con lo que importa.
+                </p>
+            </div>
+            <div class="relative">
+                <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=800"
+                     alt="Hospedaje Digital" class="rounded-3xl shadow-2xl w-full object-cover h-96">
+                <div class="absolute -bottom-6 -left-6 bg-accent text-white rounded-2xl px-6 py-4 shadow-xl">
+                    <p class="text-3xl font-bold">+10</p>
+                    <p class="text-sm font-medium opacity-90">Años de experiencia</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VALORES -->
+    <section class="py-24 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <p class="text-accent font-semibold tracking-widest text-sm uppercase mb-3">Lo que nos mueve</p>
+                <h2 class="text-4xl font-bold text-primary">Nuestros valores</h2>
+            </div>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-primary/10 rounded-xl grid place-items-center mb-5">
+                        <i class="fa-solid fa-heart text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-primary mb-3">Atención personalizada</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        Cada huésped es único. Nuestro equipo está disponible 24/7 para hacer tu estadía exactamente como la imaginas.
+                    </p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-primary/10 rounded-xl grid place-items-center mb-5">
+                        <i class="fa-solid fa-leaf text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-primary mb-3">Compromiso con el entorno</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        Cuidamos el medio ambiente con prácticas sostenibles que respetan la naturaleza de la región antioqueña.
+                    </p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-primary/10 rounded-xl grid place-items-center mb-5">
+                        <i class="fa-solid fa-star text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-primary mb-3">Calidad sin excepciones</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        Desde la limpieza hasta los servicios adicionales, cada detalle pasa por nuestros estándares de calidad.
+                    </p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-primary/10 rounded-xl grid place-items-center mb-5">
+                        <i class="fa-solid fa-shield-halved text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-primary mb-3">Seguridad y confianza</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        Tu tranquilidad es nuestra prioridad. Contamos con sistemas de seguridad modernos en todas nuestras instalaciones.
+                    </p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-primary/10 rounded-xl grid place-items-center mb-5">
+                        <i class="fa-solid fa-bolt text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-primary mb-3">Tecnología moderna</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        Reservas online, pagos digitales y gestión de servicios desde tu dispositivo, simple y sin filas.
+                    </p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-primary/10 rounded-xl grid place-items-center mb-5">
+                        <i class="fa-solid fa-map-location-dot text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-primary mb-3">Ubicación privilegiada</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        En el corazón de San Roque, Antioquia, cerca de todo lo que necesitas para explorar y disfrutar.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MISIÓN Y VISIÓN -->
+    <section class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-10">
+            <div class="bg-primary rounded-3xl p-10 text-white">
+                <div class="w-12 h-12 bg-white/20 rounded-xl grid place-items-center mb-6">
+                    <i class="fa-solid fa-bullseye text-white text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-4">Nuestra Misión</h3>
+                <p class="text-white/80 leading-relaxed">
+                    Brindar experiencias de hospedaje de primera clase, combinando comodidad, tecnología y
+                    atención personalizada para crear momentos que nuestros huéspedes recuerden con cariño.
+                </p>
+            </div>
+            <div class="bg-accent rounded-3xl p-10 text-white">
+                <div class="w-12 h-12 bg-white/20 rounded-xl grid place-items-center mb-6">
+                    <i class="fa-solid fa-eye text-white text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-4">Nuestra Visión</h3>
+                <p class="text-white/80 leading-relaxed">
+                    Ser el referente de hospedaje en San Roque y la región, reconocidos por nuestra calidad,
+                    innovación y el compromiso genuino con cada huésped que nos visita.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-20 bg-slate-50">
+        <div class="max-w-3xl mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold text-primary mb-4">¿Listo para visitarnos?</h2>
+            <p class="text-gray-500 mb-8 text-lg">Reserva tu estadía hoy y vive la experiencia Hospedaje Digital.</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="../login.html" class="px-8 py-4 bg-primary text-white rounded-xl font-bold shadow-xl hover:-translate-y-1 transition-all">
+                    Reservar ahora
+                </a>
+                <a href="contacto.html" class="px-8 py-4 bg-white text-primary border border-gray-200 rounded-xl font-bold hover:bg-gray-50 transition-all">
+                    Contáctanos
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-primary text-white py-12">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-3">
+                <span class="w-9 h-9 rounded-xl grid place-items-center bg-white/10">
+                    <i class="fa-solid fa-hotel"></i>
+                </span>
+                <span class="font-bold tracking-tight">HOSPEDAJE DIGITAL</span>
+            </div>
+            <div class="flex gap-6 text-sm text-white/60">
+                <a href="landingpage.html" class="hover:text-white transition-colors">Inicio</a>
+                <a href="nosotros.html" class="hover:text-white transition-colors">Nosotros</a>
+                <a href="contacto.html" class="hover:text-white transition-colors">Contacto</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

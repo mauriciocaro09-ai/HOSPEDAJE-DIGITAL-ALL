@@ -1,0 +1,23 @@
+# Variables de entorno (contienen secretos — NUNCA subir a git)
+.env
+.env.local
+.env.production
+
+# Dependencias de Node
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Archivos del sistema operativo
+.DS_Store
+desktop.ini
+Thumbs.db
+
+# Imágenes subidas por usuarios
+src/public/img/paquetes/*.jpg
+src/public/img/paquetes/*.jpeg
+src/public/img/paquetes/*.png
+src/public/img/paquetes/*.webp
+src/public/img/paquetes/*.gif

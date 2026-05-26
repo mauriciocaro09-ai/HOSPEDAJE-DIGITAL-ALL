@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Hospedaje Digital</title>
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="../css/register.css">
+</head>
+<body>
+    <div class="rm-body">
+        <h2 class="rm-title">Crear Cuenta</h2>
+        <p class="rm-subtitle">Completa tus datos para registrarte en el sistema</p>
+
+        <form id="registerForm" novalidate>
+            <div class="rm-section">
+                <h3 class="rm-section-title">Información de Documento</h3>
+                <div class="rm-grid">
+                    <div class="rm-field">
+                        <label for="reg_tipoDoc">Tipo Documento <span class="rm-req">*</span></label>
+                        <select id="reg_tipoDoc" required>
+                            <option value="">Selecciona un tipo</option>
+                            <option value="CC">Cédula de Ciudadanía</option>
+                            <option value="TI">Tarjeta de Identidad</option>
+                            <option value="CE">Cédula de Extranjería</option>
+                        </select>
+                    </div>
+                    <div class="rm-field">
+                        <label for="reg_numDoc">Número Documento <span class="rm-req">*</span></label>
+                        <input type="text" id="reg_numDoc" inputmode="numeric" maxlength="20" data-filtro="numeros" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rm-section">
+                <h3 class="rm-section-title">Datos de Contacto</h3>
+                <div class="rm-grid">
+                    <div class="rm-field">
+                        <label for="reg_nombre">Nombre <span class="rm-req">*</span></label>
+                        <input type="text" id="reg_nombre" maxlength="50" data-filtro="letras" required>
+                    </div>
+                    <div class="rm-field">
+                        <label for="reg_apellido">Apellido <span class="rm-req">*</span></label>
+                        <input type="text" id="reg_apellido" maxlength="50" data-filtro="letras" required>
+                    </div>
+                    <div class="rm-field">
+                        <label for="reg_telefono">Teléfono</label>
+                        <input type="text" id="reg_telefono" inputmode="numeric" maxlength="15" data-filtro="numeros">
+                    </div>
+                    <div class="rm-field">
+                        <label for="reg_pais">País</label>
+                        <input type="text" id="reg_pais" maxlength="60" data-filtro="letras">
+                    </div>
+                    <div class="rm-field rm-full">
+                        <label for="reg_direccion">Dirección</label>
+                        <input type="text" id="reg_direccion" maxlength="50">
+                    </div>
+                </div>
+            </div>
+
+            <div class="rm-section">
+                <h3 class="rm-section-title">Credenciales de Acceso</h3>
+                <div class="rm-grid">
+                    <div class="rm-field">
+                        <label for="reg_email">Correo Electrónico <span class="rm-req">*</span></label>
+                        <input type="email" id="reg_email" maxlength="50" required>
+                    </div>
+                    <div class="rm-field">
+                        <label for="reg_password">Contraseña <span class="rm-req">*</span></label>
+                        <input type="password" id="reg_password" maxlength="128" required>
+                    </div>
+                    <div class="rm-field">
+                        <label for="reg_password2">Confirmar Contraseña <span class="rm-req">*</span></label>
+                        <input type="password" id="reg_password2" maxlength="128" required>
+                    </div>
+                </div>
+            </div>
+
+            <div id="registerError" class="rm-error hidden"></div>
+            <button type="submit" class="rm-btn" id="reg-submit">Registrarse</button>
+        </form>
+
+        <p class="rm-footer">¿Ya tienes cuenta? <a href="../login.html" target="_top" rel="noopener">Inicia sesión</a></p>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const form   = document.getElementById("registerForm");
+            const errBox = document.getElementById("registerError");
+            const btn    = document.getElementById("reg-submit");
+
+            form?.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                errBox.classList.add("hidden");
+                errBox.textContent = "";
+
+                const tipoDoc   = document.getElementById("reg_tipoDoc").value.trim();
+                const numDoc    = document.getElementById("reg_numDoc").value.trim();
+                const nombre    = document.getElementById("reg_nombre").value.trim();
+                const apellido  = document.getElementById("reg_apellido").value.trim();
+                const email     = document.getElementById("reg_email").value.trim();
+                const password  = document.getElementById("reg_password").value.trim();
+                const password2 = document.getElementById("reg_password2").value.trim();
+
+                if (!tipoDoc || !numDoc || !nombre || !apellido || !email || !password || !password2) {
+                    errBox.textContent = "Por favor, completa todos los campos obligatorios (*)";
+                    errBox.classList.remove("hidden");
+                    return;
+                }
+
+                if (password !== password2) {
+                    errBox.textContent = "Las contraseñas no coinciden.";
+                    errBox.classList.remove("hidden");
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.textContent = "Registrando...";
+
+                const apiUrl = window.API_URL || "http://localhost:3000/api";
+                try {
+                    const res = await fetch(`${apiUrl}/auth/register`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            NombreUsuario:    nombre,
+                            Apellido:         apellido,
+                            Email:            email,
+                            Contrasena:       password,
+                            TipoDocumento:    tipoDoc,
+                            NumeroDocumento:  numDoc,
+                            Telefono:  document.getElementById("reg_telefono").value.trim() || null,
+                            Pais:      document.getElementById("reg_pais").value.trim()     || null,
+                            Direccion: document.getElementById("reg_direccion").value.trim()|| null,
+                            IDRol: 2,
+                        })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        if (typeof showToast === "function") showToast("¡Registro exitoso! Redirigiendo...", "success", 2000);
+                        setTimeout(() => {
+                            if (window.parent && window.parent !== window.self) {
+                                window.parent.postMessage({ type: "register-success" }, "*");
+                            } else {
+                                window.location.href = "../login.html";
+                            }
+                        }, 2000);
+                    } else {
+                        errBox.textContent = data.error || data.message || "Error al registrar";
+                        errBox.classList.remove("hidden");
+                    }
+                } catch (err) {
+                    errBox.textContent = "No se pudo conectar con el servidor";
+                    errBox.classList.remove("hidden");
+                }
+            });
+        });
+    </script>
+    <script src="../js/validation.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof initFiltrosInput === 'function') initFiltrosInput();
+        });
+    </script>
+</body>
+</html>

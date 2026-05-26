@@ -1,0 +1,15 @@
+{
+  "name": "hospedaje-digital-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Frontend estático (HTML/CSS/JS) para Hospedaje Digital",
+  "scripts": {
+    "stop:port": "node ../BACKEND/scripts/stop-port.js 8080",
+    "dev:clean": "npm run stop:port && npm run dev",
+    "dev": "http-server -p 8080 -c-1",
+    "start": "http-server -p 8080 -c-1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

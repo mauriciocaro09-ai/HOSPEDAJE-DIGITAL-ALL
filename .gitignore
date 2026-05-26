@@ -1,0 +1,30 @@
+# Dependencias
+node_modules/
+*/node_modules/
+
+# Variables de entorno
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# WhatsApp session data
+BACKEND/.wwebjs_auth/
+BACKEND/.wwebjs_cache/
+
+# Claude settings
+.claude/settings.local.json
+
+# Repositorio git anterior (backup del historial previo)
+.git_anterior/

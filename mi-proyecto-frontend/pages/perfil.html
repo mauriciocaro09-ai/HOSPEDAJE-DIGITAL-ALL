@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Hospedaje Digital</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --verde-header: #0f4a4b;
+            --fondo: #eef1f6;
+            --card: #f4f4f5;
+            --texto: #1f2937;
+            --muted: #94a3b8;
+            --acento: #ef6c00;
+            --borde: #ebe5dd;
+        }
+
+        * { box-sizing: border-box; }
+
+        .req { color: #e53e3e; font-weight: 700; margin-left: 0.15rem; }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--fondo);
+            color: var(--texto);
+        }
+
+        .topbar {
+            background: var(--verde-header);
+            color: #fff;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            font-weight: 700;
+            box-shadow: 0 1px 3px rgba(0,0,0,.18);
+        }
+
+        .topbar i { margin-right: 8px; }
+
+        .menu-fab {
+            position: fixed;
+            left: 16px;
+            top: 62px;
+            width: 36px;
+            height: 36px;
+            border: 0;
+            border-radius: 8px;
+            background: #1f2937;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,.25);
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 8px 16px 32px;
+        }
+
+        .titulo {
+            text-align: center;
+            margin: 0 0 12px;
+        }
+
+        .titulo h1 {
+            margin: 0;
+            font-size: 44px;
+            line-height: 1;
+            font-weight: 800;
+        }
+
+        .titulo p {
+            margin: 6px 0 0;
+            color: #7b8794;
+            font-weight: 600;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card);
+            border-radius: 14px;
+            box-shadow: 0 8px 22px rgba(0,0,0,.12);
+            border: 1px solid #e5e7eb;
+            padding: 18px 20px 20px;
+        }
+
+        .section { margin-top: 8px; }
+
+        .section h3 {
+            margin: 0 0 10px;
+            color: var(--acento);
+            font-size: 20px;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--borde);
+            padding-bottom: 7px;
+            letter-spacing: .5px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 24px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field.full { grid-column: 1 / -1; }
+
+        .label {
+            font-size: 11px;
+            color: #9aa4b2;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .value,
+        .input {
+            background: #eceef1;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            min-height: 46px;
+            padding: 12px 14px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #354052;
+        }
+
+        .input { width: 100%; outline: none; }
+
+        .input:focus {
+            border-color: #8fb2ff;
+            box-shadow: 0 0 0 3px rgba(59,130,246,.18);
+            background: #fff;
+        }
+
+        .hidden { display: none; }
+
+        .role-box {
+            background: #fff1e7;
+            color: #cc5a00;
+            border-color: #ffe1c9;
+            text-align: center;
+        }
+
+        .actions {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            border: 0;
+            min-height: 52px;
+            border-radius: 12px;
+            font-size: 25px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(0,0,0,.1);
+        }
+
+        .btn-primary { background: #f5b400; color: #1f2937; }
+        .btn-primary:hover { background: #e8aa00; }
+
+        .btn-secondary { background: #e7ebf2; color: #3f4a5c; }
+        .btn-secondary:hover { background: #dbe1ea; }
+
+        .mensaje {
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            display: none;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .mensaje.info { display: block; background: #e0f2fe; color: #075985; }
+        .mensaje.error { display: block; background: #fee2e2; color: #991b1b; }
+
+        @media (max-width: 768px) {
+            .titulo h1 { font-size: 34px; }
+            .section h3 { font-size: 18px; }
+            .value, .input { font-size: 20px; min-height: 42px; }
+            .btn { font-size: 18px; }
+            .actions { grid-template-columns: 1fr; }
+            .grid { grid-template-columns: 1fr; }
+            .field.full { grid-column: auto; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <i class="fa-solid fa-hotel"></i>
+        Hospedaje Digital
+    </header>
+
+    <button class="menu-fab" type="button" id="btn-volver-sidebar" aria-label="Volver al inicio">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <main class="container">
+        <div class="titulo">
+            <h1><i class="fa-solid fa-user" style="color:#6f2dbd;"></i> Mi Perfil</h1>
+            <p>Administra tu informacion personal y credenciales</p>
+        </div>
+
+        <section class="card">
+            <div id="perfil-mensaje" class="mensaje" aria-live="polite"></div>
+
+            <div id="modo-lectura">
+                <div class="section">
+                    <h3>Informacion de documento</h3>
+                    <div class="grid">
+                        <div class="field">
+                            <span class="label">Tipo de documento</span>
+                            <span class="value" id="view-tipo">-</span>
+                        </div>
+                        <div class="field">
+                            <span class="label">Numero de documento</span>
+                            <span class="value" id="view-numero">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Datos de contacto</h3>
+                    <div class="grid">
+                        <div class="field">
+                            <span class="label">Nombre</span>
+                            <span class="value" id="view-nombre">-</span>
+                        </div>
+                        <div class="field">
+                            <span class="label">Apellido</span>
+                            <span class="value" id="view-apellido">-</span>
+                        </div>
+                        <div class="field">
+                            <span class="label">Telefono</span>
+                            <span class="value" id="view-telefono">-</span>
+                        </div>
+                        <div class="field">
+                            <span class="label">Pais</span>
+                            <span class="value" id="view-pais">-</span>
+                        </div>
+                        <div class="field full">
+                            <span class="label">Direccion</span>
+                            <span class="value" id="view-direccion">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="grid">
+                        <div class="field">
+                            <h3>Acceso</h3>
+                            <span class="label">Email</span>
+                            <span class="value" id="view-email">-</span>
+                        </div>
+                        <div class="field">
+                            <h3>Rol</h3>
+                            <span class="label">Tu rol</span>
+                            <span class="value role-box" id="view-rol">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button type="button" class="btn btn-primary" id="btn-editar">
+                        <i class="fa-solid fa-pen-to-square"></i> Editar Perfil
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btn-cerrar-sesion">
+                        <i class="fa-solid fa-door-open"></i> Cerrar Sesion
+                    </button>
+                </div>
+            </div>
+
+            <form id="modo-edicion" class="hidden">
+                <div class="section">
+                    <h3>Informacion de documento</h3>
+                    <div class="grid">
+                        <div class="field">
+                            <label class="label" for="edit-tipo">Tipo de documento</label>
+                            <input class="input" id="edit-tipo" name="tipo-documento" type="text" maxlength="50">
+                        </div>
+                        <div class="field">
+                            <label class="label" for="edit-numero">Numero de documento</label>
+                            <input class="input" id="edit-numero" name="numero-documento" type="text" maxlength="50">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Datos de contacto</h3>
+                    <div class="grid">
+                        <div class="field">
+                            <label class="label" for="edit-nombre">Nombre <span class="req" aria-hidden="true">*</span></label>
+                            <input class="input" id="edit-nombre" name="nombre" type="text" maxlength="255" required>
+                        </div>
+                        <div class="field">
+                            <label class="label" for="edit-apellido">Apellido</label>
+                            <input class="input" id="edit-apellido" name="apellido" type="text" maxlength="255">
+                        </div>
+                        <div class="field">
+                            <label class="label" for="edit-telefono">Telefono</label>
+                            <input class="input" id="edit-telefono" name="telefono" type="text" maxlength="50">
+                        </div>
+                        <div class="field">
+                            <label class="label" for="edit-pais">Pais</label>
+                            <input class="input" id="edit-pais" name="pais" type="text" maxlength="100">
+                        </div>
+                        <div class="field full">
+                            <label class="label" for="edit-direccion">Direccion</label>
+                            <input class="input" id="edit-direccion" name="direccion" type="text" maxlength="255">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="grid">
+                        <div class="field">
+                            <h3>Acceso</h3>
+                            <label class="label" for="edit-email">Email</label>
+                            <input class="input" id="edit-email" name="email" type="email" readonly>
+                        </div>
+                        <div class="field">
+                            <h3>Rol</h3>
+                            <span class="label">Tu rol</span>
+                            <span class="value role-box" id="edit-rol">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btn-cancelar">
+                        <i class="fa-solid fa-xmark"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <script src="../js/config.js"></script>
+    <script>
+        const token = sessionStorage.getItem('token');
+        const API_URL = (typeof CONFIG !== 'undefined' && CONFIG.API_URL)
+            ? CONFIG.API_URL
+            : 'http://localhost:3000/api';
+
+        const estado = { perfil: null };
+
+        const byId = (id) => document.getElementById(id);
+
+        const mostrarMensaje = (texto, tipo = 'info') => {
+            const el = byId('perfil-mensaje');
+            if (!el) return;
+            if (!texto) {
+                el.textContent = '';
+                el.className = 'mensaje';
+                return;
+            }
+
+            el.textContent = texto;
+            el.className = `mensaje ${tipo}`;
+        };
+
+        const textoSeguro = (valor) => {
+            if (valor === null || valor === undefined) return '-';
+            const t = String(valor).trim();
+            return t || '-';
+        };
+
+        const cerrarSesion = () => {
+            sessionStorage.clear();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '../login.html';
+        };
+
+        const alternarEdicion = (activo) => {
+            byId('modo-lectura').classList.toggle('hidden', activo);
+            byId('modo-edicion').classList.toggle('hidden', !activo);
+        };
+
+        const pintarPerfil = (perfil) => {
+            const p = perfil || {};
+            const rol = p.rol?.nombre || p.rolNombre || p.rol || '-';
+
+            byId('view-tipo').textContent = textoSeguro(p.tipoDocumento);
+            byId('view-numero').textContent = textoSeguro(p.numeroDocumento);
+            byId('view-nombre').textContent = textoSeguro(p.nombre);
+            byId('view-apellido').textContent = textoSeguro(p.apellido);
+            byId('view-telefono').textContent = textoSeguro(p.telefono);
+            byId('view-pais').textContent = textoSeguro(p.pais);
+            byId('view-direccion').textContent = textoSeguro(p.direccion);
+            byId('view-email').textContent = textoSeguro(p.email);
+            byId('view-rol').textContent = textoSeguro(rol);
+
+            byId('edit-tipo').value = p.tipoDocumento || '';
+            byId('edit-numero').value = p.numeroDocumento || '';
+            byId('edit-nombre').value = p.nombre || '';
+            byId('edit-apellido').value = p.apellido || '';
+            byId('edit-telefono').value = p.telefono || '';
+            byId('edit-pais').value = p.pais || '';
+            byId('edit-direccion').value = p.direccion || '';
+            byId('edit-email').value = p.email || '';
+            byId('edit-rol').textContent = textoSeguro(rol);
+        };
+
+        const cargarPerfil = async () => {
+            if (!token) {
+                mostrarMensaje('Tu sesion no esta activa. Debes iniciar sesion.', 'error');
+                window.location.href = '../login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error('No se pudo cargar perfil');
+
+                const data = await response.json();
+                estado.perfil = data?.usuario || {};
+                sessionStorage.setItem('usuario', JSON.stringify(estado.perfil));
+                pintarPerfil(estado.perfil);
+                mostrarMensaje('');
+            } catch (error) {
+                mostrarMensaje('No se pudo cargar el perfil. Intenta iniciar sesion nuevamente.', 'error');
+            }
+        };
+
+        const guardarPerfil = async (event) => {
+            event.preventDefault();
+
+            const payload = {
+                TipoDocumento: byId('edit-tipo').value.trim(),
+                NumeroDocumento: byId('edit-numero').value.trim(),
+                NombreUsuario: byId('edit-nombre').value.trim(),
+                Apellido: byId('edit-apellido').value.trim(),
+                Telefono: byId('edit-telefono').value.trim(),
+                Pais: byId('edit-pais').value.trim(),
+                Direccion: byId('edit-direccion').value.trim(),
+                Email: byId('edit-email').value.trim()
+            };
+
+            if (!payload.NombreUsuario || !payload.Email) {
+                mostrarMensaje('Nombre y email son obligatorios.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('No se pudo actualizar');
+
+                const data = await response.json();
+                estado.perfil = data?.usuario || estado.perfil;
+                sessionStorage.setItem('usuario', JSON.stringify(estado.perfil));
+                pintarPerfil(estado.perfil);
+                alternarEdicion(false);
+                mostrarMensaje('Perfil actualizado correctamente.', 'info');
+            } catch (error) {
+                mostrarMensaje('No se pudo guardar. Intenta nuevamente.', 'error');
+            }
+        };
+
+        byId('btn-volver-sidebar').addEventListener('click', () => {
+            try {
+                const userData = localStorage.getItem('user') || sessionStorage.getItem('usuario') || '{}';
+                const user = JSON.parse(userData);
+                const esAdmin = user.rol === 1;
+                window.location.href = esAdmin ? '../index.html' : '../cliente.html';
+            } catch (e) {
+                window.location.href = '../cliente.html';
+            }
+        });
+
+        byId('btn-editar').addEventListener('click', () => {
+            alternarEdicion(true);
+            mostrarMensaje('Edita tus datos y guarda los cambios.', 'info');
+        });
+
+        byId('btn-cerrar-sesion').addEventListener('click', cerrarSesion);
+
+        byId('btn-cancelar').addEventListener('click', () => {
+            pintarPerfil(estado.perfil || {});
+            alternarEdicion(false);
+            mostrarMensaje('');
+        });
+
+        byId('modo-edicion').addEventListener('submit', guardarPerfil);
+
+        alternarEdicion(false);
+        // Si hay token de reset en la URL, mostrar formulario de establecer contraseña
+        const params = new URLSearchParams(window.location.search);
+        const resetToken = params.get('resetToken');
+        if (resetToken) {
+            // reemplazar contenido por formulario de restablecimiento
+            document.querySelector('main .card').innerHTML = `
+                <div class="titulo"><h1>Restablecer contraseña</h1><p>Establece una nueva contraseña para tu cuenta</p></div>
+                <div id="reset-mensaje" class="mensaje" aria-live="polite"></div>
+                <form id="reset-form">
+                    <div style="display:grid;gap:12px;margin-top:16px;">
+                        <input id="reset-password" class="input" type="password" placeholder="Nueva contraseña" required>
+                        <input id="reset-password-confirm" class="input" type="password" placeholder="Confirmar contraseña" required>
+                        <button type="submit" class="btn btn-primary">Establecer contraseña</button>
+                    </div>
+                </form>
+            `;
+
+            const showMsg = (txt, tipo='info') => { const el = document.getElementById('reset-mensaje'); if (!el) return; el.textContent = txt; el.className = `mensaje ${tipo}`; };
+
+            document.getElementById('reset-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const p = document.getElementById('reset-password').value.trim();
+                const pc = document.getElementById('reset-password-confirm').value.trim();
+                if (!p || p.length < 6) { showMsg('La contraseña debe tener al menos 6 caracteres', 'error'); return; }
+                if (p !== pc) { showMsg('Las contraseñas no coinciden', 'error'); return; }
+                try {
+                    const res = await fetch(`${API_URL}/auth/cliente-set-password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: resetToken, password: p }) });
+                    const j = await res.json();
+                    if (!res.ok) { showMsg(j.error || j.message || 'No se pudo establecer la contraseña', 'error'); return; }
+                    showMsg('Contraseña establecida correctamente. Ahora puedes iniciar sesión.', 'info');
+                    setTimeout(() => { window.location.href = '../login.html'; }, 2500);
+                } catch (err) { showMsg('Error de red. Intenta nuevamente.', 'error'); }
+            });
+        } else {
+            cargarPerfil();
+        }
+    </script>
+</body>
+</html>

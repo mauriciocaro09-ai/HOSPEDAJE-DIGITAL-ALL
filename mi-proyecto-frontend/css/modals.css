@@ -1,0 +1,324 @@
+/* ========================================
+   MODAL STYLES
+======================================== */
+
+/* Overlay oscuro */
+.fixed.inset-0.bg-black.bg-opacity-50 {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 50 !important;
+    animation: fadeIn 0.3s ease-out !important;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* Modal principal */
+.bg-white.rounded-lg.shadow-xl {
+    background-color: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+}
+
+.bg-white.rounded-lg.shadow-xl.p-6 {
+    padding: 24px !important;
+    max-width: 672px !important;
+    animation: slideIn 0.3s ease-out !important;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Contenedor flexible */
+.space-y-6 > * + * {
+    margin-top: 24px !important;
+}
+
+.space-y-4 > * + * {
+    margin-top: 16px !important;
+}
+
+/* Espaciado */
+.p-6 { padding: 24px !important; }
+.p-4 { padding: 16px !important; }
+.p-3 { padding: 12px !important; }
+.mb-6 { margin-bottom: 24px !important; }
+.mb-4 { margin-bottom: 16px !important; }
+.mb-3 { margin-bottom: 12px !important; }
+.mb-2 { margin-bottom: 8px !important; }
+.gap-3 { gap: 12px !important; }
+.gap-4 { gap: 16px !important; }
+
+/* Flex y Grid */
+.flex { display: flex !important; }
+.items-center { align-items: center !important; }
+.justify-center { justify-content: center !important; }
+.justify-end { justify-content: flex-end !important; }
+.grid { display: grid !important; }
+.grid-cols-1 { grid-template-columns: 1fr !important; }
+.grid-cols-2 { grid-template-columns: 1fr 1fr !important; }
+.md\:grid-cols-2 { grid-template-columns: 1fr 1fr !important; }
+
+/* Textos */
+.text-2xl { font-size: 24px !important; line-height: 32px !important; }
+.text-xl { font-size: 20px !important; line-height: 28px !important; }
+.text-lg { font-size: 18px !important; line-height: 28px !important; }
+.text-sm { font-size: 14px !important; line-height: 20px !important; }
+.text-xs { font-size: 12px !important; line-height: 16px !important; }
+
+.font-bold { font-weight: 700 !important; }
+.font-semibold { font-weight: 600 !important; }
+.font-medium { font-weight: 500 !important; }
+
+.text-slate-800 { color: #1e293b !important; }
+.text-slate-700 { color: #334155 !important; }
+.text-slate-600 { color: #475569 !important; }
+.text-slate-500 { color: #64748b !important; }
+.text-red-500 { color: #ef4444 !important; }
+.text-red-600 { color: #dc2626 !important; }
+.text-yellow-700 { color: #b45309 !important; }
+.text-green-600 { color: #16a34a !important; }
+.text-blue-600 { color: #2563eb !important; }
+.text-white { color: white !important; }
+
+/* Background colors */
+.bg-yellow-50 { background-color: #fffbeb !important; }
+.bg-slate-200 { background-color: #e2e8f0 !important; }
+.bg-slate-300 { background-color: #cbd5e1 !important; }
+.bg-blue-600 { background-color: #2563eb !important; }
+.bg-red-600 { background-color: #dc2626 !important; }
+
+/* Bordes */
+.border-l-4 { border-left: 4px solid !important; }
+.border-l-yellow-400 { border-left-color: #facc15 !important; }
+.border-b-2 { border-bottom: 2px solid !important; }
+.border-2 { border: 2px solid !important; }
+.border-slate-200 { border-color: #e2e8f0 !important; }
+
+.rounded-lg { border-radius: 8px !important; }
+
+/* Inputs y Selects */
+.w-full {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.w-5 { width: 20px !important; height: 20px !important; }
+.w-96 { width: 384px !important; }
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="password"],
+select,
+textarea {
+    display: block !important;
+    width: 100% !important;
+    padding: 12px !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    transition: all 0.3s ease !important;
+    box-sizing: border-box !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+select:focus,
+textarea:focus {
+    outline: none !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+}
+
+input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    cursor: pointer !important;
+    accent-color: #16a34a !important;
+}
+
+/* Botones */
+button {
+    transition: all 0.3s ease !important;
+}
+
+.px-6 { padding-left: 24px !important; padding-right: 24px !important; }
+.py-2 { padding-top: 8px !important; padding-bottom: 8px !important; }
+.py-3 { padding-top: 12px !important; padding-bottom: 12px !important; }
+
+.hover\:bg-slate-300:hover { background-color: #cbd5e1 !important; }
+.hover\:bg-slate-200:hover { background-color: #e2e8f0 !important; }
+.hover\:bg-blue-700:hover { background-color: #1d4ed8 !important; }
+.hover\:bg-red-700:hover { background-color: #b91c1c !important; }
+.hover\:border-blue-400:hover { border-color: #60a5fa !important; }
+
+.opacity-50 { opacity: 0.5 !important; }
+.cursor-pointer { cursor: pointer !important; }
+
+/* Label para checkboxes */
+label {
+    display: flex !important;
+    align-items: center !important;
+    cursor: pointer !important;
+}
+
+.permiso-checkbox {
+    cursor: pointer !important;
+}
+
+/* Especiales */
+.ml-3 { margin-left: 12px !important; }
+
+.pb-6 { padding-bottom: 24px !important; }
+.pb-4 { padding-bottom: 16px !important; }
+
+.border-bottom-none {
+    border-bottom: none !important;
+}
+
+.animate-in {
+    animation: slideIn 0.3s ease-out !important;
+}
+
+/* Max-width y Max-height */
+.max-w-2xl { max-width: 672px !important; }
+.max-w-full { max-width: 100% !important; }
+
+.max-h-\[90vh\] {
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+}
+
+/* Overflow */
+.overflow-y-auto {
+    overflow-y: auto !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .md\:col-span-2 {
+        grid-column: 1 / -1 !important;
+    }
+    
+    .md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .p-4 {
+        padding: 16px !important;
+    }
+}
+
+/* Sticky */
+.sticky {
+    position: sticky !important;
+}
+
+.top-0 {
+    top: 0 !important;
+}
+
+/* ========================================
+   ESPECÍFICO: MODAL DE NUEVA RESERVA (WIZARD)
+   ======================================== */
+
+/* Aumentar el ancho máximo y el espacio interno del modal de reservas */
+#modal-reserva-admin .bg-white,
+#modal-reserva-admin .crud-modal-content,
+.wizard-modal .crud-modal-wizard {
+    max-width: 1000px !important;
+    width: 95% !important;
+    padding: 2rem 3rem !important; /* Espaciado lateral generoso, superior moderado */
+}
+
+/* Organizar las grillas de formularios con más separación */
+#modal-reserva-admin .grid,
+.wizard-step .grid {
+    grid-template-columns: repeat(2, 1fr) !important; /* Forzamos 2 columnas para orden */
+    gap: 25px 35px !important; 
+    margin-bottom: 25px !important;
+}
+
+/* Darle aire a los grupos de campos y etiquetas */
+#modal-reserva-admin .form-group {
+    margin-bottom: 10px !important;
+}
+
+#modal-reserva-admin label {
+    margin-bottom: 10px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    display: block !important;
+    font-size: 0.9rem !important;
+}
+
+/* Mejorar la visualización de los pasos del Wizard */
+#modal-reserva-admin .wizard-step {
+    padding: 30px 20px !important;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+/* Estilo de inputs: Bordes redondeados y enfoque naranja */
+#modal-reserva-admin input,
+#modal-reserva-admin select,
+#modal-reserva-admin textarea {
+    border-radius: 14px !important; /* Más redondeado */
+}
+
+#modal-reserva-admin input:focus,
+#modal-reserva-admin select:focus,
+#modal-reserva-admin textarea:focus {
+    border-color: #ff8c42 !important; /* Naranja corporativo */
+    box-shadow: 0 0 0 4px rgba(255, 140, 66, 0.2) !important;
+}
+
+/* Ajuste para el área de resumen en el paso final */
+#wizard-resumen {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px 25px;
+    background: #f8fafc;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Z-index */
+.z-50 {
+    z-index: 50 !important;
+}

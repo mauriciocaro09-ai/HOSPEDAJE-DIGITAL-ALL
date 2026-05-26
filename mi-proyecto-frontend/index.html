@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <meta name="description" content="Hospedaje Digital - Encuentra la habitación perfecta para tu estadía">
+    <title>Hospedaje Digital - Inicio</title>
+    <!-- Estilos CSS -->
+    <link rel="stylesheet" href="css/reset.css?v=20260524b">
+    <link rel="stylesheet" href="css/variables.css?v=20260524b">
+    <link rel="stylesheet" href="css/styles.css?v=20260524b">
+    <link rel="stylesheet" href="css/crud-base.css?v=20260524b">
+    <link rel="stylesheet" href="css/crud-paquetes.css?v=20260524b">
+    <link rel="stylesheet" href="css/crud-reservas.css?v=20260524k">
+    <link rel="stylesheet" href="css/dashboard.css?v=20260524b">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body>
+    <!-- ============================================
+         SIDEBAR - Menú Lateral 77
+    ============================================ -->
+    <aside id="sidebar" class="sidebar open">
+        <div class="sidebar-brand">
+            <button id="sidebar-toggle" class="sidebar-hamburger" aria-label="Toggle menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <span class="sidebar-brand-text">📊 MENU</span>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                            <li>
+                                <a href="#" onclick="cargarSeccion('dashboard', event)" title="Panel de Control">
+                                    <span class="icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></span>
+                                    <span class="text">Panel de Control</span>
+                                </a>
+                            </li>
+                <li>
+                    <a href="#" onclick="cargarSeccion('administrar-habitaciones', event)" title="Habitaciones">
+                        <span class="icon"><i class="fa-solid fa-bed" aria-hidden="true"></i></span>
+                        <span class="text">Habitaciones</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="cargarSeccion('administrar-servicios', event)" title="Servicios">
+                        <span class="icon"><i class="fa-solid" aria-hidden="true">&#xf7b6;</i></span>
+                        <span class="text">Servicios</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="cargarSeccion('administrar-paquetes', event)" title="Paquetes">
+                        <span class="icon"><i class="fa-solid fa-box"></i></span>
+                        <span class="text">Paquetes</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="cargarSeccion('administrar-reservas', event)" title="Reservas">
+                        <span class="icon"><i class="fa-solid fa-calendar-check"></i></span>
+                        <span class="text">Reservas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="cargarSeccion('administrar-clientes', event)" title="Clientes">
+                        <span class="icon"><i class="fa-solid fa-users" aria-hidden="true"></i></span>
+                        <span class="text">Clientes</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="cargarSeccion('administrar-usuarios', event)" title="Usuarios">
+                        <span class="icon"><i class="fa-solid fa-user-gear" aria-hidden="true"></i></span>
+                        <span class="text">Usuarios</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="cargarSeccion('administrar-roles', event)" title="Roles">
+                        <span class="icon"><i class="fa-solid fa-id-badge" aria-hidden="true"></i></span>
+                        <span class="text">Roles</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="pages/perfil.html" id="sidebar-link-perfil" class="perfil-sidebar-link" title="Perfil">
+                        <span class="icon"><i class="fa-solid fa-user-circle" aria-hidden="true"></i></span>
+                        <span class="text">Perfil</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-user-info" id="sidebar-user-info">
+                <span id="sidebar-user-email" class="sidebar-user-email"></span>
+                <span id="sidebar-user-role" class="sidebar-user-role"></span>
+            </div>
+            <button class="sidebar-logout-btn" onclick="cerrarSesion()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="text">Cerrar Sesión</span>
+            </button>
+            <p class="sidebar-version">Hospedaje Digital v1.0</p>
+        </div>
+    </aside>
+    <!-- Overlay oscuro cuando el sidebar está abierto -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+    <!-- Tooltip del sidebar colapsado (JS-powered, fuera del sidebar para evitar overflow:hidden) -->
+    <div id="sidebar-nav-tip"></div>
+    <!-- Wrapper para el contenido principal -->
+    <div id="main-wrapper" class="main-wrapper sidebar-open">
+        <!-- Header y Navegación -->
+        <header>
+            <nav>
+                <h1><i class="fa-solid fa-hotel" aria-hidden="true"></i> Hospedaje Digital</h1>
+            </nav>
+        </header>
+        <!-- Contenido Principal -->
+        <main>
+            <!-- Hero Section -->
+            <section class="hero">
+                <h2>Bienvenido a Hospedaje Digital</h2>
+                <p>Encuentra la habitación perfecta para tu estadía</p>
+            </section>
+            <!-- Sección CRUD de Habitaciones -->
+            <section id="seccion-administrar-habitaciones" class="crud-habitaciones-section hidden">
+                <div class="crud-habitaciones-toolbar">
+                    <button type="button" class="btn-accion-crud btn-accion-principal" id="btn-nueva-habitacion-admin">+ NUEVA HABITACION</button>
+                    <div id="mensaje-habitacion-admin" class="crud-habitaciones-mensaje" aria-live="polite"></div>
+                </div>
+<div class="crud-habitaciones-layout">
+                    <section class="crud-habitaciones-panel crud-habitaciones-panel-lista">
+                        <div class="crud-habitaciones-lista-top">
+                            <div class="crud-habitaciones-filtros">
+                                <input type="search" id="busqueda-habitaciones-admin" placeholder="Buscar habitación">
+                                <select id="filtro-estado-habitaciones-admin" aria-label="Filtrar habitaciones por estado">
+                                    <option value="all">Todos</option>
+                                    <option value="available">Disponibles</option>
+                                    <option value="unavailable">No disponibles</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="crud-habitaciones-tabla-wrap">
+                            <table class="crud-habitaciones-tabla">
+                                <thead>
+                                    <tr>
+                                        <th>Imagen</th>
+                                        <th>Nombre</th>
+                                        <th>Costo</th>
+                                        <th>Descripción</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="habitaciones-admin-tbody">
+                                    <tr>
+                                        <td colspan="6" class="mensaje-vacio">Cargando habitaciones...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </section>
+            <div id="modal-habitacion-admin" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="habitacion-admin-form-title">
+                <div class="crud-modal-content">
+                    <button type="button" class="crud-modal-close" id="btn-cerrar-modal-habitacion" aria-label="Cerrar formulario">&times;</button>
+                    <h4 id="habitacion-admin-form-title">Crear habitación</h4>
+                    <p class="crud-habitaciones-note">Los campos están alineados con la estructura real de la base de datos.</p>
+                    <div id="mensaje-habitacion-admin-modal" class="crud-habitaciones-mensaje" aria-live="polite"></div>
+                    <form id="form-habitacion-admin" class="crud-habitaciones-form">
+                        <input type="hidden" id="habitacion-admin-id">
+                        <label>
+                            <span>Nombre de la habitación <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <input type="text" id="habitacion-admin-nombre" required maxlength="30" placeholder="Ej. Suite Premium">
+                        </label>
+                        <label>
+                            <span>Descripción <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <textarea id="habitacion-admin-descripcion" required maxlength="50" placeholder="Describe la habitación en pocas palabras"></textarea>
+                        </label>
+                        <label>
+                            <span>Costo <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <input type="number" id="habitacion-admin-costo" required min="0" step="0.01" placeholder="Ej. 250000">
+                        </label>
+                        <label>
+                            <span>Estado <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <select id="habitacion-admin-estado" required>
+                                <option value="1">Disponible</option>
+                                <option value="0">No disponible</option>
+                            </select>
+                        </label>
+                        <label>
+                            Imágenes por URL
+                            <textarea id="habitacion-admin-imagen" placeholder="Pega una o varias URL separadas por salto de línea o coma"></textarea>
+                            <small class="crud-habitaciones-help">Pega una o varias URLs para armar la galería del detalle.</small>
+                        </label>
+                        <div id="habitacion-admin-preview-wrap" class="crud-habitaciones-preview hidden">
+                            <p>Vista previa:</p>
+                            <div class="carousel" id="habitacion-carousel" role="region" aria-roledescription="carousel" aria-label="Vista previa de imágenes de la habitación">
+                                <button type="button" class="carousel-btn prev" id="habitacion-carousel-prev" aria-label="Imagen anterior">‹</button>
+                                <div class="carousel-viewport">
+                                    <ul class="carousel-track" id="habitacion-carousel-track" role="list"></ul>
+                                </div>
+                                <button type="button" class="carousel-btn next" id="habitacion-carousel-next" aria-label="Siguiente imagen">›</button>
+                            </div>
+                            <div class="carousel-counter" id="habitacion-carousel-counter" aria-hidden="true"></div>
+                        </div>
+                        <div class="crud-habitaciones-form-actions">
+                            <button type="submit" class="btn-accion-crud btn-accion-principal" id="btn-habitacion-admin-guardar">Guardar habitación</button>
+                            <button type="button" class="btn-accion-crud btn-accion-secundaria" id="btn-habitacion-admin-limpiar">Limpiar formulario</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Sección de Administración de Servicios -->
+            <section id="seccion-administrar-servicios" class="crud-servicios-section hidden">
+                <div class="crud-servicios-toolbar">
+                    <button type="button" class="btn-accion-crud btn-accion-principal" id="btn-nuevo-servicio-admin">+ NUEVO SERVICIO</button>
+                    <div id="mensaje-servicio-admin" class="crud-servicios-mensaje" aria-live="polite"></div>
+                </div>
+<div class="crud-servicios-layout">
+                    <section class="crud-servicios-panel crud-servicios-panel-lista">
+                        <div class="crud-servicios-lista-top">
+                            <div class="crud-servicios-filtros">
+                                <input type="search" id="busqueda-servicios-admin" placeholder="Buscar servicio">
+                                <select id="filtro-estado-servicios-admin" aria-label="Filtrar servicios por estado">
+                                    <option value="all">Todos</option>
+                                    <option value="active">Activos</option>
+                                    <option value="inactive">Inactivos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="crud-servicios-tabla-wrap">
+                            <table class="crud-servicios-tabla">
+                                <thead>
+                                    <tr>
+                                        <th>Imagen</th>
+                                        <th>Nombre</th>
+                                        <th>Duración (min)</th>
+                                        <th>Personas</th>
+                                        <th>Costo</th>
+                                        <th>Descripción</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="servicios-admin-tbody">
+                                    <tr>
+                                        <td colspan="8" class="mensaje-vacio">Cargando servicios...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </section>
+            <!-- Sección de Administración de Paquetes -->
+            <section id="seccion-administrar-paquetes" class="crud-paquetes-section hidden">
+                <div class="crud-paquetes-toolbar">
+                    <button type="button" class="btn-accion-crud btn-accion-principal" id="btn-nuevo-paquete" aria-label="Crear un nuevo paquete">+ NUEVO PAQUETE</button>
+                    <div id="mensaje-paquete" class="crud-paquetes-mensaje" aria-live="polite"></div>
+                </div>
+<div class="crud-paquetes-layout">
+                    <section class="crud-paquetes-panel crud-paquetes-panel-lista">
+                        <div class="crud-paquetes-lista-top">
+                            <div class="crud-paquetes-filtros">
+                                <input type="search" id="busqueda-paquetes" class="crud-paquetes-busqueda" placeholder="Buscar paquete..." aria-label="Buscar paquetes">
+                                <select id="filtro-estado-paquetes" class="crud-paquetes-select" aria-label="Filtrar paquetes por estado">
+                                    <option value="all">Todos</option>
+                                    <option value="active">Activos</option>
+                                    <option value="inactive">Inactivos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="crud-paquetes-tabla-wrap">
+                            <table class="crud-paquetes-tabla">
+                                <thead>
+                                    <tr>
+                                        <th>Imagen</th>
+                                        <th>Nombre</th>
+                                        <th>Descripción</th>
+                                        <th>Precio</th>
+                                        <th>Duración</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-paquetes">
+                                    <tr>
+                                        <td colspan="7" class="mensaje-vacio">Cargando paquetes...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="paginacion-paquetes" class="crud-paquetes-paginacion hidden" aria-label="Paginación de paquetes"></div>
+                    </section>
+                </div>
+            </section>
+            <!-- Sección de Administración de Clientes -->
+            <section id="seccion-administrar-clientes" class="crud-clientes-section hidden">
+                <div class="crud-clientes-toolbar">
+                    <button type="button" class="btn-accion-crud btn-accion-principal" id="btn-nuevo-cliente-admin">+ NUEVO CLIENTE</button>
+                    <div id="mensaje-cliente-admin" class="crud-clientes-mensaje" aria-live="polite"></div>
+                </div>
+<div class="crud-clientes-layout">
+                    <section class="crud-clientes-panel crud-clientes-panel-lista">
+                        <div class="crud-clientes-lista-top">
+                            <div class="crud-clientes-filtros">
+                                <input type="search" id="busqueda-clientes-admin" placeholder="Buscar por documento, nombre, email o teléfono">
+                                <select id="filtro-estado-clientes-admin" aria-label="Filtrar clientes por estado">
+                                    <option value="all">Todos</option>
+                                    <option value="active">Activos</option>
+                                    <option value="inactive">Inactivos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="crud-clientes-tabla-wrap">
+                            <table class="crud-clientes-tabla">
+                                <thead>
+                                    <tr>
+                                        <th>Documento</th>
+                                        <th>Nombre</th>
+                                        <th>Apellido</th>
+                                        <th>Email</th>
+                                        <th>Teléfono</th>
+                                        <th>Dirección</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="clientes-admin-tbody">
+                                    <tr>
+                                        <td colspan="8" class="mensaje-vacio">Selecciona "Administrar clientes" para cargar datos.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </section>
+            <section id="seccion-administrar-usuarios" class="crud-clientes-section hidden">
+                <div class="crud-clientes-toolbar">
+                    <button type="button" class="btn-accion-crud btn-accion-principal" id="btn-nuevo-usuario-admin">+ NUEVO USUARIO</button>
+                    <div id="mensaje-usuario-admin" class="crud-clientes-mensaje" aria-live="polite"></div>
+                </div>
+<div class="crud-clientes-layout">
+                    <section class="crud-clientes-panel crud-clientes-panel-lista">
+                        <div class="crud-clientes-lista-top">
+                            <div class="crud-clientes-filtros">
+                                <input type="search" id="busqueda-usuarios-admin" placeholder="Buscar usuario">
+                                <select id="filtro-estado-usuarios-admin" aria-label="Filtrar usuarios por estado">
+                                    <option value="all">Todos</option>
+                                    <option value="active">Activos</option>
+                                    <option value="inactive">Inactivos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="crud-clientes-tabla-wrap">
+                            <table class="crud-clientes-tabla">
+                                <thead>
+                                    <tr>
+                                        <th>Documento</th>
+                                        <th>Nombre</th>
+                                        <th>Email</th>
+                                        <th>Rol</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usuarios-admin-tbody">
+                                    <tr><td colspan="6" class="mensaje-vacio">Cargando usuarios...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </section>
+            <section id="seccion-administrar-roles" class="crud-clientes-section hidden">
+                <div class="crud-clientes-toolbar">
+                    <button type="button" class="btn-accion-crud btn-accion-principal" id="btn-nuevo-rol-admin">+ NUEVO ROL</button>
+                    <div id="mensaje-rol-admin" class="crud-clientes-mensaje" aria-live="polite"></div>
+                </div>
+<div class="crud-clientes-layout">
+                    <section class="crud-clientes-panel crud-clientes-panel-lista">
+                        <div class="crud-clientes-lista-top">
+                            <div class="crud-clientes-filtros">
+                                <input type="search" id="busqueda-roles-admin" placeholder="Buscar rol">
+                                <select id="filtro-estado-roles-admin" aria-label="Filtrar roles por estado">
+                                    <option value="all">Todos</option>
+                                    <option value="active">Activos</option>
+                                    <option value="inactive">Inactivos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="crud-clientes-tabla-wrap">
+                            <table class="crud-clientes-tabla">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Permisos</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="roles-admin-tbody">
+                                    <tr><td colspan="4" class="mensaje-vacio">Cargando roles...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </section>
+            <!-- Sección de Administración de Reservas -->
+            <section id="seccion-administrar-reservas" class="crud-clientes-section hidden reservas-dashboard-section">
+                <div class="reservas-dashboard-header">
+                    <div>
+                        <p class="reservas-dashboard-kicker">Reservas</p>
+                        <h2 id="reserva-admin-form-title">+ Nueva Reserva</h2>
+                        <p class="reservas-dashboard-subtitle">Vista completa tipo dashboard para gestionar una reserva sin modal.</p>
+                    </div>
+                    <div class="reservas-dashboard-header-actions">
+                        <button type="button" class="btn-accion-crud btn-accion-principal" id="btn-nuevo-reserva-admin">+ NUEVA RESERVA</button>
+                        <div id="mensaje-reserva-admin" class="crud-clientes-mensaje" aria-live="polite"></div>
+                    </div>
+                </div>
+                <div id="reservas-admin-busqueda" class="form-busqueda-reservas">
+                    <input type="search" id="busqueda-reservas-admin" placeholder="Buscar por cliente, documento..." aria-label="Buscar reserva">
+                    <select id="filtro-estado-reservas-admin" aria-label="Filtrar por estado">
+                        <option value="all">Todos los estados</option>
+                        <option value="confirmada">Confirmada</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="cancelada">Cancelada</option>
+                    </select>
+                </div>
+                <div id="reservas-admin-tabla-wrap" class="crud-clientes-tabla-wrap">
+                    <table class="crud-clientes-tabla">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Documento</th>
+                                <th>Fecha inicio</th>
+                                <th>Fecha fin</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reservas-admin-tbody">
+                            <tr><td colspan="7" class="mensaje-vacio">Cargando reservas...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <form id="form-reserva-admin" class="reservas-dashboard-form hidden" novalidate>
+                    <input type="hidden" id="reserva-admin-id">
+                    <div class="reserva-main-panel">
+                        <div class="reserva-card client-search-card">
+                            <label>
+                                <span class="card-title">Buscar cliente por documento o nombre <span class="campo-obligatorio">*</span></span>
+                                <input type="text" id="reserva-admin-search-cliente" placeholder="Escribe documento, nombre o apellido..." autocomplete="off">
+                            </label>
+                            <details class="reserva-extra-fields">
+                                <summary>Detalles adicionales (Completar si es cliente nuevo)</summary>
+                                <div class="reserva-extra-grid">
+                                    <label><span>Tipo documento</span>
+                                        <select id="reserva-admin-tipo-documento" required>
+                                            <option value="">Selecciona un tipo</option>
+                                            <option value="CC">Cédula de Ciudadanía</option>
+                                            <option value="TI">Tarjeta de Identidad</option>
+                                            <option value="CE">Cédula de Extranjería</option>
+                                        </select>
+                                    </label>
+                                    <label><span>Documento <span class="campo-obligatorio">*</span></span>
+                                        <input type="text" id="reserva-admin-cliente" maxlength="50" required>
+                                    </label>
+                                    <label><span>Contacto</span>
+                                        <input type="tel" id="reserva-admin-contacto" maxlength="50">
+                                    </label>
+                                    <label><span>Email</span>
+                                        <input type="email" id="reserva-admin-email" maxlength="100">
+                                    </label>
+                                    <label><span>País</span>
+                                        <input type="text" id="reserva-admin-pais" maxlength="100">
+                                    </label>
+                                </div>
+                            </details>
+                        </div>
+                        <div class="reserva-card">
+                            <span class="card-title"><i class="fa-solid fa-bed"></i> HABITACIÓN Y FECHAS</span>
+                            <div class="reserva-form-group">
+                                <label>
+                                    <span>Habitación <span class="campo-obligatorio">*</span></span>
+                                    <select id="reserva-admin-habitacion" required><option value="">-- Selecciona habitación --</option></select>
+                                </label>
+                                <div class="fechas-grid">
+                                    <label>
+                                        <span>Fecha inicio <span class="campo-obligatorio">*</span></span>
+                                        <input type="date" id="reserva-admin-fecha-inicio" required>
+                                    </label>
+                                    <label>
+                                        <span>Fecha fin <span class="campo-obligatorio">*</span></span>
+                                        <input type="date" id="reserva-admin-fecha-fin" required>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="reserva-card">
+                            <span class="card-title"><i class="fa-solid fa-credit-card"></i> PAGO Y ESTADO</span>
+                            <div class="reserva-form-group">
+                                <label>
+                                    <span>Método de pago</span>
+                                    <select id="reserva-admin-metodo-pago"></select>
+                                </label>
+                                <label>
+                                    <span>Estado de la reserva</span>
+                                    <select id="reserva-admin-estado"></select>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="reserva-card paquetes-card">
+                            <span class="card-title"><i class="fa-solid fa-box"></i> PAQUETES <small>solo activos — clic para seleccionar</small></span>
+                            <div class="paquetes-scroll-container">
+                                <select id="reserva-admin-paquetes" multiple style="display:none;"></select>
+                                <div class="paquetes-visual-list" id="paquetes-visual-list">
+                                    <p class="empty-state-text">Usa el menú original o implementa la carga dinámica en JS aquí.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="reserva-card servicios-card">
+                            <span class="card-title"><i class="fa-solid fa-concierge-bell"></i> SERVICIOS ADICIONALES <small>solo activos — clic para agregar</small></span>
+                            <div class="servicios-visual-list" id="servicios-visual-list">
+                                <p class="empty-state-text">Aquí irán los tags de servicios adicionales.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <aside class="reserva-sidebar-panel">
+                        <div class="reserva-sidebar-section">
+                            <h4>ESTANCIA</h4>
+                            <div class="reserva-summary-row"><span>Entrada</span><strong id="reserva-summary-in">--</strong></div>
+                            <div class="reserva-summary-row"><span>Salida</span><strong id="reserva-summary-out">--</strong></div>
+                            <div class="reserva-summary-row border-top"><span>Noches</span><strong id="reserva-summary-nights">--</strong></div>
+                        </div>
+                        <div class="reserva-sidebar-section">
+                            <h4>DESGLOSE DE PRECIO</h4>
+                            <div class="reserva-summary-row"><span>Habitación</span><strong id="reserva-summary-hab">$0</strong></div>
+                            <div class="reserva-summary-row"><span>Paquetes</span><strong id="reserva-summary-paq">$0</strong></div>
+                            <div class="reserva-summary-row"><span>Servicios</span><strong id="reserva-summary-serv">$0</strong></div>
+                            <div class="reserva-summary-row input-row">
+                                <span>Descuento ($)</span>
+                                <input type="number" id="reserva-admin-descuento" value="0" min="0" step="1000">
+                            </div>
+                            <div class="reserva-summary-row"><span>IVA</span><strong id="reserva-summary-iva">$0</strong></div>
+                            <div class="reserva-summary-row total-row border-top">
+                                <span>Total a pagar</span>
+                                <strong class="total-price" id="reserva-admin-monto-total-display">$0</strong>
+                                <input type="hidden" id="reserva-admin-monto-total">
+                                <input type="hidden" id="reserva-admin-subtotal">
+                                <input type="hidden" id="reserva-admin-fecha-reserva">
+                            </div>
+                        </div>
+                        <div class="reserva-sidebar-actions">
+                            <button type="submit" class="btn-reserva-guardar" id="wizard-submit">
+                                <i class="fa-solid fa-lock"></i> Guardar reserva
+                            </button>
+                            <button type="button" class="btn-reserva-limpiar" id="btn-reserva-admin-limpiar">
+                                <i class="fa-solid fa-broom"></i> Limpiar campos
+                            </button>
+                            <button type="button" class="btn-reserva-cancelar" id="btn-cerrar-modal-reserva">
+                                &times; Cancelar
+                            </button>
+                        </div>
+                    </aside>
+                    <div style="display:none;">
+                        <button id="wizard-prev"></button>
+                        <button id="wizard-next"></button>
+                    </div>
+                </form>
+            </section>
+            <!-- Modal: Detalle de reserva -->
+            <div id="modal-detalle-reserva" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="detalle-reserva-titulo">
+                <div class="crud-modal-content reserva-detalle-modal">
+                    <button type="button" class="crud-modal-close" id="btn-cerrar-detalle-reserva" aria-label="Cerrar">&times;</button>
+                    <h4 id="detalle-reserva-titulo">Detalle de Reserva</h4>
+                    <div id="detalle-reserva-contenido" class="reserva-detalle-grid"></div>
+                    <div class="reserva-detalle-acciones">
+                        <button type="button" class="btn-accion-crud btn-accion-editar" id="btn-detalle-editar">Editar reserva</button>
+                        <button type="button" class="btn-accion-crud" id="btn-detalle-cerrar">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal: Cambio rápido de estado -->
+            <div id="modal-cambio-estado-reserva" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="cambio-estado-titulo">
+                <div class="crud-modal-content" style="max-width:360px;">
+                    <button type="button" class="crud-modal-close" id="btn-cerrar-cambio-estado" aria-label="Cerrar">&times;</button>
+                    <h4 id="cambio-estado-titulo">Cambiar estado de reserva</h4>
+                    <input type="hidden" id="cambio-estado-reserva-id">
+                    <div class="crud-clientes-form" style="gap:12px;">
+                        <label>
+                            <span>Nuevo estado</span>
+                            <select id="cambio-estado-select"></select>
+                        </label>
+                        <div id="mensaje-cambio-estado" class="crud-clientes-mensaje" aria-live="polite"></div>
+                        <div style="display:flex;gap:8px;margin-top:4px;">
+                            <button type="button" class="btn-accion-crud btn-accion-principal" id="btn-confirmar-cambio-estado">Confirmar</button>
+                            <button type="button" class="btn-accion-crud" id="btn-cancelar-cambio-estado">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modal-cliente-admin" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="cliente-admin-form-title">
+                <div class="crud-modal-content">
+                    <button type="button" class="crud-modal-close" id="btn-cerrar-modal-cliente" aria-label="Cerrar formulario">&times;</button>
+                    <h4 id="cliente-admin-form-title">Crear cliente</h4>
+                    <p class="crud-clientes-note">Los campos están alineados con la estructura real de la base de datos.</p>
+                    <div id="mensaje-cliente-admin-modal" class="crud-clientes-mensaje" aria-live="polite"></div>
+                    <form id="form-cliente-admin" class="crud-clientes-form">
+                        <input type="hidden" id="cliente-admin-id">
+                        <label>
+                            <span>Documento <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <input type="text" id="cliente-admin-documento" required maxlength="50" placeholder="Ej. 1234567890">
+                        </label>
+                        <label>
+                            <span>Nombre <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <input type="text" id="cliente-admin-nombre" required maxlength="50" placeholder="Ej. Carlos">
+                        </label>
+                        <label>
+                            <span>Apellido</span>
+                            <input type="text" id="cliente-admin-apellido" maxlength="50" placeholder="Ej. López">
+                        </label>
+                        <label>
+                            <span>Dirección</span>
+                            <input type="text" id="cliente-admin-direccion" maxlength="50" placeholder="Ej. Calle 10 # 12-34">
+                        </label>
+                        <label>
+                            <span>Email <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <input type="email" id="cliente-admin-email" required maxlength="50" placeholder="Ej. cliente@email.com">
+                        </label>
+                        <label>
+                            <span>Teléfono</span>
+                            <input type="text" id="cliente-admin-telefono" maxlength="50" placeholder="Ej. 3001234567">
+                        </label>
+                        <label>
+                            <span>Estado <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <select id="cliente-admin-estado" required>
+                                <option value="1">Activo</option>
+                                <option value="0">Inactivo</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span>ID Rol</span>
+                            <input type="number" id="cliente-admin-idrol" min="1" value="1" placeholder="Ej. 1">
+                        </label>
+                        <div class="crud-clientes-form-actions">
+                            <button type="submit" class="btn-accion-crud btn-accion-principal" id="btn-cliente-admin-guardar">Guardar cliente</button>
+                            <button type="button" class="btn-accion-crud btn-accion-secundaria" id="btn-cliente-admin-limpiar">Limpiar formulario</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="modal-usuario-admin" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="usuario-admin-form-title">
+                <div class="crud-modal-content">
+                    <button type="button" class="crud-modal-close" id="btn-cerrar-modal-usuario" aria-label="Cerrar formulario">&times;</button>
+                    <h4 id="usuario-admin-form-title">Crear usuario</h4>
+                    <p class="crud-clientes-note">Los campos están alineados con la estructura real de la base de datos.</p>
+                    <div id="mensaje-usuario-admin-modal" class="crud-clientes-mensaje" aria-live="polite"></div>
+                    <form id="form-usuario-admin" class="crud-clientes-form">
+                        <input type="hidden" id="usuario-admin-id">
+                        <label><span>Nombre <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="text" id="usuario-admin-nombre" required maxlength="255"></label>
+                        <label><span>Apellido</span><input type="text" id="usuario-admin-apellido" maxlength="255"></label>
+                        <label><span>Email <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="email" id="usuario-admin-email" required maxlength="255"></label>
+                        <label><span>Contraseña <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="password" id="usuario-admin-contrasena" maxlength="255"></label>
+                        <label><span>Tipo documento</span><input type="text" id="usuario-admin-documento" maxlength="50"></label>
+                        <label><span>Número documento</span><input type="text" id="usuario-admin-numero-documento" maxlength="50"></label>
+                        <label><span>Teléfono</span><input type="text" id="usuario-admin-telefono" maxlength="50"></label>
+                        <label><span>País</span><input type="text" id="usuario-admin-pais" maxlength="100"></label>
+                        <label><span>Dirección</span><input type="text" id="usuario-admin-direccion" maxlength="255"></label>
+                        <label><span>Rol</span><select id="usuario-admin-idrol"></select></label>
+                        <label><span>Estado</span><select id="usuario-admin-estado"><option value="1">Activo</option><option value="0">Inactivo</option></select></label>
+                        <div class="crud-clientes-form-actions">
+                            <button type="submit" class="btn-accion-crud btn-accion-principal" id="btn-usuario-admin-guardar">Guardar usuario</button>
+                            <button type="button" class="btn-accion-crud btn-accion-secundaria" id="btn-usuario-admin-limpiar">Limpiar formulario</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="modal-rol-admin" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="rol-admin-form-title">
+                <div class="crud-modal-content">
+                    <button type="button" class="crud-modal-close" id="btn-cerrar-modal-rol" aria-label="Cerrar formulario">&times;</button>
+                    <h4 id="rol-admin-form-title">Crear rol</h4>
+                    <p class="crud-clientes-note">Los campos están alineados con la estructura real de la base de datos.</p>
+                    <div id="mensaje-rol-admin-modal" class="crud-clientes-mensaje" aria-live="polite"></div>
+                    <form id="form-rol-admin" class="crud-clientes-form">
+                        <input type="hidden" id="rol-admin-id">
+                        <label><span>Nombre del rol <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="text" id="rol-admin-nombre" required maxlength="255"></label>
+                        <label><span>Estado</span><select id="rol-admin-estado"><option value="1">Activo</option><option value="0">Inactivo</option></select></label>
+                        <label><span>Permisos</span><div id="rol-admin-permisos" class="crud-roles-permisos"></div></label>
+                        <div class="crud-clientes-form-actions">
+                            <button type="submit" class="btn-accion-crud btn-accion-principal" id="btn-rol-admin-guardar">Guardar rol</button>
+                            <button type="button" class="btn-accion-crud btn-accion-secundaria" id="btn-rol-admin-limpiar">Limpiar formulario</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="modal-permiso-admin" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="permiso-admin-form-title">
+                <div class="crud-modal-content">
+                    <button type="button" class="crud-modal-close" id="btn-cerrar-modal-permiso" aria-label="Cerrar formulario">&times;</button>
+                    <h4 id="permiso-admin-form-title">Crear permiso</h4>
+                    <p class="crud-clientes-note">Los campos están alineados con la estructura real de la base de datos.</p>
+                    <div id="mensaje-permiso-admin-modal" class="crud-clientes-mensaje" aria-live="polite"></div>
+                    <form id="form-permiso-admin" class="crud-clientes-form">
+                        <input type="hidden" id="permiso-admin-id">
+                        <label><span>Nombre del permiso <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="text" id="permiso-admin-nombre" required maxlength="255"></label>
+                        <label><span>Descripción</span><textarea id="permiso-admin-descripcion" maxlength="255"></textarea></label>
+                        <label><span>Estado</span><select id="permiso-admin-estado"><option value="1">Activo</option><option value="0">Inactivo</option></select></label>
+                        <div class="crud-clientes-form-actions">
+                            <button type="submit" class="btn-accion-crud btn-accion-principal" id="btn-permiso-admin-guardar">Guardar permiso</button>
+                            <button type="button" class="btn-accion-crud btn-accion-secundaria" id="btn-permiso-admin-limpiar">Limpiar formulario</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="modal-servicio-admin" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="servicio-admin-form-title">
+                <div class="crud-modal-content">
+                    <button type="button" class="crud-modal-close" id="btn-cerrar-modal-servicio" aria-label="Cerrar formulario">&times;</button>
+                    <h4 id="servicio-admin-form-title">Crear servicio</h4>
+                    <p class="crud-servicios-note">Los campos están alineados con la estructura real de la base de datos.</p>
+                    <div id="mensaje-servicio-admin-modal" class="crud-servicios-mensaje" aria-live="polite"></div>
+                    <form id="form-servicio-admin" class="crud-servicios-form">
+                        <input type="hidden" id="servicio-admin-id">
+                        <label>
+                            <span>Nombre del servicio <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <input type="text" id="servicio-admin-nombre" required maxlength="50" placeholder="Ej. Masaje relajante">
+                        </label>
+                        <label>
+                            <span>Descripción <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <textarea id="servicio-admin-descripcion" required maxlength="100" placeholder="Describe el servicio en pocas palabras"></textarea>
+                        </label>
+                        <label>
+                            <span>Duración (minutos) <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <input type="number" id="servicio-admin-duracion" required min="0" placeholder="Ej. 60">
+                        </label>
+                        <label>
+                            <span>Cantidad máxima de personas <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <input type="number" id="servicio-admin-cantidad-maxima" required min="1" placeholder="Ej. 4">
+                        </label>
+                        <label>
+                            <span>Costo <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <input type="number" id="servicio-admin-costo" required min="0" step="0.01" placeholder="Ej. 150000">
+                        </label>
+                        <label>
+                            <span>Estado <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <select id="servicio-admin-estado" required>
+                                <option value="1">Activo</option>
+                                <option value="0">Inactivo</option>
+                            </select>
+                        </label>
+                        <div class="crud-servicios-form-actions">
+                            <button type="submit" class="btn-accion-crud btn-accion-principal" id="btn-servicio-admin-guardar">Guardar servicio</button>
+                            <button type="button" class="btn-accion-crud btn-accion-secundaria" id="btn-servicio-admin-limpiar">Limpiar formulario</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="modal-perfil" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="perfil-titulo">
+                <div class="crud-modal-content perfil-modal-content">
+                    <button type="button" class="crud-modal-close" id="btn-cerrar-modal-perfil" aria-label="Cerrar perfil">&times;</button>
+                    <div class="perfil-modal-header">
+                        <div class="perfil-avatar" aria-hidden="true">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <h4 id="perfil-titulo">Mi Perfil</h4>
+                        <p>Administra tu información personal y credenciales</p>
+                    </div>
+                    <div id="perfil-mensaje" class="perfil-mensaje hidden" aria-live="polite"></div>
+                    <!-- SECCIÓN DE LECTURA (Por defecto visible) -->
+                    <div id="perfil-lectura" class="perfil-lectura">
+                        <section class="perfil-section">
+                            <h5>Información de documento</h5>
+                            <div class="perfil-grid-campos">
+                                <label class="perfil-field">
+                                    <span class="perfil-label">Tipo de documento</span>
+                                    <span class="perfil-value" id="perfil-tipo-documento">-</span>
+                                </label>
+                                <label class="perfil-field">
+                                    <span class="perfil-label">Número de documento</span>
+                                    <span class="perfil-value" id="perfil-numero-documento">-</span>
+                                </label>
+                            </div>
+                        </section>
+                        <section class="perfil-section">
+                            <h5>Datos de contacto</h5>
+                            <div class="perfil-grid-campos">
+                                <label class="perfil-field">
+                                    <span class="perfil-label">Nombre</span>
+                                    <span class="perfil-value" id="perfil-nombre">-</span>
+                                </label>
+                                <label class="perfil-field">
+                                    <span class="perfil-label">Apellido</span>
+                                    <span class="perfil-value" id="perfil-apellido">-</span>
+                                </label>
+                                <label class="perfil-field">
+                                    <span class="perfil-label">Teléfono</span>
+                                    <span class="perfil-value" id="perfil-telefono">-</span>
+                                </label>
+                                <label class="perfil-field">
+                                    <span class="perfil-label">País</span>
+                                    <span class="perfil-value" id="perfil-pais">-</span>
+                                </label>
+                                <label class="perfil-field perfil-field-full">
+                                    <span class="perfil-label">Dirección</span>
+                                    <span class="perfil-value" id="perfil-direccion">-</span>
+                                </label>
+                            </div>
+                        </section>
+                        <section class="perfil-section">
+                            <h5>Acceso</h5>
+                            <div class="perfil-grid-campos">
+                                <label class="perfil-field perfil-field-full">
+                                    <span class="perfil-label">Email</span>
+                                    <span class="perfil-value" id="perfil-email">-</span>
+                                </label>
+                            </div>
+                        </section>
+                        <section class="perfil-section">
+                            <h5>Rol</h5>
+                            <div class="perfil-grid-campos">
+                                <article class="perfil-field perfil-field-full perfil-field-rol">
+                                    <span class="perfil-label">Tu rol</span>
+                                    <span class="perfil-value" id="perfil-rol-text">-</span>
+                                </article>
+                            </div>
+                        </section>
+                        <section class="perfil-section perfil-section-permisos">
+                            <h5>Permisos</h5>
+                            <div id="perfil-permisos" class="perfil-permisos"></div>
+                        </section>
+                    </div>
+                    <!-- SECCIÓN DE EDICIÓN (Oculta inicialmente) -->
+                    <form id="perfil-form" class="perfil-form hidden">
+                        <section class="perfil-section">
+                            <h5>Información de documento</h5>
+                            <div class="perfil-grid-campos">
+                                <label class="perfil-field">
+                                    <span class="perfil-label">Tipo de documento</span>
+                                    <input type="text" id="perfil-edit-tipo-documento" maxlength="50" placeholder="CC" readonly>
+                                </label>
+                                <label class="perfil-field">
+                                    <span class="perfil-label">Número de documento</span>
+                                    <input type="text" id="perfil-edit-numero-documento" maxlength="50" placeholder="1234567890" readonly>
+                                </label>
+                            </div>
+                        </section>
+                        <section class="perfil-section">
+                            <h5>Datos de contacto</h5>
+                            <div class="perfil-grid-campos">
+                                <label class="perfil-field">
+                                    <span class="perfil-label">Nombre</span>
+                                    <input type="text" id="perfil-edit-nombre" maxlength="255" placeholder="Nombre" readonly>
+                                </label>
+                                <label class="perfil-field">
+                                    <span class="perfil-label">Apellido</span>
+                                    <input type="text" id="perfil-edit-apellido" maxlength="255" placeholder="Apellido" readonly>
+                                </label>
+                                <label class="perfil-field">
+                                    <span class="perfil-label">Teléfono</span>
+                                    <input type="text" id="perfil-edit-telefono" maxlength="50" placeholder="3001234567" readonly>
+                                </label>
+                                <label class="perfil-field">
+                                    <span class="perfil-label">País</span>
+                                    <input type="text" id="perfil-edit-pais" maxlength="100" placeholder="Colombia" readonly>
+                                </label>
+                                <label class="perfil-field perfil-field-full">
+                                    <span class="perfil-label">Dirección</span>
+                                    <input type="text" id="perfil-edit-direccion" maxlength="255" placeholder="Dirección" readonly>
+                                </label>
+                            </div>
+                        </section>
+                        <section class="perfil-section">
+                            <h5>Acceso</h5>
+                            <div class="perfil-grid-campos">
+                                <label class="perfil-field perfil-field-full">
+                                    <span class="perfil-label">Email</span>
+                                    <input type="email" id="perfil-edit-email" maxlength="255" placeholder="correo@ejemplo.com" readonly>
+                                </label>
+                            </div>
+                        </section>
+                        <section class="perfil-section">
+                            <h5>Rol</h5>
+                            <div class="perfil-grid-campos">
+                                <article class="perfil-field perfil-field-full perfil-field-rol">
+                                    <span class="perfil-label">Tu rol</span>
+                                    <span class="perfil-value" id="perfil-edit-rol-text">-</span>
+                                </article>
+                            </div>
+                        </section>
+                        <section class="perfil-section perfil-section-permisos">
+                            <h5>Permisos</h5>
+                            <div id="perfil-edit-permisos" class="perfil-permisos"></div>
+                        </section>
+                    </form>
+                    <div class="perfil-actions">
+                        <button type="button" class="perfil-btn perfil-btn-primary" id="btn-editar-perfil">Editar Perfil</button>
+                        <button type="submit" form="perfil-form" class="perfil-btn perfil-btn-primary hidden" id="btn-guardar-perfil">Guardar Cambios</button>
+                        <button type="button" class="perfil-btn perfil-btn-secondary hidden" id="btn-cancelar-edicion-perfil">Cancelar</button>
+                        <button type="button" class="perfil-btn perfil-btn-secondary" id="btn-cerrar-sesion">Cerrar Sesión</button>
+                    </div>
+                </div>
+            </div>
+            <div id="modal-detalle-admin" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="detalle-admin-titulo">
+                <div class="crud-modal-content crud-detalle-modal-content">
+                    <button type="button" class="crud-modal-close" id="btn-cerrar-modal-detalle" aria-label="Cerrar detalle">&times;</button>
+                    <h4 id="detalle-admin-titulo">Detalle</h4>
+                    <div id="detalle-admin-contenido" class="detalle-admin-contenido"></div>
+                </div>
+            </div>
+            <!-- Modal - Crear/Editar Paquete -->
+            <div id="modal-paquete" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-paquete-titulo">
+                <div class="crud-modal-content">
+                    <button type="button" class="crud-modal-close crud-paquetes-close" id="btn-cerrar-modal-paquete" aria-label="Cerrar formulario">&times;</button>
+                    <h4 id="modal-paquete-titulo">Crear paquete</h4>
+                    <p class="crud-paquetes-note">Completa los datos del paquete y selecciona los servicios incluidos.</p>
+                    <form id="formulario-paquete" class="crud-paquetes-form">
+                        <label>
+                            <span>Nombre <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <input type="text" id="paquete-nombre" name="NombrePaquete" required maxlength="150" placeholder="Ej: Paquete Romántico">
+                        </label>
+                        <label>
+                            <span>Descripción</span>
+                            <textarea id="paquete-descripcion" name="Descripcion" maxlength="500" placeholder="Describe los detalles del paquete..." rows="3"></textarea>
+                        </label>
+                        <div class="form-row-2">
+                            <label>
+                                <span>Precio <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                                <input type="number" id="paquete-precio" name="PrecioPaquete" required min="0" step="1000" placeholder="0">
+                            </label>
+                            <label>
+                                <span>Duración (noches) <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                                <input type="number" id="paquete-duracion" name="DuracionNoches" required min="1" value="1">
+                            </label>
+                        </div>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="paquete-incluir-habitacion" name="IncluirHabitacion" checked>
+                            <span>Incluye alojamiento</span>
+                        </label>
+                        <label>
+                            <span>URL de Imagen</span>
+                            <input type="url" id="paquete-imagen" name="Imagen" placeholder="https://...">
+                        </label>
+                        <label>
+                            <span>Estado</span>
+                            <select id="paquete-estado" name="Estado">
+                                <option value="1">Activo</option>
+                                <option value="0">Inactivo</option>
+                            </select>
+                        </label>
+                        <div class="servicios-section">
+                            <label>
+                                <span>Servicios Incluidos</span>
+                            </label>
+                            <div id="lista-servicios-paquete" class="crud-paquetes-servicios-grid">
+                                <!-- Se llenará dinámicamente -->
+                            </div>
+                        </div>
+                        <div class="crud-paquetes-form-actions">
+                            <button type="submit" class="btn-accion-crud btn-accion-principal" id="btn-guardar-paquete">
+                                <i class="fa-solid fa-check"></i> Guardar paquete
+                            </button>
+                            <button type="button" class="btn-accion-crud btn-accion-secundaria" id="btn-cancelar-paquete">
+                                <i class="fa-solid fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Modal - Detalles y Servicios de Paquete -->
+            <div id="modal-paquete-detalles" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-detalles-titulo">
+                <div class="crud-modal-content crud-modal-lg">
+                    <button type="button" class="crud-modal-close" id="btn-cerrar-detalles" aria-label="Cerrar detalles">&times;</button>
+                    <h4 id="modal-detalles-titulo">Detalles del Paquete</h4>
+                    <div class="crud-paquetes-detalles">
+                        <div class="detalles-header">
+                            <img id="detalles-imagen" src="" alt="Paquete" class="detalles-imagen">
+                            <div class="detalles-info">
+                                <h3 id="detalles-nombre"></h3>
+                                <p id="detalles-descripcion"></p>
+                                <div class="detalles-meta">
+                                    <span class="precio-badge" id="detalles-precio"></span>
+                                    <span class="duracion-badge" id="detalles-duracion"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="detalles-servicios">
+                            <h4>Servicios Incluidos</h4>
+                            <div id="detalles-servicios" class="servicios-lista">
+                                <!-- Se llenará dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="crud-paquetes-form-actions">
+                        <button type="button" class="btn-accion-crud btn-accion-secundaria" id="btn-cerrar-detalles-btn" aria-label="Cerrar ventana de detalles">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+               <!-- Modal - Dashboard de Reserva -->
+        </main>
+    </div>
+    <!-- Scripts JavaScript -->
+    <!-- ⭐ IMPORTANTE: Cargar en este orden -->
+    <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script defer src="js/config.js?v=20260524b"></script>    <!-- Primero: Configuración -->
+        <script defer src="js/dashboard-inject.js?v=20260524b"></script> <!-- Inyectar Dashboard HTML -->
+    <script defer src="js/constants.js?v=20260524b"></script> <!-- Segundo: Constantes -->
+    <script defer src="js/validation.js?v=20260524b"></script> <!-- Tercero: Validación -->
+    <script defer src="js/notifications.js?v=20260524b"></script> <!-- Cuarto: Notificaciones -->
+    <script defer src="js/api.js?v=20260524b"></script>      <!-- Quinto: Funciones de API -->
+    <script defer src="js/perfil.js?v=20260524b"></script>   <!-- Nuevo: Módulo de Perfil -->
+    <script defer src="js/app.js?v=20260524b"></script>      <!-- Sexto: Lógica de la aplicación -->
+    <script defer src="js/usuarios.js?v=20260524b"></script>
+    <script defer src="js/roles.js?v=20260524b"></script>
+    <script defer src="js/eventos.js?v=20260524b"></script>  <!-- Séptimo: Eventos y formularios -->
+    <script defer src="js/paquetes.js?v=20260524b"></script> <!-- Paquetes: Módulo de Paquetes -->
+    <script defer src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+        <script defer src="js/dashboard.js?v=20260524b"></script> <!-- Dashboard: Panel de Control -->
+    <script defer src="js/reservas.js?v=20260524b"></script> <!-- Reservas: Módulo de Reservas -->
+    <!-- Script del Sidebar -->
+    <script>
+        // ============================================
+        // FUNCIONALIDAD DEL SIDEBAR
+        // ============================================
+        // Cargar habitaciones cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('habitaciones')) {
+                cargarHabitaciones();
+            }
+        });
+        const sidebar = document.getElementById('sidebar');
+        const toggle = document.getElementById('sidebar-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
+        const mainWrapper = document.getElementById('main-wrapper');
+        function openSidebar() {
+            sidebar.classList.add('open');
+            mainWrapper.classList.add('sidebar-open');
+            if (overlay && window.innerWidth <= 768) overlay.classList.add('active');
+            localStorage.setItem('hospedaje_sidebar_open', '1');
+        }
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            mainWrapper.classList.remove('sidebar-open');
+            if (overlay) overlay.classList.remove('active');
+            localStorage.setItem('hospedaje_sidebar_open', '0');
+        }
+        function toggleSidebar() {
+            sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+        }
+        // Sidebar siempre inicia expandido (nombres visibles)
+        localStorage.removeItem('hospedaje_sidebar_open');
+        openSidebar();
+        if (toggle) toggle.addEventListener('click', toggleSidebar);
+        if (overlay) overlay.addEventListener('click', closeSidebar);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && sidebar.classList.contains('open')) closeSidebar();
+        });
+        // Tooltip del sidebar colapsado
+        (function() {
+            const tip = document.getElementById('sidebar-nav-tip');
+            if (!tip) return;
+            document.querySelectorAll('.sidebar-nav a[title]').forEach(function(link) {
+                link.addEventListener('mouseenter', function() {
+                    if (sidebar.classList.contains('open')) return;
+                    var rect = link.getBoundingClientRect();
+                    tip.textContent = link.getAttribute('title');
+                    tip.style.top = (rect.top + rect.height / 2) + 'px';
+                    tip.style.left = '88px';
+                    tip.style.transform = 'translateY(-50%)';
+                    tip.classList.add('visible');
+                });
+                link.addEventListener('mouseleave', function() {
+                    tip.classList.remove('visible');
+                });
+            });
+        })();
+
+        // Rellenar info de usuario en sidebar
+        try {
+            const rawUser = sessionStorage.getItem('usuario') || localStorage.getItem('user') || localStorage.getItem('usuario');
+            const u = rawUser ? JSON.parse(rawUser) : null;
+            if (u) {
+                const emailEl = document.getElementById('sidebar-user-email');
+                const roleEl  = document.getElementById('sidebar-user-role');
+                if (emailEl) emailEl.textContent = u.Email || u.email || '';
+                if (roleEl)  roleEl.textContent  = u.NombreRol || u.Rol || '';
+            }
+        } catch(e) {}
+    </script>
+</body>
+</html>

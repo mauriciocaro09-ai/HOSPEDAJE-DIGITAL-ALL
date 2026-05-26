@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospedaje Digital | Experiencias Inolvidables</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1a2744',
+                        'primary-dark': '#111b33',
+                        secondary: '#1a1a1a',
+                        accent: '#ff8a3d',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-white text-secondary font-sans antialiased">
+
+    <!-- NAVEGACIÓN -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a class="flex items-center gap-3 font-bold text-primary tracking-tight" href="#inicio">
+                <span class="w-10 h-10 rounded-xl grid place-items-center bg-primary text-white shadow-lg shadow-primary/20">
+                    <i class="fa-solid fa-hotel"></i>
+                </span>
+                <span class="hidden sm:block text-lg">HOSPEDAJE DIGITAL</span>
+            </a>
+
+            <div class="hidden md:flex items-center gap-8 font-medium text-gray-500">
+                <a href="#inicio" class="hover:text-primary transition-colors">Inicio</a>
+                <a href="#habitaciones" class="hover:text-primary transition-colors">Habitaciones</a>
+                <a href="#paquetes" class="hover:text-primary transition-colors">Paquetes</a>
+                <a href="#servicios" class="hover:text-primary transition-colors">Servicios</a>
+                <a href="#nosotros" class="hover:text-primary transition-colors">Nosotros</a>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="../login.html" class="px-5 py-2.5 rounded-lg font-semibold text-primary hover:bg-gray-50 transition-all text-sm">Login</a>
+                <button type="button" id="open-register-modal" class="px-5 py-2.5 rounded-lg font-semibold bg-primary text-white hover:bg-opacity-90 shadow-md hover:shadow-lg transition-all text-sm">Registrarme</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section id="inicio" class="hero-fullbg relative overflow-hidden">
+
+        <!-- Slides de fondo -->
+        <div class="hero-slide active absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1600"
+                 alt="Suite Principal" class="w-full h-full object-cover" loading="eager">
+        </div>
+        <div class="hero-slide absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=1600"
+                 alt="Habitación Estándar" class="w-full h-full object-cover" loading="lazy">
+        </div>
+        <div class="hero-slide absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80&w=1600"
+                 alt="Suite Panorámica" class="w-full h-full object-cover" loading="lazy">
+        </div>
+        <div class="hero-slide absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&q=80&w=1600"
+                 alt="Suite Ejecutiva" class="w-full h-full object-cover" loading="lazy">
+        </div>
+
+        <!-- Overlay degradado -->
+        <div class="hero-overlay absolute inset-0"></div>
+
+        <!-- Contenido centrado sobre el slider -->
+        <div class="relative z-10 max-w-7xl mx-auto px-6 h-full flex items-center">
+            <div class="max-w-2xl">
+                <p class="text-white/70 font-semibold tracking-widest text-sm uppercase mb-4">San Roque, Antioquia</p>
+                <h1 class="text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight text-white mb-8">
+                    Descanso sin <br><span class="text-accent italic">complicaciones</span>
+                </h1>
+                <p class="text-lg text-white/80 leading-relaxed max-w-lg mb-10">
+                    Reserva tus habitaciones de forma simple. Accede a todos los servicios en una plataforma clara, moderna y disponible 24/7.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="../login.html" class="px-8 py-4 bg-accent text-white rounded-xl font-bold shadow-xl hover:-translate-y-1 transition-all">Entrar al sistema</a>
+                    <a href="#habitaciones" class="px-8 py-4 bg-white/15 text-white border border-white/30 rounded-xl font-bold hover:bg-white/25 transition-all backdrop-blur-sm">Ver habitaciones</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flechas de navegación -->
+        <button type="button" id="hero-slider-prev" class="slider-arrow slider-arrow--left" aria-label="Anterior">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button type="button" id="hero-slider-next" class="slider-arrow slider-arrow--right" aria-label="Siguiente">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <!-- Puntos de navegación -->
+        <div class="slider-dots" id="hero-slider-dots">
+            <button type="button" class="slider-dot active" data-slide="0" aria-label="Slide 1"></button>
+            <button type="button" class="slider-dot" data-slide="1" aria-label="Slide 2"></button>
+            <button type="button" class="slider-dot" data-slide="2" aria-label="Slide 3"></button>
+            <button type="button" class="slider-dot" data-slide="3" aria-label="Slide 4"></button>
+        </div>
+    </section>
+
+    <!-- HABITACIONES -->
+    <section id="habitaciones" class="py-24">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                <div class="max-w-xl">
+                    <h2 class="text-4xl font-bold mb-4 tracking-tight">Nuestras habitaciones</h2>
+                    <p class="text-gray-500 text-lg">Selecciona entre nuestras opciones y comienza tu reserva en el sistema hoy mismo.</p>
+                </div>
+                <a href="../login.html" class="inline-flex px-6 py-3 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all">Reservar ahora</a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="habitaciones-container">
+                <!-- Skeleton loader o estado inicial -->
+                <div class="col-span-full flex flex-col items-center py-20 text-gray-400">
+                    <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p>Cargando experiencias...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAQUETES -->
+    <section id="paquetes" class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                <div class="max-w-xl">
+                    <h2 class="text-4xl font-bold mb-4 tracking-tight">Nuestros paquetes</h2>
+                    <p class="text-gray-500 text-lg">Experiencias completas diseñadas para que disfrutes al máximo tu estadía.</p>
+                </div>
+                <a href="../login.html" class="inline-flex px-6 py-3 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all">Ver todos</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="paquetes-container">
+                <div class="col-span-full flex flex-col items-center py-20 text-gray-400">
+                    <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p>Cargando paquetes...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SERVICIOS -->
+    <section id="servicios" class="py-24">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                <div class="max-w-xl">
+                    <h2 class="text-4xl font-bold mb-4 tracking-tight">Nuestros servicios</h2>
+                    <p class="text-gray-500 text-lg">Complementa tu estadía con actividades y atenciones pensadas para ti.</p>
+                </div>
+                <a href="../login.html" class="inline-flex px-6 py-3 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all">Ver todos</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="servicios-container">
+                <div class="col-span-full flex flex-col items-center py-20 text-gray-400">
+                    <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p>Cargando servicios...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- POR QUÉ ELEGIRNOS -->
+    <section id="nosotros" class="py-24 bg-primary">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4">Por qué elegirnos</h2>
+                <p class="text-primary-foreground text-emerald-100/70 italic text-lg">Un sistema pensado para que tu experiencia sea fluida de inicio a fin.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white/10 backdrop-blur-sm p-10 rounded-3xl border border-white/10 hover:bg-white/15 transition-all group">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-primary text-2xl mb-6 shadow-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Simple</h3>
+                    <p class="text-emerald-50/70 leading-relaxed text-sm">Interfaz intuitiva sin complicaciones. Reserva en pocos clics sin necesidad de tutoriales.</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm p-10 rounded-3xl border border-white/10 hover:bg-white/15 transition-all group">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-primary text-2xl mb-6 shadow-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Seguro</h3>
+                    <p class="text-emerald-50/70 leading-relaxed text-sm">Tus datos protegidos y transacciones confiables bajo los más altos estándares de seguridad.</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm p-10 rounded-3xl border border-white/10 hover:bg-white/15 transition-all group">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-primary text-2xl mb-6 shadow-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Rápido</h3>
+                    <p class="text-emerald-50/70 leading-relaxed text-sm">Confirmación inmediata y gestión ágil. Sabemos que tu tiempo es valioso.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODAL DETALLE HABITACIÓN -->
+    <dialog id="hab-detalle-modal" class="hab-detalle-modal">
+        <div class="hab-detalle-inner">
+            <!-- Encabezado -->
+            <div class="hab-detalle-header">
+                <h2 id="hab-detalle-nombre" class="hab-detalle-titulo"></h2>
+                <button id="hab-detalle-close" class="hab-detalle-close" aria-label="Cerrar">×</button>
+            </div>
+            <!-- Carrusel de imágenes -->
+            <div class="hab-detalle-img-wrap" id="hab-detalle-slider">
+                <!-- Se genera dinámicamente -->
+            </div>
+            <!-- Info -->
+            <div class="hab-detalle-body">
+                <p id="hab-detalle-desc" class="hab-detalle-desc"></p>
+                <div class="hab-detalle-meta">
+                    <div class="hab-detalle-precio">
+                        <span class="hab-detalle-precio-val" id="hab-detalle-precio"></span>
+                        <span class="hab-detalle-precio-label">/ noche</span>
+                    </div>
+                    <span class="hab-detalle-badge">Disponible</span>
+                </div>
+                <a href="../login.html" class="hab-detalle-btn">
+                    <i class="fa-solid fa-calendar-check"></i> Reservar ahora
+                </a>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- MODAL DETALLE PAQUETE -->
+    <dialog id="paq-detalle-modal" class="hab-detalle-modal">
+        <div class="hab-detalle-inner">
+            <div class="hab-detalle-header">
+                <h2 id="paq-detalle-nombre" class="hab-detalle-titulo"></h2>
+                <button id="paq-detalle-close" class="hab-detalle-close" aria-label="Cerrar">×</button>
+            </div>
+            <div class="hab-detalle-img-wrap" id="paq-detalle-slider"></div>
+            <div class="hab-detalle-body">
+                <p id="paq-detalle-desc" class="hab-detalle-desc"></p>
+                <div class="hab-detalle-meta">
+                    <div class="hab-detalle-precio">
+                        <span class="hab-detalle-precio-val" id="paq-detalle-precio"></span>
+                        <span class="hab-detalle-precio-label">/ paquete</span>
+                    </div>
+                    <span id="paq-detalle-noches" class="hab-detalle-badge"></span>
+                </div>
+                <a href="../login.html" class="hab-detalle-btn">
+                    <i class="fa-solid fa-calendar-check"></i> Reservar paquete
+                </a>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- MODAL DETALLE SERVICIO -->
+    <dialog id="srv-detalle-modal" class="hab-detalle-modal">
+        <div class="hab-detalle-inner">
+            <div class="hab-detalle-header">
+                <h2 id="srv-detalle-nombre" class="hab-detalle-titulo"></h2>
+                <button id="srv-detalle-close" class="hab-detalle-close" aria-label="Cerrar">×</button>
+            </div>
+            <div class="hab-detalle-img-wrap" id="srv-detalle-slider"></div>
+            <div class="hab-detalle-body">
+                <p id="srv-detalle-desc" class="hab-detalle-desc"></p>
+                <div class="hab-detalle-meta">
+                    <div class="hab-detalle-precio">
+                        <span class="hab-detalle-precio-val" id="srv-detalle-precio"></span>
+                        <span class="hab-detalle-precio-label">/ servicio</span>
+                    </div>
+                    <span id="srv-detalle-info" class="hab-detalle-badge"></span>
+                </div>
+                <a href="../login.html" class="hab-detalle-btn">
+                    <i class="fa-solid fa-calendar-check"></i> Solicitar servicio
+                </a>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- FOOTER -->
+    <footer class="bg-primary text-white">
+        <!-- Cuerpo del footer -->
+        <div class="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-3 gap-12">
+
+            <!-- Columna 1: Marca -->
+            <div>
+                <div class="flex items-center gap-3 mb-5">
+                    <span class="w-10 h-10 rounded-xl grid place-items-center bg-accent text-white shadow-lg">
+                        <i class="fa-solid fa-hotel"></i>
+                    </span>
+                    <span class="text-lg font-bold tracking-tight">HOSPEDAJE DIGITAL</span>
+                </div>
+                <p class="text-white/60 text-sm leading-relaxed mb-6">
+                    Tu plataforma de reservas moderna y segura. Disfruta una experiencia de hospedaje sin complicaciones en San Roque, Antioquia.
+                </p>
+                <div class="flex items-center gap-3">
+                    <a href="#" aria-label="Instagram" class="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:text-accent hover:border-accent transition-all">
+                        <i class="fa-brands fa-instagram text-sm"></i>
+                    </a>
+                    <a href="#" aria-label="Facebook" class="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:text-accent hover:border-accent transition-all">
+                        <i class="fa-brands fa-facebook text-sm"></i>
+                    </a>
+                    <a href="#" aria-label="WhatsApp" class="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:text-accent hover:border-accent transition-all">
+                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Columna 2: Links rápidos -->
+            <div>
+                <h4 class="text-sm font-bold uppercase tracking-widest text-white/40 mb-5">Navegación</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="#inicio" class="text-white/70 hover:text-accent transition-colors">Inicio</a></li>
+                    <li><a href="#habitaciones" class="text-white/70 hover:text-accent transition-colors">Habitaciones</a></li>
+                    <li><a href="#paquetes" class="text-white/70 hover:text-accent transition-colors">Paquetes</a></li>
+                    <li><a href="#servicios" class="text-white/70 hover:text-accent transition-colors">Servicios</a></li>
+                    <li><a href="#nosotros" class="text-white/70 hover:text-accent transition-colors">Por qué elegirnos</a></li>
+                    <li><a href="../login.html" class="text-white/70 hover:text-accent transition-colors">Iniciar sesión</a></li>
+                </ul>
+            </div>
+
+            <!-- Columna 3: Contacto -->
+            <div>
+                <h4 class="text-sm font-bold uppercase tracking-widest text-white/40 mb-5">Contacto</h4>
+                <ul class="space-y-4 text-sm text-white/70">
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-location-dot text-accent mt-0.5"></i>
+                        <span>San Roque, Antioquia, Colombia</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <i class="fa-solid fa-phone text-accent"></i>
+                        <a href="tel:+573044305969" class="hover:text-accent transition-colors">+57 304 430 5969</a>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <i class="fa-brands fa-whatsapp text-accent"></i>
+                        <a href="https://wa.me/573044305969" target="_blank" rel="noopener" class="hover:text-accent transition-colors">Escríbenos por WhatsApp</a>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <i class="fa-solid fa-clock text-accent"></i>
+                        <span>Atención 24 / 7</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Barra inferior -->
+        <div class="border-t border-white/10">
+            <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-white/40">
+                <p>© 2026 <span class="font-semibold text-white/60">Hospedaje Digital</span>. Todos los derechos reservados.</p>
+                <p>Diseñado para simplificar tu estancia.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botón flotante de WhatsApp -->
+    <a href="https://wa.me/573044305969?text=Hola%2C%20me%20gustar%C3%ADa%20obtener%20informaci%C3%B3n%20sobre%20habitaciones%20y%20realizar%20una%20reserva."
+       target="_blank"
+       rel="noopener noreferrer"
+       class="whatsapp-fab"
+       aria-label="Contactar por WhatsApp">
+        <span class="whatsapp-fab__pulse"></span>
+        <i class="fa-brands fa-whatsapp whatsapp-fab__icon"></i>
+        <span class="whatsapp-fab__tooltip">Reservar por WhatsApp</span>
+    </a>
+
+    <!-- MODAL DE REGISTRO INLINE -->
+    <dialog id="register-modal" class="register-modal">
+        <div class="rm-header">
+            <button type="button" class="register-modal__close" id="register-modal-close" aria-label="Cerrar registro">×</button>
+        </div>
+
+        <div class="rm-body">
+            <h2 class="rm-title">Crear Cuenta</h2>
+            <p class="rm-subtitle">Completa tus datos para registrarte</p>
+
+            <form id="rm-form" novalidate>
+                <div class="rm-section">
+                    <h3 class="rm-section-title">Información de Documento</h3>
+                    <div class="rm-grid">
+                        <div class="rm-field">
+                            <label for="rm_tipoDoc">Tipo Documento <span class="rm-req">*</span></label>
+                            <select id="rm_tipoDoc" required>
+                                <option value="">Selecciona un tipo</option>
+                                <option value="CC">Cédula de Ciudadanía</option>
+                                <option value="TI">Tarjeta de Identidad</option>
+                                <option value="CE">Cédula de Extranjería</option>
+                            </select>
+                        </div>
+                        <div class="rm-field">
+                            <label for="rm_numDoc">Número Documento <span class="rm-req">*</span></label>
+                            <input type="text" id="rm_numDoc" inputmode="numeric" maxlength="20" data-filtro="numeros" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rm-section">
+                    <h3 class="rm-section-title">Datos de Contacto</h3>
+                    <div class="rm-grid">
+                        <div class="rm-field">
+                            <label for="rm_nombre">Nombre <span class="rm-req">*</span></label>
+                            <input type="text" id="rm_nombre" maxlength="50" data-filtro="letras" required>
+                        </div>
+                        <div class="rm-field">
+                            <label for="rm_apellido">Apellido <span class="rm-req">*</span></label>
+                            <input type="text" id="rm_apellido" maxlength="50" data-filtro="letras" required>
+                        </div>
+                        <div class="rm-field">
+                            <label for="rm_telefono">Teléfono</label>
+                            <input type="text" id="rm_telefono" inputmode="numeric" maxlength="15" data-filtro="numeros">
+                        </div>
+                        <div class="rm-field">
+                            <label for="rm_pais">País</label>
+                            <input type="text" id="rm_pais" maxlength="60" data-filtro="letras">
+                        </div>
+                        <div class="rm-field rm-full">
+                            <label for="rm_direccion">Dirección</label>
+                            <input type="text" id="rm_direccion" maxlength="50">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rm-section">
+                    <h3 class="rm-section-title">Credenciales de Acceso</h3>
+                    <div class="rm-grid">
+                        <div class="rm-field">
+                            <label for="rm_email">Correo Electrónico <span class="rm-req">*</span></label>
+                            <input type="email" id="rm_email" maxlength="50" required>
+                        </div>
+                        <div class="rm-field">
+                            <label for="rm_password">Contraseña <span class="rm-req">*</span></label>
+                            <input type="password" id="rm_password" maxlength="128" required>
+                        </div>
+                        <div class="rm-field">
+                            <label for="rm_password2">Confirmar Contraseña <span class="rm-req">*</span></label>
+                            <input type="password" id="rm_password2" maxlength="128" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="rm-error" class="rm-error hidden"></div>
+                <button type="submit" class="rm-btn" id="rm-submit">Registrarse</button>
+            </form>
+
+            <p class="rm-footer">¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
+        </div>
+    </dialog>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/modal.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/validation.js"></script>
+    <script>
+        const registerModal = document.getElementById('register-modal');
+        const openRegisterModalButton = document.getElementById('open-register-modal');
+
+        function openRegisterModal() {
+            if (!registerModal) return;
+            registerModal.showModal();
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeRegisterModal() {
+            if (!registerModal) return;
+            registerModal.close();
+            document.body.style.overflow = '';
+            document.getElementById('rm-form')?.reset();
+            const err = document.getElementById('rm-error');
+            if (err) { err.classList.add('hidden'); err.textContent = ''; }
+        }
+
+        openRegisterModalButton?.addEventListener('click', openRegisterModal);
+        document.getElementById('register-modal-close')?.addEventListener('click', closeRegisterModal);
+
+        // Cerrar al hacer clic en el backdrop (click sobre el propio dialog fuera del contenido)
+        registerModal?.addEventListener('click', (e) => {
+            if (e.target === registerModal) closeRegisterModal();
+        });
+
+        // ESC lo maneja el browser nativamente; limpiamos el formulario
+        registerModal?.addEventListener('cancel', (e) => {
+            e.preventDefault();
+            closeRegisterModal();
+        });
+
+        document.getElementById('rm-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('rm-submit');
+
+            const tipoDoc  = document.getElementById('rm_tipoDoc').value.trim();
+            const numDoc   = document.getElementById('rm_numDoc').value.trim();
+            const nombre   = document.getElementById('rm_nombre').value.trim();
+            const apellido = document.getElementById('rm_apellido').value.trim();
+            const email    = document.getElementById('rm_email').value.trim();
+            const password  = document.getElementById('rm_password').value.trim();
+            const password2 = document.getElementById('rm_password2').value.trim();
+
+            if (!tipoDoc || !numDoc || !nombre || !apellido || !email || !password || !password2) {
+                Swal.fire({
+                    title: 'Campos incompletos',
+                    text: 'Por favor, completá todos los campos obligatorios (*)',
+                    icon: 'warning',
+                    confirmButtonColor: '#f97316',
+                    confirmButtonText: 'Entendido'
+                });
+                return;
+            }
+
+            if (password !== password2) {
+                Swal.fire({
+                    title: 'Contraseñas distintas',
+                    text: 'Las contraseñas que ingresaste no coinciden. Revisalas e intentá de nuevo.',
+                    icon: 'warning',
+                    confirmButtonColor: '#f97316',
+                    confirmButtonText: 'Corregir'
+                });
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Registrando...';
+
+            const apiUrl = window.API_URL || 'http://localhost:3000/api';
+            try {
+                const res = await fetch(`${apiUrl}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        NombreUsuario: nombre,
+                        Apellido: apellido,
+                        Email: email,
+                        Contrasena: password,
+                        TipoDocumento: tipoDoc,
+                        NumeroDocumento: numDoc,
+                        Telefono: document.getElementById('rm_telefono').value.trim() || null,
+                        Pais: document.getElementById('rm_pais').value.trim() || null,
+                        Direccion: document.getElementById('rm_direccion').value.trim() || null,
+                        IDRol: 2,
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    closeRegisterModal();
+                    Swal.fire({
+                        title: '¡Registro exitoso!',
+                        text: 'Tu cuenta fue creada correctamente. Ya podés iniciar sesión.',
+                        icon: 'success',
+                        confirmButtonColor: '#0d3031',
+                        confirmButtonText: 'Ir a iniciar sesión'
+                    }).then(() => {
+                        window.location.href = '../login.html';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error al registrar',
+                        text: data.error || data.message || 'Ocurrió un error inesperado. Intentá de nuevo.',
+                        icon: 'error',
+                        confirmButtonColor: '#e53e3e',
+                        confirmButtonText: 'Cerrar'
+                    });
+                }
+            } catch (err) {
+                Swal.fire({
+                    title: 'Sin conexión',
+                    text: 'No se pudo conectar con el servidor. Verificá tu conexión e intentá de nuevo.',
+                    icon: 'error',
+                    confirmButtonColor: '#e53e3e',
+                    confirmButtonText: 'Cerrar'
+                });
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Registrarse';
+            }
+        });
+
+        const roomImages = [
+            'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
+            'https://images.unsplash.com/photo-1582719478250-c89cae4df85b?auto=format&fit=crop&q=80&w=800',
+            'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=800',
+            'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80&w=800'
+        ];
+
+        function getRandomImage(index) {
+            return roomImages[index % roomImages.length];
+        }
+
+        function extraerPrimeraImagenHab(valor) {
+            if (!valor) return null;
+
+            // MySQL devuelve campos TEXT como Buffer: {type:"Buffer", data:[...bytes]}
+            if (valor && valor.type === 'Buffer' && Array.isArray(valor.data)) {
+                try {
+                    const str = new TextDecoder('utf-8').decode(new Uint8Array(valor.data));
+                    return extraerPrimeraImagenHab(str);
+                } catch (_) { return null; }
+            }
+
+            if (Array.isArray(valor)) {
+                const url = valor.find(v => typeof v === 'string' && (v.trim().startsWith('http') || v.trim().startsWith('data:image/')));
+                return url ? url.trim() : null;
+            }
+
+            if (typeof valor === 'string') {
+                const txt = valor.trim();
+                if (txt.startsWith('[')) {
+                    try {
+                        const arr = JSON.parse(txt);
+                        const url = Array.isArray(arr) && arr.find(v => typeof v === 'string' && (v.trim().startsWith('http') || v.trim().startsWith('data:image/')));
+                        if (url) return url.trim();
+                    } catch (_) {}
+                }
+                if (txt.startsWith('http')) return txt.split(/[,\n]/)[0].trim();
+                if (txt.startsWith('data:image/')) return txt;
+            }
+            return null;
+        }
+
+        function getHabImage(room, index) {
+            const url = extraerPrimeraImagenHab(room.ImagenHabitacion)
+                     || extraerPrimeraImagenHab(room.ImagenesHabitacion)
+                     || extraerPrimeraImagenHab(room.GaleriaHabitacion);
+            return url || getRandomImage(index);
+        }
+
+        // Extrae TODAS las imágenes de una habitación como array
+        function extraerTodasImagenes(valor) {
+            if (!valor) return [];
+            // Buffer de MySQL
+            if (valor && valor.type === 'Buffer' && Array.isArray(valor.data)) {
+                try {
+                    const str = new TextDecoder('utf-8').decode(new Uint8Array(valor.data));
+                    return extraerTodasImagenes(str);
+                } catch (_) { return []; }
+            }
+            if (Array.isArray(valor)) {
+                return valor.filter(v => typeof v === 'string' && (v.trim().startsWith('http') || v.trim().startsWith('data:image/'))).map(v => v.trim());
+            }
+            if (typeof valor === 'string') {
+                const txt = valor.trim();
+                if (txt.startsWith('[')) {
+                    try {
+                        const arr = JSON.parse(txt);
+                        if (Array.isArray(arr)) return arr.filter(v => typeof v === 'string' && (v.trim().startsWith('http') || v.trim().startsWith('data:image/'))).map(v => v.trim());
+                    } catch (_) {}
+                }
+                // Separadas por coma o salto de línea
+                return txt.split(/[,\n]/).map(s => s.trim()).filter(s => s.startsWith('http') || s.startsWith('data:image/'));
+            }
+            return [];
+        }
+
+        function getHabImages(room, index) {
+            const imgs = [
+                ...extraerTodasImagenes(room.ImagenHabitacion),
+                ...extraerTodasImagenes(room.ImagenesHabitacion),
+                ...extraerTodasImagenes(room.GaleriaHabitacion),
+            ];
+            // Eliminar duplicados y asegurar que sean URLs válidas
+            const unicas = [...new Set(imgs)].filter(url =>
+                typeof url === 'string' &&
+                url.trim() !== '' &&
+                url.trim() !== 'undefined' &&
+                (url.startsWith('http') || url.startsWith('data:image/'))
+            );
+            return unicas.length > 0 ? unicas : [getRandomImage(index)];
+        }
+
+        // Inicializa los mini carruseles de las cards
+        function initCardCarousels() {
+            document.querySelectorAll('.card-carousel').forEach(carousel => {
+                const slides = carousel.querySelectorAll('.card-slide');
+                const dots   = carousel.querySelectorAll('.card-dot');
+                const btnPrev = carousel.querySelector('.card-prev');
+                const btnNext = carousel.querySelector('.card-next');
+                if (slides.length <= 1) {
+                    if (btnPrev) btnPrev.style.display = 'none';
+                    if (btnNext) btnNext.style.display = 'none';
+                    return;
+                }
+                let cur = 0;
+                function goTo(n) {
+                    slides[cur].classList.remove('active');
+                    dots[cur]?.classList.remove('active');
+                    cur = ((n % slides.length) + slides.length) % slides.length;
+                    slides[cur].classList.add('active');
+                    dots[cur]?.classList.add('active');
+                }
+                btnPrev?.addEventListener('click', e => { e.preventDefault(); goTo(cur - 1); });
+                btnNext?.addEventListener('click', e => { e.preventDefault(); goTo(cur + 1); });
+                dots.forEach((d, i) => d.addEventListener('click', e => { e.preventDefault(); goTo(i); }));
+            });
+        }
+
+        async function loadHabitaciones() {
+            const container = document.getElementById('habitaciones-container');
+            try {
+                const apiUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : 'http://localhost:3000/api';
+                const resp = await fetch(`${apiUrl}/habitaciones/disponibles`);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const habitaciones = await resp.json();
+
+                if (!Array.isArray(habitaciones) || habitaciones.length === 0) {
+                    container.innerHTML = '<p class="col-span-full text-center text-gray-400 italic">No hay habitaciones disponibles hoy.</p>';
+                    return;
+                }
+
+                // Actualizar contador de estadísticas
+                const statHab = document.getElementById('stat-habitaciones');
+                if (statHab) statHab.textContent = habitaciones.length;
+
+                const roomsToDisplay = habitaciones;
+
+                // Guardamos datos completos para el modal (evita problemas con caracteres especiales en data-*)
+                window._habDetalleData = [];
+
+                const html = roomsToDisplay.map((room, index) => {
+                    const imgs = getHabImages(room, index);
+
+                    // Guardar datos completos en array JS
+                    window._habDetalleData.push({
+                        nombre: room.NombreHabitacion || 'Suite Ejecutiva',
+                        desc:   room.Descripcion    || 'Sin descripción disponible.',
+                        precio: '$' + Number(room.Costo || 0).toLocaleString('es-CO'),
+                        imgs:   imgs
+                    });
+                    const slidesHtml = imgs.map((src, i) => `
+                        <div class="card-slide${i === 0 ? ' active' : ''} absolute inset-0">
+                            <img src="${src}" alt="${room.NombreHabitacion || 'Habitación'}"
+                                 class="w-full h-full object-cover"
+                                 onerror="this.onerror=null;this.src='${getRandomImage(index)}';">
+                        </div>`).join('');
+                    const dotsHtml = imgs.length > 1 ? `
+                        <div class="card-dots">
+                            ${imgs.map((_, i) => `<button class="card-dot${i === 0 ? ' active' : ''}" aria-label="Foto ${i+1}"></button>`).join('')}
+                        </div>` : '';
+                    return `
+                    <article class="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-md hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-400">
+                        <!-- Carrusel de imágenes -->
+                        <div class="card-carousel relative h-56 overflow-hidden bg-gray-100">
+                            ${slidesHtml}
+                            <!-- Badge disponible -->
+                            <div class="absolute top-3 left-3 z-10 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow">
+                                <span class="w-1.5 h-1.5 rounded-full bg-white inline-block"></span> Disponible
+                            </div>
+                            <!-- Precio -->
+                            <div class="absolute bottom-3 right-3 z-10 bg-primary/90 backdrop-blur text-white text-sm font-bold px-3 py-1.5 rounded-xl shadow">
+                                $${Number(room.Costo || 0).toLocaleString('es-CO')} <span class="font-normal text-white/70 text-xs">/ noche</span>
+                            </div>
+                            <!-- Flechas -->
+                            <button class="card-prev card-arrow" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button class="card-next card-arrow" aria-label="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+                            <!-- Dots -->
+                            ${dotsHtml}
+                        </div>
+                        <!-- Contenido -->
+                        <div class="p-6">
+                            <div class="flex items-start justify-between gap-2 mb-1">
+                                <h3 class="text-lg font-bold text-secondary">${room.NombreHabitacion || 'Suite Ejecutiva'}</h3>
+                                <button class="btn-ver-detalle flex-shrink-0"
+                                    data-idx="${index}"
+                                    title="Ver detalle">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-5 line-clamp-2">${room.Descripcion || 'Un oasis de tranquilidad con vistas espectaculares y diseño minimalista.'}</p>
+                            <a href="../login.html"
+                               class="w-full flex items-center justify-center gap-2 py-3 bg-accent text-white font-bold rounded-xl hover:bg-orange-500 transition-colors text-sm shadow hover:shadow-lg">
+                                <i class="fa-solid fa-calendar-check"></i> Reservar ahora
+                            </a>
+                        </div>
+                    </article>`;
+                }).join('');
+
+                container.innerHTML = html;
+                initCardCarousels();
+            } catch (error) {
+                console.error('[Landing] Error habitaciones:', error);
+                container.innerHTML = `<p class="col-span-full text-center text-red-400">Error: ${error.message}</p>`;
+            }
+        }
+
+        const paqueteImages = [
+            'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80&w=800',
+            'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80&w=800',
+            'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=800',
+            'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
+        ];
+
+        function getPaqueteImage(paquete, index) {
+            const img = paquete.Imagen;
+            if (typeof img === 'string' && img.trim().startsWith('http')) return img.trim();
+            return paqueteImages[index % paqueteImages.length];
+        }
+
+        async function loadPaquetes() {
+            const container = document.getElementById('paquetes-container');
+            try {
+                const apiUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : 'http://localhost:3000/api';
+                const resp = await fetch(`${apiUrl}/paquetes`);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const paquetes = await resp.json();
+                if (!Array.isArray(paquetes) || paquetes.length === 0) {
+                    container.innerHTML = '<p class="col-span-full text-center text-gray-400 italic">No hay paquetes disponibles en este momento.</p>';
+                    return;
+                }
+                // Actualizar contador de estadísticas
+                const statPaq = document.getElementById('stat-paquetes');
+                if (statPaq) statPaq.textContent = paquetes.length;
+
+                const items = paquetes;
+
+                // Guardar datos completos para el modal
+                window._paqDetalleData = [];
+
+                container.innerHTML = items.map((p, i) => {
+                    const imgs = extraerTodasImagenes(p.Imagen);
+                    const fallback = paqueteImages[i % paqueteImages.length];
+                    const allImgs = imgs.length > 0 ? imgs : [fallback];
+
+                    window._paqDetalleData.push({
+                        nombre:  p.NombrePaquete  || 'Paquete',
+                        desc:    p.Descripcion    || 'Disfruta de una experiencia única e inolvidable.',
+                        precio:  '$' + Number(p.PrecioPaquete || 0).toLocaleString('es-CO'),
+                        noches:  p.DuracionNoches || 1,
+                        imgs:    allImgs
+                    });
+
+                    const slidesHtml = allImgs.map((src, si) => `
+                        <div class="card-slide${si === 0 ? ' active' : ''} absolute inset-0">
+                            <img src="${src}" alt="${p.NombrePaquete || 'Paquete'}" class="w-full h-full object-cover"
+                                 onerror="this.onerror=null;this.src='${fallback}';">
+                        </div>`).join('');
+                    const dotsHtml = allImgs.length > 1 ? `
+                        <div class="card-dots">
+                            ${allImgs.map((_, si) => `<button class="card-dot${si === 0 ? ' active' : ''}" aria-label="Foto ${si+1}"></button>`).join('')}
+                        </div>` : '';
+                    return `
+                    <article class="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-md hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-400">
+                        <div class="card-carousel relative h-56 overflow-hidden bg-gray-100">
+                            ${slidesHtml}
+                            <!-- Badge duración -->
+                            <div class="absolute top-3 left-3 z-10 bg-accent text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow">
+                                <i class="fa-solid fa-moon text-white/80 text-[10px]"></i>
+                                ${p.DuracionNoches || 1} noche${(p.DuracionNoches || 1) !== 1 ? 's' : ''}
+                            </div>
+                            <!-- Precio -->
+                            <div class="absolute bottom-3 right-3 z-10 bg-primary/90 backdrop-blur text-white text-sm font-bold px-3 py-1.5 rounded-xl shadow">
+                                $${Number(p.PrecioPaquete || 0).toLocaleString('es-CO')} <span class="font-normal text-white/70 text-xs">/ paquete</span>
+                            </div>
+                            <!-- Botón ver detalle -->
+                            <button class="btn-ver-detalle-paq absolute top-3 right-3 z-10" data-idx="${i}" aria-label="Ver detalle">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <button class="card-prev card-arrow" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button class="card-next card-arrow" aria-label="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+                            ${dotsHtml}
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold text-secondary mb-1">${p.NombrePaquete || 'Paquete'}</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-5 line-clamp-2">${p.Descripcion || 'Disfruta de una experiencia única e inolvidable.'}</p>
+                            <a href="../login.html"
+                               class="w-full flex items-center justify-center gap-2 py-3 bg-accent text-white font-bold rounded-xl hover:bg-orange-500 transition-colors text-sm shadow hover:shadow-lg">
+                                <i class="fa-solid fa-calendar-check"></i> Ver paquete
+                            </a>
+                        </div>
+                    </article>`;
+                }).join('');
+                initCardCarousels();
+            } catch (error) {
+                container.innerHTML = '<p class="col-span-full text-center text-red-400">Error al conectar con el servidor.</p>';
+            }
+        }
+
+        const servicioIconos = ['fa-spa', 'fa-utensils', 'fa-person-hiking', 'fa-dumbbell', 'fa-car', 'fa-umbrella-beach'];
+
+        async function loadServicios() {
+            const container = document.getElementById('servicios-container');
+            try {
+                const apiUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : 'http://localhost:3000/api';
+                const resp = await fetch(`${apiUrl}/servicios?soloActivos=true`);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const activos = await resp.json();
+                if (activos.length === 0) {
+                    container.innerHTML = '<p class="col-span-full text-center text-gray-400 italic">No hay servicios disponibles en este momento.</p>';
+                    return;
+                }
+                const items = activos;
+
+                // Guardar datos completos para el modal
+                window._srvDetalleData = [];
+
+                container.innerHTML = items.map((s, i) => {
+                    const icono = servicioIconos[i % servicioIconos.length];
+                    const imgs = extraerTodasImagenes(s.Imagen);
+                    const tieneImagenes = imgs.length > 0;
+
+                    // Fallback: gradiente con icono cuando no hay imagen
+                    const srvFallbackSlide = `<div class="card-slide active absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/80 to-primary">
+                               <i class="fa-solid ${icono} text-white text-5xl opacity-80"></i>
+                           </div>`;
+
+                    window._srvDetalleData.push({
+                        nombre:   s.NombreServicio || 'Servicio',
+                        desc:     s.Descripcion    || '',
+                        precio:   '$' + Number(s.Costo || 0).toLocaleString('es-CO'),
+                        duracion: s.Duracion           || null,
+                        personas: s.CantidadMaximaPersonas || null,
+                        icono:    icono,
+                        imgs:     imgs
+                    });
+
+                    const headerHtml = tieneImagenes
+                        ? imgs.map((src, si) => `
+                            <div class="card-slide${si === 0 ? ' active' : ''} absolute inset-0">
+                                <img src="${src}" alt="${s.NombreServicio || 'Servicio'}"
+                                     class="w-full h-full object-cover"
+                                     onerror="this.onerror=null;this.style.display='none';">
+                            </div>`).join('')
+                        : srvFallbackSlide;
+
+                    const dotsHtml = imgs.length > 1 ? `
+                        <div class="card-dots">
+                            ${imgs.map((_, si) => `<button class="card-dot${si === 0 ? ' active' : ''}" aria-label="Foto ${si+1}"></button>`).join('')}
+                        </div>` : '';
+
+                    const arrowsHtml = imgs.length > 1 ? `
+                        <button class="card-prev card-arrow" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="card-next card-arrow" aria-label="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>` : '';
+
+                    return `
+                    <article class="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-md hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-400">
+                        <!-- Carrusel -->
+                        <div class="card-carousel relative h-52 overflow-hidden bg-gray-100">
+                            ${headerHtml}
+                            ${arrowsHtml}
+                            ${dotsHtml}
+                            <!-- Precio -->
+                            <div class="absolute bottom-3 right-3 z-10 bg-primary/90 backdrop-blur text-white text-sm font-bold px-3 py-1.5 rounded-xl shadow">
+                                $${Number(s.Costo || 0).toLocaleString('es-CO')} <span class="font-normal text-white/70 text-xs">/ servicio</span>
+                            </div>
+                            <!-- Botón ver detalle -->
+                            <button class="btn-ver-detalle-srv absolute top-3 right-3 z-10" data-idx="${i}" aria-label="Ver detalle">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <!-- Contenido -->
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold text-secondary mb-1">${s.NombreServicio || 'Servicio'}</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-4 line-clamp-2">${s.Descripcion || ''}</p>
+                            <div class="flex flex-wrap gap-3 text-xs text-gray-500 mb-4">
+                                ${s.Duracion ? `<span class="flex items-center gap-1"><i class="fa-regular fa-clock text-accent"></i> ${s.Duracion} min</span>` : ''}
+                                ${s.CantidadMaximaPersonas ? `<span class="flex items-center gap-1"><i class="fa-solid fa-users text-accent"></i> Máx. ${s.CantidadMaximaPersonas} personas</span>` : ''}
+                            </div>
+                            <a href="../login.html"
+                               class="w-full flex items-center justify-center gap-2 py-3 bg-accent text-white font-bold rounded-xl hover:bg-orange-500 transition-colors text-sm shadow hover:shadow-lg">
+                                <i class="fa-solid fa-calendar-check"></i> Solicitar servicio
+                            </a>
+                        </div>
+                    </article>`;
+                }).join('');
+                initCardCarousels();
+            } catch (error) {
+                container.innerHTML = '<p class="col-span-full text-center text-red-400">Error al conectar con el servidor.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHabitaciones();
+            loadPaquetes();
+            loadServicios();
+
+            // ── Modal detalle habitación ───────────────────────────
+            const modal    = document.getElementById('hab-detalle-modal');
+            const btnClose = document.getElementById('hab-detalle-close');
+            const slider   = document.getElementById('hab-detalle-slider');
+
+            function abrirDetalleHab(btn) {
+                const idx  = parseInt(btn.dataset.idx, 10);
+                const data = (window._habDetalleData || [])[idx];
+                if (!data) return;
+
+                document.getElementById('hab-detalle-nombre').textContent = data.nombre;
+                document.getElementById('hab-detalle-desc').textContent   = data.desc;
+                document.getElementById('hab-detalle-precio').textContent = data.precio;
+
+                // Construir carrusel de imágenes
+                let imgs = data.imgs || [];
+
+                // Normalizar URL de Unsplash (añadir parámetros si no los tiene)
+                const normUrl = url => {
+                    if (!url || typeof url !== 'string') return '';
+                    const u = url.trim();
+                    if (u.includes('unsplash.com') && !u.includes('?')) {
+                        return u + '?auto=format&fit=crop&q=80&w=900';
+                    }
+                    return u;
+                };
+
+                // Fallback robusto: si el URL falla, usar imagen genérica de hotel
+                const FALLBACK_IMG = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=900';
+
+                let curSlide = 0;
+                const slidesHtml = imgs.map((src, i) => {
+                    const url = normUrl(src);
+                    return `<div class="hd-slide${i === 0 ? ' active' : ''}">
+                        <img src="${url}" alt="${data.nombre}" class="hd-slide-img"
+                             onerror="this.onerror=null;this.src='${FALLBACK_IMG}';">
+                    </div>`;
+                }).join('');
+
+                const dotsHtml = imgs.length > 1 ? `
+                    <div class="hd-dots">
+                        ${imgs.map((_, i) => `<button class="hd-dot${i === 0 ? ' active' : ''}"></button>`).join('')}
+                    </div>` : '';
+
+                const arrowsHtml = imgs.length > 1 ? `
+                    <button class="hd-arrow hd-prev"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="hd-arrow hd-next"><i class="fa-solid fa-chevron-right"></i></button>` : '';
+
+                slider.innerHTML = slidesHtml + arrowsHtml + dotsHtml;
+
+                // Inicializar navegación del carrusel del modal
+                const hdSlides = slider.querySelectorAll('.hd-slide');
+                const hdDots   = slider.querySelectorAll('.hd-dot');
+                function hdGoTo(n) {
+                    hdSlides[curSlide].classList.remove('active');
+                    hdDots[curSlide]?.classList.remove('active');
+                    curSlide = ((n % hdSlides.length) + hdSlides.length) % hdSlides.length;
+                    hdSlides[curSlide].classList.add('active');
+                    hdDots[curSlide]?.classList.add('active');
+                }
+                slider.querySelector('.hd-prev')?.addEventListener('click', () => hdGoTo(curSlide - 1));
+                slider.querySelector('.hd-next')?.addEventListener('click', () => hdGoTo(curSlide + 1));
+                hdDots.forEach((d, i) => d.addEventListener('click', () => hdGoTo(i)));
+
+                modal.showModal();
+            }
+
+            document.getElementById('habitaciones-container').addEventListener('click', e => {
+                const btn = e.target.closest('.btn-ver-detalle');
+                if (btn) { e.preventDefault(); abrirDetalleHab(btn); }
+            });
+
+            btnClose.addEventListener('click', () => modal.close());
+            modal.addEventListener('click', e => { if (e.target === modal) modal.close(); });
+
+            // ── Función genérica para carrusel de modal ────────────
+            const FALLBACK_MODAL = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=900';
+
+            function normUrlModal(url) {
+                if (!url || typeof url !== 'string') return '';
+                const u = url.trim();
+                return (u.includes('unsplash.com') && !u.includes('?'))
+                    ? u + '?auto=format&fit=crop&q=80&w=900' : u;
+            }
+
+            function construirCarruselModal(sliderEl, imgs, nombreAlt) {
+                let cur = 0;
+                const slidesHtml = imgs.map((src, i) => {
+                    const url = normUrlModal(src);
+                    return `<div class="hd-slide${i === 0 ? ' active' : ''}">
+                        <img src="${url}" alt="${nombreAlt}" class="hd-slide-img"
+                             onerror="this.onerror=null;this.src='${FALLBACK_MODAL}';">
+                    </div>`;
+                }).join('');
+                const dotsHtml = imgs.length > 1 ? `<div class="hd-dots">${imgs.map((_, i) => `<button class="hd-dot${i === 0 ? ' active' : ''}"></button>`).join('')}</div>` : '';
+                const arrowsHtml = imgs.length > 1 ? `
+                    <button class="hd-arrow hd-prev"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="hd-arrow hd-next"><i class="fa-solid fa-chevron-right"></i></button>` : '';
+
+                sliderEl.innerHTML = slidesHtml + arrowsHtml + dotsHtml;
+
+                const hdSlides = sliderEl.querySelectorAll('.hd-slide');
+                const hdDots   = sliderEl.querySelectorAll('.hd-dot');
+                function goTo(n) {
+                    hdSlides[cur].classList.remove('active');
+                    hdDots[cur]?.classList.remove('active');
+                    cur = ((n % hdSlides.length) + hdSlides.length) % hdSlides.length;
+                    hdSlides[cur].classList.add('active');
+                    hdDots[cur]?.classList.add('active');
+                }
+                sliderEl.querySelector('.hd-prev')?.addEventListener('click', () => goTo(cur - 1));
+                sliderEl.querySelector('.hd-next')?.addEventListener('click', () => goTo(cur + 1));
+                hdDots.forEach((d, i) => d.addEventListener('click', () => goTo(i)));
+            }
+
+            // ── Modal detalle PAQUETE ──────────────────────────────
+            const paqModal    = document.getElementById('paq-detalle-modal');
+            const paqSlider   = document.getElementById('paq-detalle-slider');
+            const paqBtnClose = document.getElementById('paq-detalle-close');
+
+            function abrirDetallePaq(btn) {
+                const idx  = parseInt(btn.dataset.idx, 10);
+                const data = (window._paqDetalleData || [])[idx];
+                if (!data) return;
+
+                document.getElementById('paq-detalle-nombre').textContent = data.nombre;
+                document.getElementById('paq-detalle-desc').textContent   = data.desc;
+                document.getElementById('paq-detalle-precio').textContent  = data.precio;
+                const noches = data.noches;
+                document.getElementById('paq-detalle-noches').textContent  =
+                    noches + ' noche' + (noches !== 1 ? 's' : '');
+
+                const imgs = data.imgs && data.imgs.length > 0 ? data.imgs : [FALLBACK_MODAL];
+                construirCarruselModal(paqSlider, imgs, data.nombre);
+                paqModal.showModal();
+            }
+
+            document.getElementById('paquetes-container').addEventListener('click', e => {
+                const btn = e.target.closest('.btn-ver-detalle-paq');
+                if (btn) { e.preventDefault(); abrirDetallePaq(btn); }
+            });
+            paqBtnClose.addEventListener('click', () => paqModal.close());
+            paqModal.addEventListener('click', e => { if (e.target === paqModal) paqModal.close(); });
+
+            // ── Modal detalle SERVICIO ─────────────────────────────
+            const srvModal    = document.getElementById('srv-detalle-modal');
+            const srvSlider   = document.getElementById('srv-detalle-slider');
+            const srvBtnClose = document.getElementById('srv-detalle-close');
+
+            function abrirDetalleSrv(btn) {
+                const idx  = parseInt(btn.dataset.idx, 10);
+                const data = (window._srvDetalleData || [])[idx];
+                if (!data) return;
+
+                document.getElementById('srv-detalle-nombre').textContent = data.nombre;
+                document.getElementById('srv-detalle-desc').textContent   = data.desc;
+                document.getElementById('srv-detalle-precio').textContent  = data.precio;
+
+                // Badge: duración + personas
+                let badge = '';
+                if (data.duracion) badge += data.duracion + ' min';
+                if (data.personas) badge += (badge ? ' · ' : '') + 'Máx. ' + data.personas + ' personas';
+                document.getElementById('srv-detalle-info').textContent = badge || 'Disponible';
+
+                // Si no hay imágenes, mostrar slide con icono
+                let imgs = data.imgs && data.imgs.length > 0 ? data.imgs : [];
+                if (imgs.length === 0) {
+                    srvSlider.innerHTML = `<div class="hd-slide active" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a2744cc,#1a2744);">
+                        <i class="fa-solid ${data.icono} text-white" style="font-size:3.5rem;opacity:.85;"></i>
+                    </div>`;
+                } else {
+                    construirCarruselModal(srvSlider, imgs, data.nombre);
+                }
+                srvModal.showModal();
+            }
+
+            document.getElementById('servicios-container').addEventListener('click', e => {
+                const btn = e.target.closest('.btn-ver-detalle-srv');
+                if (btn) { e.preventDefault(); abrirDetalleSrv(btn); }
+            });
+            srvBtnClose.addEventListener('click', () => srvModal.close());
+            srvModal.addEventListener('click', e => { if (e.target === srvModal) srvModal.close(); });
+        });
+
+    </script>
+
+    <script>
+        // ── Hero Image Slider ──────────────────────────────────────
+        (function () {
+            const slides = document.querySelectorAll('.hero-slide');
+            const dots   = document.querySelectorAll('#hero-slider-dots .slider-dot');
+            if (!slides.length) return;
+
+            let current = 0;
+            let timer;
+
+            function goTo(n) {
+                slides[current].classList.remove('active');
+                dots[current]?.classList.remove('active');
+                current = ((n % slides.length) + slides.length) % slides.length;
+                slides[current].classList.add('active');
+                dots[current]?.classList.add('active');
+            }
+
+            function startAuto() {
+                clearInterval(timer);
+                timer = setInterval(() => goTo(current + 1), 5000);
+            }
+
+            document.getElementById('hero-slider-prev')?.addEventListener('click', () => {
+                goTo(current - 1);
+                startAuto();
+            });
+
+            document.getElementById('hero-slider-next')?.addEventListener('click', () => {
+                goTo(current + 1);
+                startAuto();
+            });
+
+            dots.forEach((dot, i) => {
+                dot.addEventListener('click', () => {
+                    goTo(i);
+                    startAuto();
+                });
+            });
+
+            const container = document.getElementById('inicio');
+            container?.addEventListener('mouseenter', () => clearInterval(timer));
+            container?.addEventListener('mouseleave', startAuto);
+
+            startAuto();
+        })();
+    </script>
+
+    <style>
+        /* ── Botón ojo ver detalle ───────────────────────────────── */
+        .btn-ver-detalle {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 8px;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a2744;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-ver-detalle:hover {
+            background: #1a2744;
+            color: #fff;
+        }
+        /* Reutiliza el mismo estilo para paquetes y servicios */
+        .btn-ver-detalle-paq,
+        .btn-ver-detalle-srv {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 8px;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a2744;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-ver-detalle-paq:hover,
+        .btn-ver-detalle-srv:hover {
+            background: #1a2744;
+            color: #fff;
+        }
+
+        /* ── Modal detalle habitación ────────────────────────────── */
+        .hab-detalle-modal {
+            padding: 0;
+            border: none;
+            border-radius: 20px;
+            width: min(92vw, 520px);
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(15,23,42,0.35);
+        }
+        .hab-detalle-modal::backdrop {
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(4px);
+        }
+        .hab-detalle-inner {
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .hab-detalle-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .hab-detalle-titulo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a2744;
+            margin: 0;
+        }
+        .hab-detalle-close {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .hab-detalle-close:hover { background: #e2e8f0; }
+        .hab-detalle-img-wrap {
+            width: 100%;
+            height: 260px;
+            overflow: hidden;
+            background: #e2e8f0;
+            position: relative;
+        }
+        /* Slides del modal */
+        .hd-slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.45s ease;
+        }
+        .hd-slide.active { opacity: 1; }
+        .hd-slide-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* Flechas del modal */
+        .hd-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.45);
+            border: none;
+            color: #fff;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .hd-arrow:hover { background: rgba(0,0,0,0.7); }
+        .hd-prev { left: 10px; }
+        .hd-next { right: 10px; }
+        /* Dots del modal */
+        .hd-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+        }
+        .hd-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.45);
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: all 0.3s;
+        }
+        .hd-dot.active {
+            background: #fff;
+            width: 22px;
+        }
+        .hab-detalle-body {
+            padding: 20px;
+        }
+        .hab-detalle-desc {
+            color: #475569;
+            font-size: 0.92rem;
+            line-height: 1.65;
+            margin-bottom: 18px;
+        }
+        .hab-detalle-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+        .hab-detalle-precio {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+        .hab-detalle-precio-val {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1a2744;
+        }
+        .hab-detalle-precio-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        .hab-detalle-badge {
+            background: #dcfce7;
+            color: #166534;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 999px;
+        }
+        .hab-detalle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 13px;
+            background: #ff8a3d;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .hab-detalle-btn:hover { background: #f97316; }
+
+        /* ── Mini carrusel en cards de habitaciones ─────────────── */
+        .card-slide {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .card-slide.active {
+            opacity: 1;
+        }
+        .card-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.45);
+            border: none;
+            color: #fff;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s, background 0.2s;
+        }
+        .card-carousel:hover .card-arrow {
+            opacity: 1;
+        }
+        .card-arrow:hover {
+            background: rgba(0,0,0,0.7);
+        }
+        .card-prev { left: 8px; }
+        .card-next { right: 8px; }
+        .card-dots {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 10;
+        }
+        .card-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.45);
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: all 0.3s;
+        }
+        .card-dot.active {
+            background: #fff;
+            width: 18px;
+        }
+
+        .register-modal {
+            padding: 0;
+            border: none;
+            border-radius: 18px;
+            background: #1a2c3d;
+            width: min(94vw, 700px);
+            max-height: min(92vh, 860px);
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.4);
+            overflow: hidden;
+        }
+
+        .register-modal[open] {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .register-modal::backdrop {
+            background: rgba(8, 15, 28, 0.65);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+        }
+
+        .rm-header {
+            flex-shrink: 0;
+            background: #1a2c3d;
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 14px 0;
+            border-radius: 18px 18px 0 0;
+        }
+
+        .register-modal__close {
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .register-modal__close:hover { background: rgba(255,255,255,0.28); }
+
+        .rm-body {
+            overflow-y: auto;
+            flex: 1;
+            padding: 4px 28px 32px;
+            color: #fff;
+            scrollbar-width: none;
+        }
+        .rm-body::-webkit-scrollbar { display: none; }
+        .rm-title { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+        .rm-subtitle { color: #94a3b8; font-size: 13px; margin-bottom: 24px; }
+
+        .rm-error {
+            background: #7f1d1d;
+            color: #fecaca;
+            border: 1px solid #dc2626;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        .rm-error.hidden { display: none; }
+
+        .rm-section { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid #2d4052; }
+        .rm-section:last-of-type { border-bottom: none; margin-bottom: 0; }
+        .rm-section-title { font-size: 14px; font-weight: 600; color: #e2e8f0; margin-bottom: 14px; }
+
+        .rm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .rm-field { display: flex; flex-direction: column; gap: 5px; }
+        .rm-field.rm-full { grid-column: 1 / -1; }
+        .rm-field label { font-size: 13px; font-weight: 500; color: #cbd5e1; }
+        .rm-req { color: #f87171; font-weight: 700; }
+        /* ── Campos obligatorios: borde izquierdo azul ── */
+        .rm-field input[required],
+        .rm-field select[required] {
+            border-left: 3px solid #1a2744;
+        }
+        .rm-field input[required]:focus,
+        .rm-field select[required]:focus {
+            border-left-color: #ff8a3d;
+        }
+        .rm-field input,
+        .rm-field select {
+            padding: 10px 12px;
+            border: 1px solid #3d5166;
+            border-radius: 8px;
+            background: #fff;
+            color: #000;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .rm-field input:focus,
+        .rm-field select:focus {
+            border-color: #ff8a3d;
+            box-shadow: 0 0 0 3px rgba(255,138,61,0.2);
+        }
+
+        .rm-btn {
+            width: 100%;
+            padding: 13px;
+            background: #ff8a3d;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+        .rm-btn:hover { background: #ff7a1f; }
+        .rm-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .rm-footer { text-align: center; font-size: 13px; color: #94a3b8; margin-top: 18px; }
+        .rm-footer a { color: #cbd5e1; font-weight: 600; text-decoration: none; }
+        .rm-footer a:hover { color: #fff; }
+
+        @media (max-width: 640px) {
+            .register-modal { width: 100%; border-radius: 14px; max-height: 96vh; }
+            .rm-grid { grid-template-columns: 1fr; }
+            .rm-body { padding: 8px 18px 28px; }
+        }
+
+        /* ── WhatsApp FAB ──────────────────────────────────────── */
+        .whatsapp-fab {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 900;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #25d366;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 24px rgba(37,211,102,0.45);
+            text-decoration: none;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .whatsapp-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 32px rgba(37,211,102,0.55);
+        }
+
+        .whatsapp-fab__icon {
+            color: #fff;
+            font-size: 2rem;
+            line-height: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Anillo de pulso */
+        .whatsapp-fab__pulse {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: #25d366;
+            animation: waPulse 2.4s ease-out infinite;
+        }
+
+        @keyframes waPulse {
+            0%   { transform: scale(1);   opacity: 0.6; }
+            70%  { transform: scale(1.6); opacity: 0;   }
+            100% { transform: scale(1.6); opacity: 0;   }
+        }
+
+        /* Tooltip */
+        .whatsapp-fab__tooltip {
+            position: absolute;
+            right: calc(100% + 14px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+            padding: 6px 12px;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .whatsapp-fab__tooltip::after {
+            content: '';
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 6px solid transparent;
+            border-left-color: #1a1a1a;
+        }
+
+        .whatsapp-fab:hover .whatsapp-fab__tooltip {
+            opacity: 1;
+        }
+
+        @media (max-width: 640px) {
+            .whatsapp-fab {
+                bottom: 20px;
+                right: 20px;
+                width: 52px;
+                height: 52px;
+            }
+            .whatsapp-fab__icon { font-size: 1.7rem; }
+            .whatsapp-fab__tooltip { display: none; }
+        }
+
+        /* ── Hero Full-Background Slider ──────────────────────── */
+        .hero-fullbg {
+            height: 100vh;
+            min-height: 580px;
+            max-height: 900px;
+        }
+
+        .hero-overlay {
+            background: linear-gradient(
+                105deg,
+                rgba(0,0,0,0.65) 0%,
+                rgba(0,0,0,0.35) 55%,
+                rgba(0,0,0,0.10) 100%
+            );
+            z-index: 2;
+        }
+
+        .hero-slide {
+            opacity: 0;
+            transition: opacity 1s ease;
+            z-index: 1;
+        }
+
+        .hero-slide.active {
+            opacity: 1;
+            z-index: 1;
+        }
+
+        .slider-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.30);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: background 0.2s, transform 0.2s;
+            z-index: 10;
+        }
+
+        .slider-arrow:hover {
+            background: rgba(255,255,255,0.30);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .slider-arrow--left  { left: 24px; }
+        .slider-arrow--right { right: 24px; }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .slider-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.4);
+            border: 0;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            padding: 0;
+        }
+
+        .slider-dot.active {
+            background: #fff;
+            width: 28px;
+        }
+
+        @media (max-width: 768px) {
+            .hero-fullbg { max-height: 700px; }
+            .slider-arrow { width: 38

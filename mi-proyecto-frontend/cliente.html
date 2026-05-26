@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospedaje Digital - Mi Cuenta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --sidebar-bg: #1a2744;
+            --sidebar-hover: #243560;
+            --sidebar-active: #1a2744;
+            --sidebar-width: 240px;
+            --header-h: 60px;
+            --accent: #1a2744;
+            --primary: #1a2744;
+            --text: #1a1a2e;
+            --muted: #5c6478;
+            --bg: #f8f7f4;
+            --card-bg: #ffffff;
+            --border: #ddd8ce;
+        }
+
+        body { font-family: "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+
+        /* ── SIDEBAR ─────────────────────────────── */
+        .sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            z-index: 200;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            padding: 20px 18px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-brand h2 {
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-brand span {
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+
+        .sidebar-nav ul { list-style: none; }
+
+        .sidebar-nav li a,
+        .sidebar-nav li button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            transition: background 0.2s, color 0.2s;
+            border-radius: 0;
+        }
+
+        .sidebar-nav li a:hover,
+        .sidebar-nav li button:hover {
+            background: var(--sidebar-hover);
+            color: #fff;
+        }
+
+        .sidebar-nav li.active a {
+            background: var(--sidebar-hover);
+            color: #fff;
+            border-left: 3px solid var(--accent);
+        }
+
+        .sidebar-nav li a i,
+        .sidebar-nav li button i { width: 18px; text-align: center; }
+
+        .sidebar-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 8px 18px;
+        }
+
+        .sidebar-footer {
+            padding: 14px 18px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-user-info { overflow: hidden; }
+
+        .sidebar-user-name {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-user-role {
+            color: rgba(255,255,255,0.5);
+            font-size: 11px;
+        }
+
+        /* ── HEADER ──────────────────────────────── */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--header-h);
+            background: var(--sidebar-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+        }
+
+        .topbar-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+        .btn-cerrar-sesion {
+            padding: 8px 16px;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cerrar-sesion:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            color: #dc2626;
+        }
+
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--primary);
+            padding: 4px 8px;
+        }
+
+        /* ── MAIN CONTENT ────────────────────────── */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            padding-top: var(--header-h);
+            min-height: 100vh;
+        }
+
+        .main-content { padding: 28px 24px; }
+
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* ── CARDS ───────────────────────────────── */
+        .page-header { margin-bottom: 24px; }
+        .page-header h2 { font-size: 22px; font-weight: 700; color: var(--text); }
+        .page-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.orange { background: #fff7ed; color: var(--accent); }
+        .stat-icon.green  { background: #f0fdf4; color: #16a34a; }
+        .stat-icon.blue   { background: #eff6ff; color: #1a2744; }
+
+        .stat-info .stat-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-info .stat-value { font-size: 26px; font-weight: 800; color: var(--text); }
+
+        .welcome-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #243560 100%);
+            border-radius: 16px;
+            padding: 28px;
+            color: #fff;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .welcome-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+        .welcome-card p  { color: rgba(255,255,255,0.75); font-size: 14px; }
+        .welcome-card .welcome-icon { font-size: 48px; opacity: 0.3; }
+
+        /* ── ROOMS GRID ──────────────────────────── */
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .room-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .room-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .room-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .room-card-body { padding: 16px; }
+        .room-card-name { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+        .room-card-desc { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+
+        .room-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .room-price { font-size: 16px; font-weight: 800; color: var(--primary); }
+        .room-price span { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+        .btn-reservar {
+            padding: 8px 16px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-reservar:hover { background: #111b33; }
+
+        /* ── PAQUETES ────────────────────────────── */
+        .paquetes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .paquete-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            transition: box-shadow 0.2s;
+        }
+
+        .paquete-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+
+        .paquete-card-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            display: block;
+        }
+
+        .btn-ver-detalle-paq {
+            white-space: nowrap;
+            padding: 8px 14px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .btn-ver-detalle-paq:hover { background: var(--accent); }
+
+        .paquete-detalle-inline {
+            margin-top: 12px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f9fafb;
+        }
+        .paquete-detalle-inline img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+        }
+        .paquete-detalle-inline .pdi-body {
+            padding: 14px;
+        }
+        .paquete-detalle-inline .pdi-nombre {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+        .paquete-detalle-inline .pdi-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .paquete-detalle-inline .pdi-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .paquete-detalle-inline .pdi-badge {
+            background: #fff7ed;
+            color: var(--accent);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .paquete-detalle-inline .pdi-servicios {
+            font-size: 12px;
+            color: var(--muted);
+        }
+        .paquete-detalle-inline .pdi-servicios span {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            border-radius: 4px;
+            padding: 2px 8px;
+            margin: 2px 3px 2px 0;
+        }
+
+        .paquete-card-icon {
+            width: 44px;
+            height: 44px;
+            background: #fff7ed;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .paquete-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+        .paquete-card p  { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+
+        .paquete-precio {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .paquete-precio span { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+        /* ── RESERVAS TABLE ──────────────────────── */
+        .section-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover { background: #111b33; }
+
+        .table-wrapper {
+            background: var(--card-bg);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: #f9fafb; }
+        thead th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody td {
+            padding: 14px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f9fafb; }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-pendiente  { background: #fef9c3; color: #854d0e; }
+        .badge-confirmada { background: #dcfce7; color: #166534; }
+        .badge-cancelada  { background: #fee2e2; color: #991b1b; }
+        .badge-finalizada { background: #e0f2fe; color: #075985; }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state i { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+        .empty-state p { font-size: 14px; }
+
+        /* ── MODAL ───────────────────────────────── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(4px);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.hidden { display: none; }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 16px;
+            width: min(560px, 100%);
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 { font-size: 18px; font-weight: 700; }
+
+        .modal-close {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #f3f4f6;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--muted);
+        }
+
+        .modal-close:hover { background: #e5e7eb; }
+
+        .form-group { margin-bottom: 16px; }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text);
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255,138,61,0.15);
+        }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .total-preview {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+            margin: 16px 0;
+        }
+
+        .total-preview .total-label { font-size: 12px; color: #16a34a; font-weight: 600; }
+        .total-preview .total-value { font-size: 24px; font-weight: 800; color: #15803d; }
+
+        .modal-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            margin-bottom: 14px;
+        }
+
+        .modal-error.hidden { display: none; }
+
+        .btn-block {
+            width: 100%;
+            padding: 13px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        /* ── SERVICIOS EN MODAL ──────────────────── */
+        .servicios-lista { display: flex; flex-direction: column; gap: 8px; }
+
+        .servicio-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            user-select: none;
+        }
+
+        .servicio-item:hover { border-color: var(--accent); background: #fff7ed; }
+
+        .servicio-item input[type="checkbox"] {
+            width: 16px; height: 16px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .btn-ver-res { background: none; border: 1.5px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 600; color: var(--primary); cursor: pointer; white-space: nowrap; transition: background 0.2s; }
+        .btn-ver-res:hover { background: #e0f2fe; border-color: var(--primary); }
+        .det-seccion { margin-bottom: 18px; }
+        .det-seccion h4 { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin: 0 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+        .det-fila { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 5px 0; border-bottom: 1px solid #f3f4f6; }
+        .det-fila:last-child { border-bottom: none; }
+        .det-fila span:first-child { color: var(--muted); }
+        .det-fila strong { color: var(--text); }
+        .det-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+        .det-item:last-child { border-bottom: none; }
+        .det-item-icon { width: 34px; height: 34px; background: #f3f4f6; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 14px; flex-shrink: 0; }
+        .det-total { display: flex; justify-content: space-between; align-items: center; padding: 12px 0 0; font-size: 15px; font-weight: 700; color: var(--primary); border-top: 2px solid var(--border); margin-top: 6px; }
+        .servicio-item-img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+        .servicio-item-img-placeholder { width: 44px; height: 44px; border-radius: 6px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 18px; flex-shrink: 0; }
+        .servicio-item-info { flex: 1; min-width: 0; }
+        .servicio-item-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+        .servicio-item-desc { font-size: 11px; color: var(--muted); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4; margin-bottom: 4px; }
+        .servicio-item-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+        .servicio-item-duracion { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; color: var(--primary); background: #e0f2fe; border-radius: 20px; padding: 2px 8px; }
+        .servicio-item-horario { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; color: #065f46; background: #d1fae5; border-radius: 20px; padding: 2px 8px; }
+        .servicio-item-precio { font-size: 13px; font-weight: 700; color: var(--primary); white-space: nowrap; align-self: flex-start; padding-top: 2px; }
+
+        /* ── RESERVA VISTA COMPLETA ──────────────── */
+        .reserva-layout {
+            display: grid;
+            grid-template-columns: 1fr 290px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .reserva-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .reserva-card-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reserva-sidebar {
+            background: var(--card-bg);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            position: sticky;
+            top: calc(var(--header-h) + 20px);
+        }
+
+        .reserva-summary-block { margin-bottom: 16px; }
+
+        .reserva-summary-block h4 {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 10px;
+        }
+
+        .reserva-summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            padding: 5px 0;
+        }
+
+        .reserva-summary-row span { color: var(--muted); }
+        .reserva-summary-row strong { font-weight: 700; color: var(--text); }
+
+        .reserva-summary-divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+        .reserva-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .reserva-total-row span { font-size: 14px; font-weight: 700; color: var(--text); }
+        .reserva-total-row strong { font-size: 22px; font-weight: 800; color: var(--primary); }
+
+        .btn-cancelar-reserva {
+            width: 100%;
+            padding: 11px;
+            background: #f3f4f6;
+            color: var(--muted);
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-cancelar-reserva:hover { background: #e5e7eb; color: var(--text); }
+
+        /* ── MI PERFIL ───────────────────────────── */
+        .perfil-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+        .perfil-card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .perfil-fila {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.55rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.92rem;
+        }
+        .perfil-fila:last-child { border-bottom: none; }
+        .perfil-label { color: #6c757d; font-weight: 600; }
+        .perfil-form-campo {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 1rem;
+        }
+        .perfil-form-campo label { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+        .perfil-form-campo input {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .perfil-form-campo input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,140,66,0.15); }
+        .input-password-wrap { position: relative; }
+        .input-password-wrap input { width: 100%; padding-right: 2.8rem; box-sizing: border-box; }
+        .btn-toggle-pass {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6c757d;
+            font-size: 1rem;
+            padding: 4px;
+            line-height: 1;
+        }
+        .btn-toggle-pass:hover { color: var(--primary); }
+        .perfil-mensaje { font-size: 0.9rem; min-height: 1.2rem; margin: 4px 0 0; }
+        .btn-cancelar-res {
+            padding: 0.35rem 0.8rem;
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .btn-cancelar-res:hover { background: #fecaca; }
+        .btn-cancelar-res:disabled { opacity: 0.6; cursor: not-allowed; }
+        .perfil-ok    { color: #15803d; }
+        .perfil-error { color: #b91c1c; }
+
+        @media (max-width: 768px) {
+            .perfil-grid { grid-template-columns: 1fr; }
+            .reserva-layout { grid-template-columns: 1fr; }
+            .reserva-sidebar { position: static; }
+        }
+
+        .btn-block:hover { background: #111b33; }
+        .btn-block:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* ── SIDEBAR OVERLAY (mobile) ────────────── */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 150;
+        }
+
+        /* ── LOADING / SPINNER ───────────────────── */
+        .spinner-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 48px;
+            color: var(--muted);
+            gap: 12px;
+        }
+
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid #e5e7eb;
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── RESPONSIVE ──────────────────────────── */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay { display: block; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+            .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
+            .topbar { left: 0; }
+            .main-wrapper { margin-left: 0; }
+            .hamburger-btn { display: block; }
+            .rooms-grid, .paquetes-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <h2><i class="fa-solid fa-hotel"></i> Hospedaje Digital</h2>
+            <span>Portal del Cliente</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="active" id="nav-dashboard">
+                    <a href="#" onclick="mostrarSeccion('dashboard', event)">
+                        <i class="fa-solid fa-house"></i> Panel de Control
+                    </a>
+                </li>
+                <li id="nav-reservas">
+                    <a href="#" onclick="mostrarSeccion('reservas', event)">
+                        <i class="fa-solid fa-calendar-check"></i> Mis Reservas
+                    </a>
+                </li>
+                <div class="sidebar-divider"></div>
+                <li id="nav-perfil">
+                    <a href="#" onclick="mostrarSeccion('perfil', event)">
+                        <i class="fa-solid fa-user-circle"></i> Mi Perfil
+                    </a>
+                </li>
+                <li>
+                    <button onclick="cerrarSesion()">
+                        <i class="fa-solid fa-door-open"></i> Cerrar Sesión
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="sidebar-user-avatar" id="user-avatar">?</div>
+                <div class="sidebar-user-info">
+                    <div class="sidebar-user-name" id="user-name">Cargando...</div>
+                    <div class="sidebar-user-role">Cliente</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <button class="hamburger-btn" id="hamburger-btn" aria-label="Abrir menú">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <span class="topbar-title" id="topbar-title">Panel de Control</span>
+        </div>
+        <div class="topbar-actions">
+            <button class="btn-cerrar-sesion" onclick="cerrarSesion()">
+                <i class="fa-solid fa-door-open"></i> Salir
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-wrapper">
+        <main class="main-content">
+
+            <!-- SECCIÓN: PANEL DE CONTROL -->
+            <section class="section active" id="seccion-dashboard">
+                <div class="welcome-card">
+                    <div>
+                        <h3 id="welcome-nombre">¡Bienvenido!</h3>
+                        <p>Desde aquí puedes gestionar tus reservas y explorar nuestras habitaciones.</p>
+                    </div>
+                    <i class="fa-solid fa-hotel welcome-icon"></i>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><i class="fa-solid fa-calendar"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Total Reservas</div>
+                            <div class="stat-value" id="stat-total">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Confirmadas</div>
+                            <div class="stat-value" id="stat-confirmadas">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fa-solid fa-clock"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Pendientes</div>
+                            <div class="stat-value" id="stat-pendientes">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <div style="padding:16px 20px;border-bottom:1px solid var(--border);font-weight:700;font-size:14px;">
+                        Mis últimas reservas
+                    </div>
+                    <div id="dashboard-reservas-wrap"></div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN: HABITACIONES -->
+            <section class="section" id="seccion-habitaciones">
+                <div class="page-header">
+                    <h2>Habitaciones Disponibles</h2>
+                    <p>Selecciona una habitación y haz tu reserva</p>
+                </div>
+                <div class="rooms-grid" id="rooms-container">
+                    <div class="spinner-wrap"><div class="spinner"></div><span>Cargando habitaciones...</span></div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN: PAQUETES -->
+            <section class="section" id="seccion-paquetes">
+                <div class="page-header">
+                    <h2>Paquetes Disponibles</h2>
+                    <p>Descubre nuestros paquetes con servicios incluidos</p>
+                </div>
+                <div class="paquetes-grid" id="paquetes-container">
+                    <div class="spinner-wrap"><div class="spinner"></div><span>Cargando paquetes...</span></div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN: MIS RESERVAS -->
+            <section class="section" id="seccion-reservas">
+                <div class="section-toolbar">
+                    <div class="page-header" style="margin-bottom:0;">
+                        <h2>Mis Reservas</h2>
+                        <p>Historial de todas tus reservas</p>
+                    </div>
+                    <button class="btn-primary" onclick="mostrarNuevaReserva()">
+                        <i class="fa-solid fa-plus"></i> Nueva Reserva
+                    </button>
+                </div>
+                <div class="table-wrapper">
+                    <div id="reservas-wrap"></div>
+                </div>
+            </section>
+
+            <!-- MODAL: DETALLE DE RESERVA -->
+            <div id="modal-detalle-reserva" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:16px;">
+                <div style="background:#fff;border-radius:16px;width:min(560px,100%);max-height:90vh;overflow-y:auto;padding:28px;position:relative;">
+                    <button onclick="cerrarDetalleReserva()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#6b7280;">&times;</button>
+                    <h3 style="margin:0 0 20px;font-size:17px;color:#1a2744;display:flex;align-items:center;gap:8px;">
+                        <i class="fa-solid fa-calendar-check"></i> Detalle de Reserva
+                    </h3>
+                    <div id="detalle-reserva-contenido"></div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: NUEVA RESERVA -->
+            <section class="section" id="seccion-nueva-reserva">
+                <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                    <div>
+                        <h2>Nueva Reserva</h2>
+                        <p>Completa los datos para hacer tu reserva</p>
+                    </div>
+                    <button class="btn-cerrar-sesion" onclick="mostrarSeccion('reservas', null)">
+                        <i class="fa-solid fa-arrow-left"></i> Volver
+                    </button>
+                </div>
+
+                <div class="modal-error hidden" id="nr-error"></div>
+
+                <form id="form-nueva-reserva" novalidate>
+                    <div class="reserva-layout">
+
+                        <!-- Panel principal -->
+                        <div>
+                            <div class="reserva-card">
+                                <div class="reserva-card-title"><i class="fa-solid fa-bed"></i> Habitación y Fechas</div>
+                                <div class="form-group">
+                                    <label>Habitación *</label>
+                                    <select id="nr-habitacion" required>
+                                        <option value="">Selecciona una habitación</option>
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label>Fecha de Entrada *</label>
+                                        <input type="date" id="nr-fecha-inicio" required>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label>Fecha de Salida *</label>
+                                        <input type="date" id="nr-fecha-fin" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="reserva-card">
+                                <div class="reserva-card-title"><i class="fa-solid fa-credit-card"></i> Método de Pago</div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Método de Pago *</label>
+                                    <select id="nr-metodo-pago" required>
+                                        <option value="" disabled selected hidden>Selecciona método de pago</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="reserva-card">
+                                <div class="reserva-card-title">
+                                    <i class="fa-solid fa-box"></i> Paquete
+                                    <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;">(opcional)</span>
+                                </div>
+                                <div class="form-group">
+                                    <div style="display:flex;gap:8px;align-items:center;">
+                                        <select id="nr-paquete" style="flex:1;">
+                                            <option value="">Sin paquete</option>
+                                        </select>
+                                        <button type="button" id="nr-paquete-ver" class="btn-ver-detalle-paq hidden">
+                                            <i class="fa-solid fa-circle-info"></i> Ver detalle
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="nr-paquete-detalle" class="paquete-detalle-inline hidden"></div>
+                            </div>
+
+                            <div class="reserva-card">
+                                <div class="reserva-card-title">
+                                    <i class="fa-solid fa-concierge-bell"></i> Servicios Adicionales
+                                    <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;">(opcional)</span>
+                                </div>
+                                <div class="servicios-lista" id="nr-servicios-lista">
+                                    <div style="color:var(--muted);font-size:13px;padding:8px 0;">Cargando servicios...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar resumen -->
+                        <aside class="reserva-sidebar">
+                            <div class="reserva-summary-block">
+                                <h4>Estancia</h4>
+                                <div class="reserva-summary-row"><span>Entrada</span><strong id="nr-sum-entrada">--</strong></div>
+                                <div class="reserva-summary-row"><span>Salida</span><strong id="nr-sum-salida">--</strong></div>
+                                <div class="reserva-summary-row"><span>Noches</span><strong id="nr-sum-noches">--</strong></div>
+                            </div>
+
+                            <div class="reserva-summary-divider"></div>
+
+                            <div class="reserva-summary-block">
+                                <h4>Desglose de precio</h4>
+                                <div class="reserva-summary-row"><span>Habitación</span><strong id="nr-sum-hab">$0</strong></div>
+                                <div class="reserva-summary-row"><span>Servicios</span><strong id="nr-sum-serv">$0</strong></div>
+                                <div class="reserva-summary-row"><span>IVA (19%)</span><strong id="nr-sum-iva">$0</strong></div>
+                            </div>
+
+                            <div class="reserva-summary-divider"></div>
+
+                            <div class="reserva-total-row">
+                                <span>Total a pagar</span>
+                                <strong id="nr-sum-total">$0</strong>
+                            </div>
+
+                            <button type="submit" class="btn-block" id="nr-btn-confirmar">
+                                <i class="fa-solid fa-check"></i> Confirmar Reserva
+                            </button>
+                            <button type="button" class="btn-cancelar-reserva" onclick="mostrarSeccion('reservas', null)">
+                                Cancelar
+                            </button>
+                        </aside>
+
+                    </div>
+                </form>
+            </section>
+
+            <!-- SECCIÓN: MI PERFIL -->
+            <section class="section" id="seccion-perfil">
+                <div class="page-header">
+                    <h2>Mi Perfil</h2>
+                    <p>Información de tu cuenta y seguridad</p>
+                </div>
+
+                <div class="perfil-grid">
+                    <!-- Datos del usuario -->
+                    <div class="reserva-card">
+                        <h3 class="perfil-card-title"><i class="fa-solid fa-user"></i> Datos de la cuenta</h3>
+                        <div class="perfil-datos" id="perfil-datos">
+                            <div class="perfil-fila"><span class="perfil-label">Nombre</span><span id="pd-nombre">—</span></div>
+                            <div class="perfil-fila"><span class="perfil-label">Apellido</span><span id="pd-apellido">—</span></div>
+                            <div class="perfil-fila"><span class="perfil-label">Correo</span><span id="pd-email">—</span></div>
+                            <div class="perfil-fila"><span class="perfil-label">Teléfono</span><span id="pd-telefono">—</span></div>
+                            <div class="perfil-fila"><span class="perfil-label">País</span><span id="pd-pais">—</span></div>
+                            <div class="perfil-fila"><span class="perfil-label">Rol</span><span id="pd-rol">—</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Cambiar contraseña -->
+                    <div class="reserva-card">
+                        <h3 class="perfil-card-title"><i class="fa-solid fa-lock"></i> Cambiar contraseña</h3>
+                        <form id="form-cambiar-password" novalidate>
+                            <div class="perfil-form-campo">
+                                <label for="cp-actual">Contraseña actual</label>
+                                <div class="input-password-wrap">
+                                    <input type="password" id="cp-actual" placeholder="Tu contraseña actual" autocomplete="current-password">
+                                    <button type="button" class="btn-toggle-pass" data-target="cp-actual" tabindex="-1" aria-label="Ver contraseña">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="perfil-form-campo">
+                                <label for="cp-nueva">Nueva contraseña</label>
+                                <div class="input-password-wrap">
+                                    <input type="password" id="cp-nueva" placeholder="Mínimo 4 caracteres" autocomplete="new-password">
+                                    <button type="button" class="btn-toggle-pass" data-target="cp-nueva" tabindex="-1" aria-label="Ver contraseña">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="perfil-form-campo">
+                                <label for="cp-confirmar">Confirmar nueva contraseña</label>
+                                <div class="input-password-wrap">
+                                    <input type="password" id="cp-confirmar" placeholder="Repite la nueva contraseña" autocomplete="new-password">
+                                    <button type="button" class="btn-toggle-pass" data-target="cp-confirmar" tabindex="-1" aria-label="Ver contraseña">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <p id="cp-mensaje" class="perfil-mensaje"></p>
+                            <button type="submit" class="btn-primary" style="margin-top:8px;">
+                                <i class="fa-solid fa-key"></i> Actualizar contraseña
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- SECCIÓN: NUEVA RESERVA (vista completa) -->
+    <!-- Se inserta dentro de main-content via JS al hacer mostrarNuevaReserva() -->
+
+    <script src="js/config.js"></script>
+    <script>
+        // ── CONFIGURACIÓN ─────────────────────────
+        const API_URL = (typeof CONFIG !== 'undefined' && CONFIG.API_URL)
+            ? CONFIG.API_URL
+            : 'http://localhost:3000/api';
+
+        const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+        let usuarioActual = null;
+        let habitacionesDisponibles = [];
+        let misReservas = [];
+
+        // ── PROTECCIÓN: si no hay token o es admin, redirigir ─
+        (function () {
+            if (!token) { window.location.href = 'login.html'; return; }
+            try {
+                const u = JSON.parse(sessionStorage.getItem('usuario') || localStorage.getItem('user') || '{}');
+                if (u.rol === 1) { window.location.href = 'index.html'; return; }
+                usuarioActual = u;
+            } catch (e) { window.location.href = 'login.html'; }
+        })();
+
+        // ── HELPERS ───────────────────────────────
+        const $ = id => document.getElementById(id);
+        const fmt = n => Number(n || 0).toLocaleString('es-CO');
+
+        function authHeaders() {
+            return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+        }
+
+        async function apiFetch(path, options = {}) {
+            const res = await fetch(`${API_URL}${path}`, {
+                ...options,
+                headers: { ...authHeaders(), ...(options.headers || {}) }
+            });
+            if (!res.ok) throw new Error(`Error ${res.status}`);
+            return res.json();
+        }
+
+        function badgeEstado(estado) {
+            const map = {
+                'Pendiente': 'badge-pendiente',
+                'Confirmada': 'badge-confirmada',
+                'Cancelada': 'badge-cancelada',
+                'Finalizada': 'badge-finalizada',
+            };
+            const cls = map[estado] || 'badge-pendiente';
+            return `<span class="badge ${cls}">${estado || 'Pendiente'}</span>`;
+        }
+
+        function formatFecha(f) {
+            if (!f) return '-';
+            return new Date(f).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        // ── NAVEGACIÓN ────────────────────────────
+        const secciones = {
+            dashboard:       'Panel de Control',
+            habitaciones:    'Habitaciones',
+            paquetes:        'Paquetes',
+            reservas:        'Mis Reservas',
+            'nueva-reserva': 'Nueva Reserva',
+            perfil:          'Mi Perfil'
+        };
+
+        function mostrarSeccion(nombre, event) {
+            if (event) event.preventDefault();
+
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('active'));
+
+            const seccion = $(`seccion-${nombre}`);
+            if (seccion) seccion.classList.add('active');
+
+            const navItem = $(`nav-${nombre}`);
+            if (navItem) navItem.classList.add('active');
+
+            $('topbar-title').textContent = secciones[nombre] || nombre;
+
+            if (window.innerWidth <= 768) cerrarSidebar();
+
+            if (nombre === 'habitaciones')    cargarHabitaciones();
+            if (nombre === 'paquetes')        cargarPaquetes();
+            if (nombre === 'reservas')        cargarMisReservas();
+            if (nombre === 'nueva-reserva')   cargarFormNuevaReserva();
+            if (nombre === 'perfil')          cargarPerfil();
+        }
+
+        // ── SIDEBAR MOBILE ────────────────────────
+        function cerrarSidebar() {
+            $('sidebar').classList.remove('open');
+            $('sidebar-overlay').classList.remove('active');
+        }
+
+        $('hamburger-btn').addEventListener('click', () => {
+            $('sidebar').classList.toggle('open');
+            $('sidebar-overlay').classList.toggle('active');
+        });
+
+        $('sidebar-overlay').addEventListener('click', cerrarSidebar);
+
+        // ── CERRAR SESIÓN ─────────────────────────
+        function cerrarSesion() {
+            sessionStorage.clear();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        // ── CARGAR PERFIL ─────────────────────────
+        async function cargarPerfil() {
+            try {
+                const data = await apiFetch('/auth/me');
+                const perfil = data.usuario || {};
+                usuarioActual = { ...usuarioActual, ...perfil };
+                const nombre = perfil.nombre || usuarioActual.nombre || 'Cliente';
+                $('welcome-nombre').textContent = `¡Bienvenido, ${nombre}!`;
+                $('user-name').textContent = nombre;
+                $('user-avatar').textContent = nombre.charAt(0).toUpperCase();
+                sessionStorage.setItem('usuario', JSON.stringify(usuarioActual));
+
+                // Llenar sección Mi Perfil si está en el DOM
+                const setText = (id, val) => { const el = $(id); if (el) el.textContent = val || '—'; };
+                setText('pd-nombre',    perfil.nombre);
+                setText('pd-apellido',  perfil.apellido);
+                setText('pd-email',     perfil.email);
+                setText('pd-telefono',  perfil.telefono);
+                setText('pd-pais',      perfil.pais);
+                setText('pd-rol',       perfil.rol?.nombre || (perfil.rol === 1 ? 'Administrador' : 'Cliente'));
+            } catch (e) {
+                const nombre = usuarioActual?.nombre || 'Cliente';
+                $('welcome-nombre').textContent = `¡Bienvenido, ${nombre}!`;
+                $('user-name').textContent = nombre;
+                $('user-avatar').textContent = nombre.charAt(0).toUpperCase();
+            }
+        }
+
+        // ── CANCELAR RESERVA ──────────────────────
+        document.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.btn-cancelar-res');
+            if (!btn) return;
+            const id = btn.dataset.id;
+            if (!confirm(`¿Seguro que deseas cancelar la reserva #${id}? Esta acción no se puede deshacer.`)) return;
+            btn.disabled = true;
+            btn.textContent = 'Cancelando...';
+            try {
+                const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+                const resp = await fetch(`${API_URL}/reservas/${id}/estado`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ IdEstadoReserva: 3 })
+                });
+                if (!resp.ok) throw new Error();
+                cargarMisReservas();
+            } catch {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-xmark"></i> Cancelar';
+                alert('No se pudo cancelar la reserva. Intenta de nuevo.');
+            }
+        });
+
+        // ── TOGGLE VER/OCULTAR CONTRASEÑA ────────
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-toggle-pass');
+            if (!btn) return;
+            const input = $(btn.dataset.target);
+            if (!input) return;
+            const mostrar = input.type === 'password';
+            input.type = mostrar ? 'text' : 'password';
+            btn.querySelector('i').className = mostrar ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+        });
+
+        // ── CAMBIAR CONTRASEÑA ────────────────────
+        document.addEventListener('submit', async (e) => {
+            if (e.target.id !== 'form-cambiar-password') return;
+            e.preventDefault();
+            const actual    = $('cp-actual')?.value.trim();
+            const nueva     = $('cp-nueva')?.value.trim();
+            const confirmar = $('cp-confirmar')?.value.trim();
+            const msg       = $('cp-mensaje');
+
+            const setMsg = (texto, ok) => {
+                if (!msg) return;
+                msg.textContent = texto;
+                msg.className = `perfil-mensaje ${ok ? 'perfil-ok' : 'perfil-error'}`;
+            };
+
+            if (!actual || !nueva || !confirmar) return setMsg('Completa todos los campos.', false);
+            if (nueva !== confirmar)             return setMsg('Las contraseñas nuevas no coinciden.', false);
+            if (nueva.length < 4)                return setMsg('La contraseña debe tener al menos 4 caracteres.', false);
+
+            try {
+                const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+                const resp = await fetch(`${API_URL}/auth/change-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ contrasenaActual: actual, nuevaContrasena: nueva })
+                });
+                const data = await resp.json();
+                if (!resp.ok) return setMsg(data.error || 'No se pudo actualizar la contraseña.', false);
+                setMsg(data.mensaje || 'Contraseña actualizada correctamente.', true);
+                e.target.reset();
+            } catch (err) {
+                setMsg('Error de conexión con el servidor.', false);
+            }
+        });
+
+        // ── DASHBOARD: MIS ESTADÍSTICAS ───────────
+        async function cargarDashboard() {
+            try {
+                const perfil = await apiFetch('/auth/me');
+                const nroDoc = perfil.usuario?.numeroDocumento;
+                if (!nroDoc) return;
+
+                const reservas = await apiFetch(`/reservas/cliente/${nroDoc}`);
+                misReservas = Array.isArray(reservas) ? reservas : [];
+
+                $('stat-total').textContent = misReservas.length;
+                $('stat-confirmadas').textContent = misReservas.filter(r => r.NombreEstadoReserva === 'Confirmada').length;
+                $('stat-pendientes').textContent  = misReservas.filter(r => r.NombreEstadoReserva === 'Pendiente').length;
+
+                renderTablaResumen(misReservas.slice(0, 5));
+            } catch (e) {
+                $('dashboard-reservas-wrap').innerHTML = '<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>No se pudieron cargar las reservas</p></div>';
+            }
+        }
+
+        function renderTablaResumen(reservas) {
+            if (!reservas.length) {
+                $('dashboard-reservas-wrap').innerHTML = '<div class="empty-state"><i class="fa-solid fa-calendar"></i><p>Aún no tienes reservas. ¡Haz tu primera reserva!</p></div>';
+                return;
+            }
+            $('dashboard-reservas-wrap').innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Habitación</th>
+                            <th>Entrada</th>
+                            <th>Salida</th>
+                            <th>Estado</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${reservas.map(r => `
+                            <tr>
+                                <td>#${r.IdReserva || r.id || '-'}</td>
+                                <td>${r.NombreHabitacion || '-'}</td>
+                                <td>${formatFecha(r.FechaInicio || r.fechaInicio)}</td>
+                                <td>${formatFecha(r.FechaFinalizacion || r.fechaFin)}</td>
+                                <td>${badgeEstado(r.NombreEstadoReserva || r.EstadoReserva)}</td>
+                                <td>$${fmt(r.Sub_Total || r.Monto_Total || 0)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>`;
+        }
+
+        // ── HABITACIONES ──────────────────────────
+        const roomImages = [
+            'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=600',
+            'https://images.unsplash.com/photo-1582719478250-c89cae4df85b?auto=format&fit=crop&q=80&w=600',
+            'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=600',
+            'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80&w=600',
+        ];
+
+        async function cargarHabitaciones() {
+            const container = $('rooms-container');
+            container.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><span>Cargando habitaciones...</span></div>';
+            try {
+                const data = await fetch(`${API_URL}/habitaciones/disponibles`).then(r => r.json());
+                habitacionesDisponibles = Array.isArray(data) ? data : [];
+
+                if (!habitacionesDisponibles.length) {
+                    container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-bed"></i><p>No hay habitaciones disponibles en este momento</p></div>';
+                    return;
+                }
+
+                container.innerHTML = habitacionesDisponibles.map((h, i) => {
+                    const imgSrc = (h.ImagenURL && typeof h.ImagenURL === 'string' && h.ImagenURL.startsWith('http'))
+                        ? h.ImagenURL
+                        : roomImages[i % roomImages.length];
+                    const precio = h.Costo && Number(h.Costo) > 0
+                        ? `$${fmt(h.Costo)} <span>/ noche</span>`
+                        : `<span style="color:var(--muted)">Consultar precio</span>`;
+                    return `
+                    <div class="room-card">
+                        <img src="${imgSrc}" alt="${h.NombreHabitacion}" onerror="this.onerror=null; this.style.background='#f3f4f6'; this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
+                        <div class="room-card-body">
+                            <div class="room-card-name">${h.NombreHabitacion || 'Habitación'}</div>
+                            <div class="room-card-desc">${h.Descripcion || 'Confort y tranquilidad en cada detalle.'}</div>
+                            <div class="room-card-footer">
+                                <div class="room-price">${precio}</div>
+                                <button class="btn-reservar" onclick="mostrarNuevaReserva(${h.IDHabitacion})">
+                                    <i class="fa-solid fa-calendar-plus"></i> Reservar
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                actualizarSelectHabitaciones();
+            } catch (e) {
+                container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>Error al cargar habitaciones</p></div>';
+            }
+        }
+
+        function actualizarSelectHabitaciones() {
+            const sel = $('res-habitacion');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">Selecciona una habitación</option>';
+            habitacionesDisponibles.forEach(h => {
+                sel.innerHTML += `<option value="${h.IDHabitacion}" data-costo="${h.Costo}">${h.NombreHabitacion} — $${fmt(h.Costo)}/noche</option>`;
+            });
+        }
+
+        // ── PAQUETES ──────────────────────────────
+        async function cargarPaquetes() {
+            const container = $('paquetes-container');
+            container.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><span>Cargando paquetes...</span></div>';
+            try {
+                const data = await fetch(`${API_URL}/paquetes`).then(r => r.json());
+                const paquetes = Array.isArray(data) ? data : (data.paquetes || []);
+
+                if (!paquetes.length) {
+                    container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-box-open"></i><p>No hay paquetes disponibles por ahora</p></div>';
+                    return;
+                }
+
+                container.innerHTML = paquetes.map(p => `
+                    <div class="paquete-card">
+                        ${p.Imagen
+                            ? `<img src="${p.Imagen}" alt="${p.NombrePaquete || 'Paquete'}" class="paquete-card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                            : ''
+                        }
+                        <div class="paquete-card-icon" ${p.Imagen ? 'style="display:none"' : ''}><i class="fa-solid fa-box"></i></div>
+                        <h4>${p.NombrePaquete || p.nombre || 'Paquete'}</h4>
+                        <p>${p.Descripcion || p.descripcion || 'Incluye una selección de servicios especiales para tu estadía.'}</p>
+                        ${p.PrecioPaquete || p.Precio || p.precio
+                            ? `<div class="paquete-precio">$${fmt(p.PrecioPaquete || p.Precio || p.precio)} <span>/ paquete</span></div>`
+                            : '<div class="paquete-precio" style="color:var(--muted);font-size:13px;">Consultar precio</div>'
+                        }
+                    </div>
+                `).join('');
+            } catch (e) {
+                container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>Error al cargar paquetes</p></div>';
+            }
+        }
+
+        // ── MIS RESERVAS ──────────────────────────
+        async function cargarMisReservas() {
+            $('reservas-wrap').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><span>Cargando reservas...</span></div>';
+            try {
+                const perfil = await apiFetch('/auth/me');
+                const nroDoc = perfil.usuario?.numeroDocumento;
+                if (!nroDoc) throw new Error('Sin documento');
+
+                const reservas = await apiFetch(`/reservas/cliente/${nroDoc}`);
+                misReservas = Array.isArray(reservas) ? reservas : [];
+
+                if (!misReservas.length) {
+                    $('reservas-wrap').innerHTML = '<div class="empty-state"><i class="fa-solid fa-calendar"></i><p>Aún no tienes reservas. ¡Haz tu primera reserva!</p></div>';
+                    return;
+                }
+
+                $('reservas-wrap').innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Habitación</th>
+                                <th>Entrada</th>
+                                <th>Salida</th>
+                                <th>Estado</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${misReservas.map(r => {
+                                const estado = (r.NombreEstadoReserva || '').toLowerCase();
+                                const cancelable = estado !== 'cancelada' && estado !== 'completada';
+                                return `
+                                <tr>
+                                    <td>#${r.IdReserva || r.id || '-'}</td>
+                                    <td>${r.NombreHabitacion || '-'}</td>
+                                    <td>${formatFecha(r.FechaInicio || r.fechaInicio)}</td>
+                                    <td>${formatFecha(r.FechaFinalizacion || r.fechaFin)}</td>
+                                    <td>${badgeEstado(r.NombreEstadoReserva || r.EstadoReserva)}</td>
+                                    <td>$${fmt(r.Monto_Total || r.Sub_Total || 0)}</td>
+                                    <td style="display:flex;gap:6px;flex-wrap:wrap;">
+                                        <button class="btn-ver-res" data-id="${r.IdReserva}"><i class="fa-solid fa-eye"></i> Ver</button>
+                                        ${cancelable ? `<button class="btn-cancelar-res" data-id="${r.IdReserva}"><i class="fa-solid fa-xmark"></i> Cancelar</button>` : ''}
+                                    </td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>`;
+                // event delegation para botones Ver
+                $('reservas-wrap').addEventListener('click', async (e) => {
+                    const btnVer = e.target.closest('.btn-ver-res');
+                    if (btnVer) verDetalleReserva(btnVer.dataset.id);
+                }, { once: true });
+
+            } catch (e) {
+                $('reservas-wrap').innerHTML = '<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>No se pudieron cargar las reservas</p></div>';
+            }
+        }
+
+        async function verDetalleReserva(id) {
+            const modal = $('modal-detalle-reserva');
+            const contenido = $('detalle-reserva-contenido');
+            modal.style.display = 'flex';
+            contenido.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>';
+
+            try {
+                const r = await apiFetch(`/reservas/${id}`);
+                const fmtF = f => f ? new Date(f).toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+                const badge = badgeEstado(r.NombreEstadoReserva || '');
+
+                const serviciosHtml = r.servicios && r.servicios.length
+                    ? r.servicios.map(s => `
+                        <div class="det-item">
+                            <div class="det-item-icon"><i class="fa-solid fa-concierge-bell"></i></div>
+                            <div style="flex:1">${s.NombreServicio} <span style="color:var(--muted);font-size:11px;">x${s.Cantidad}</span></div>
+                            <strong>$${fmt(s.SubtotalItem || s.Costo)}</strong>
+                        </div>`).join('')
+                    : '<p style="color:var(--muted);font-size:13px;margin:0">Sin servicios adicionales</p>';
+
+                const paquetesHtml = r.paquetes && r.paquetes.length
+                    ? r.paquetes.map(p => `
+                        <div class="det-item">
+                            <div class="det-item-icon"><i class="fa-solid fa-box"></i></div>
+                            <div style="flex:1">${p.NombrePaquete} <span style="color:var(--muted);font-size:11px;">x${p.Cantidad}</span></div>
+                            <strong>$${fmt(p.SubtotalItem || p.PrecioPaquete)}</strong>
+                        </div>`).join('')
+                    : '<p style="color:var(--muted);font-size:13px;margin:0">Sin paquete</p>';
+
+                contenido.innerHTML = `
+                    <div class="det-seccion">
+                        <h4>Información general</h4>
+                        <div class="det-fila"><span>Reserva</span><strong>#${r.IdReserva}</strong></div>
+                        <div class="det-fila"><span>Estado</span>${badge}</div>
+                        <div class="det-fila"><span>Habitación</span><strong>${r.NombreHabitacion || '—'}</strong></div>
+                        <div class="det-fila"><span>Entrada</span><strong>${fmtF(r.FechaInicio)}</strong></div>
+                        <div class="det-fila"><span>Salida</span><strong>${fmtF(r.FechaFinalizacion)}</strong></div>
+                        <div class="det-fila"><span>Método de pago</span><strong>${r.NombreMetodoPago || '—'}</strong></div>
+                    </div>
+                    <div class="det-seccion">
+                        <h4>Servicios adicionales</h4>
+                        ${serviciosHtml}
+                    </div>
+                    <div class="det-seccion">
+                        <h4>Paquete</h4>
+                        ${paquetesHtml}
+                    </div>
+                    <div class="det-total">
+                        <span>Total pagado</span>
+                        <span>$${fmt(r.Monto_Total || 0)}</span>
+                    </div>`;
+            } catch(e) {
+                contenido.innerHTML = '<p style="color:var(--muted);text-align:center">No se pudo cargar el detalle.</p>';
+            }
+        }
+
+        function cerrarDetalleReserva() {
+            const modal = $('modal-detalle-reserva');
+            modal.style.display = 'none';
+            $('detalle-reserva-contenido').innerHTML = '';
+        }
+
+        $('modal-detalle-reserva').addEventListener('click', e => {
+            if (e.target === $('modal-detalle-reserva')) cerrarDetalleReserva();
+        });
+
+        // ── NUEVA RESERVA (vista completa) ───────
+        let _nrIdPreselecc = null;
+
+        function mostrarNuevaReserva(idHabitacion = null) {
+            _nrIdPreselecc = idHabitacion;
+            mostrarSeccion('nueva-reserva', null);
+        }
+
+        async function cargarFormNuevaReserva() {
+            const idPreselecc = _nrIdPreselecc;
+            _nrIdPreselecc = null;
+
+            $('form-nueva-reserva').reset();
+            $('nr-error').classList.add('hidden');
+            actualizarResumen();
+
+            const hoy = new Date().toISOString().split('T')[0];
+            $('nr-fecha-inicio').min = hoy;
+            $('nr-fecha-fin').min    = hoy;
+
+            await Promise.all([
+                cargarHabitacionesNR(idPreselecc),
+                cargarMetodosPagoNR(),
+                cargarServiciosNR(),
+                cargarPaquetesNR()
+            ]);
+        }
+
+        async function cargarHabitacionesNR(idPreselecc = null) {
+            try {
+                if (!habitacionesDisponibles.length) {
+                    const data = await fetch(`${API_URL}/habitaciones/disponibles`).then(r => r.json());
+                    habitacionesDisponibles = Array.isArray(data) ? data : [];
+                }
+                const sel = $('nr-habitacion');
+                sel.innerHTML = '<option value="">Selecciona una habitación</option>';
+                habitacionesDisponibles.forEach(h => {
+                    sel.innerHTML += `<option value="${h.IDHabitacion}" data-costo="${h.Costo}">${h.NombreHabitacion} — $${fmt(h.Costo)}/noche</option>`;
+                });
+                if (idPreselecc) sel.value = idPreselecc;
+                actualizarResumen();
+            } catch(e) { console.error('Error cargando habitaciones:', e); }
+        }
+
+        async function cargarMetodosPagoNR() {
+            try {
+                const data = await apiFetch('/reservas/metodos-pago');
+                const metodos = Array.isArray(data) ? data : [];
+                const sel = $('nr-metodo-pago');
+                sel.innerHTML = '<option value="" disabled selected hidden>Selecciona método de pago</option>';
+                metodos.forEach(m => {
+                    sel.innerHTML += `<option value="${m.IdMetodoPago}">${m.NombreMetodoPago}</option>`;
+                });
+            } catch(e) { console.error('Error cargando métodos de pago:', e); }
+        }
+
+        async function cargarPaquetesNR() {
+            try {
+                const data = await fetch(`${API_URL}/paquetes`).then(r => r.json());
+                const paquetes = Array.isArray(data) ? data : [];
+                const sel = $('nr-paquete');
+                const btnVer = $('nr-paquete-ver');
+                const detalle = $('nr-paquete-detalle');
+
+                sel.innerHTML = '<option value="">Sin paquete</option>';
+                paquetes.forEach(p => {
+                    sel.innerHTML += `<option value="${p.IDPaquete}" data-precio="${p.PrecioPaquete}">${p.NombrePaquete} — $${fmt(p.PrecioPaquete)}</option>`;
+                });
+
+                sel.addEventListener('change', () => {
+                    actualizarResumen();
+                    if (sel.value) {
+                        btnVer.classList.remove('hidden');
+                    } else {
+                        btnVer.classList.add('hidden');
+                        detalle.classList.add('hidden');
+                        detalle.innerHTML = '';
+                    }
+                });
+
+                btnVer.addEventListener('click', async () => {
+                    const id = sel.value;
+                    if (!id) return;
+                    try {
+                        const p = await fetch(`${API_URL}/paquetes/${id}`).then(r => r.json());
+                        const servicios = p.servicios && p.servicios.length
+                            ? p.servicios.map(s => `<span>${s.NombreServicio}</span>`).join('')
+                            : '<span>Sin servicios adicionales</span>';
+
+                        detalle.innerHTML = `
+                            <div class="pdi-body">
+                                <div class="pdi-nombre">${p.NombrePaquete}</div>
+                                <div class="pdi-desc">${p.Descripcion || 'Sin descripción'}</div>
+                                <div class="pdi-meta">
+                                    <span class="pdi-badge">$${fmt(p.PrecioPaquete)}</span>
+                                    <span class="pdi-badge">${p.DuracionNoches} noche${p.DuracionNoches !== 1 ? 's' : ''}</span>
+                                    ${p.IncluirHabitacion ? '<span class="pdi-badge">Incluye alojamiento</span>' : ''}
+                                </div>
+                                <div class="pdi-servicios"><strong>Servicios incluidos:</strong><br>${servicios}</div>
+                            </div>
+                        `;
+                        detalle.classList.remove('hidden');
+                    } catch(e) {
+                        detalle.innerHTML = '<div class="pdi-body" style="color:var(--muted)">No se pudo cargar el detalle.</div>';
+                        detalle.classList.remove('hidden');
+                    }
+                });
+            } catch(e) { console.error('Error cargando paquetes:', e); }
+        }
+
+        async function cargarServiciosNR() {
+            const lista = $('nr-servicios-lista');
+            lista.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">Cargando servicios...</div>';
+            try {
+                const data = await fetch(`${API_URL}/servicios?soloActivos=true`).then(r => r.json());
+                const servicios = Array.isArray(data) ? data : [];
+                if (!servicios.length) {
+                    lista.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No hay servicios disponibles</div>';
+                    return;
+                }
+                lista.innerHTML = servicios.map(s => `
+                    <label class="servicio-item">
+                        <input type="checkbox" class="nr-servicio-check"
+                            data-id="${s.IDServicio}" data-costo="${s.Costo}" data-nombre="${s.NombreServicio}">
+                        ${s.Imagen
+                            ? `<img src="${s.Imagen}" alt="${s.NombreServicio}" class="servicio-item-img" onerror="this.style.display='none'">`
+                            : `<span class="servicio-item-img-placeholder"><i class="fa-solid fa-concierge-bell"></i></span>`
+                        }
+                        <div class="servicio-item-info">
+                            <div class="servicio-item-name">${s.NombreServicio}</div>
+                            ${s.Descripcion ? `<div class="servicio-item-desc">${s.Descripcion}</div>` : ''}
+                            ${(s.Duracion || s.Horario) ? `
+                            <div class="servicio-item-chips">
+                                ${s.Duracion ? `<span class="servicio-item-duracion"><i class="fa-regular fa-clock"></i> ${s.Duracion} min</span>` : ''}
+                                ${s.Horario ? `<span class="servicio-item-horario"><i class="fa-regular fa-calendar"></i> ${s.Horario}</span>` : ''}
+                            </div>` : ''}
+                        </div>
+                        <div class="servicio-item-precio">$${fmt(s.Costo)}</div>
+                    </label>
+                `).join('');
+                lista.querySelectorAll('.nr-servicio-check').forEach(cb => cb.addEventListener('change', actualizarResumen));
+            } catch(e) {
+                lista.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No se pudieron cargar los servicios</div>';
+            }
+        }
+
+        function actualizarResumen() {
+            const sel = $('nr-habitacion');
+            const opt = sel ? sel.options[sel.selectedIndex] : null;
+            const costo = parseFloat(opt?.dataset?.costo || 0);
+            const inicio = $('nr-fecha-inicio')?.value || '';
+            const fin    = $('nr-fecha-fin')?.value    || '';
+
+            const costoServicios = Array.from(document.querySelectorAll('.nr-servicio-check:checked'))
+                .reduce((sum, cb) => sum + parseFloat(cb.dataset.costo || 0), 0);
+
+            const selPaq = $('nr-paquete');
+            const paqOpt = selPaq ? selPaq.options[selPaq.selectedIndex] : null;
+            const costoPaquete = parseFloat(paqOpt?.dataset?.precio || 0);
+
+            const fmtFecha = f => f ? new Date(f + 'T12:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }) : '--';
+            $('nr-sum-entrada').textContent = fmtFecha(inicio);
+            $('nr-sum-salida').textContent  = fmtFecha(fin);
+            $('nr-sum-serv').textContent    = `$${fmt(costoServicios)}`;
+
+            if (inicio && fin && costo) {
+                const d1 = new Date(inicio), d2 = new Date(fin);
+                if (d2 > d1) {
+                    const noches   = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+                    const totalHab = noches * costo;
+                    const subTotal = totalHab + costoServicios + costoPaquete;
+                    const iva      = Math.round(subTotal * 0.19);
+                    const total    = subTotal + iva;
+
+                    $('nr-sum-noches').textContent = noches;
+                    $('nr-sum-hab').textContent    = `$${fmt(totalHab)}`;
+                    $('nr-sum-iva').textContent    = `$${fmt(iva)}`;
+                    $('nr-sum-total').textContent  = `$${fmt(total)}`;
+                    return { noches, totalHab, costoServicios, costoPaquete, subTotal, iva, total };
+                }
+            }
+            $('nr-sum-noches').textContent = '--';
+            $('nr-sum-hab').textContent    = '$0';
+            $('nr-sum-iva').textContent    = '$0';
+            $('nr-sum-total').textContent  = '$0';
+            return null;
+        }
+
+        $('nr-habitacion').addEventListener('change', actualizarResumen);
+        $('nr-fecha-inicio').addEventListener('change', () => {
+            $('nr-fecha-fin').min = $('nr-fecha-inicio').value;
+            actualizarResumen();
+        });
+        $('nr-fecha-fin').addEventListener('change', () => {
+            const inicio = $('nr-fecha-inicio').value;
+            const fin    = $('nr-fecha-fin').value;
+            const errBox = $('nr-error');
+            if (inicio && fin && fin <= inicio) {
+                errBox.textContent = 'La fecha de salida debe ser posterior a la fecha de entrada.';
+                errBox.classList.remove('hidden');
+                $('nr-fecha-fin').value = '';
+            } else {
+                errBox.classList.add('hidden');
+            }
+            actualizarResumen();
+        });
+
+        $('form-nueva-reserva').addEventListener('submit', async e => {
+            e.preventDefault();
+            const errBox = $('nr-error');
+            errBox.classList.add('hidden');
+
+            const idHab  = $('nr-habitacion').value;
+            const inicio = $('nr-fecha-inicio').value;
+            const fin    = $('nr-fecha-fin').value;
+            const metodo = $('nr-metodo-pago').value;
+
+            if (!idHab || !inicio || !fin || !metodo) {
+                errBox.textContent = 'Por favor completa todos los campos obligatorios.';
+                errBox.classList.remove('hidden');
+                errBox.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            const calculado = actualizarResumen();
+            if (!calculado || calculado.total <= 0) {
+                errBox.textContent = 'Las fechas seleccionadas no son válidas.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            // Verificar disponibilidad de la habitación en esas fechas
+            try {
+                const dispRes = await fetch(`${API_URL}/habitaciones/${idHab}/disponibilidad?inicio=${inicio}&fin=${fin}`);
+                if (!dispRes.ok) {
+                    console.error('[DISPONIBILIDAD] HTTP', dispRes.status, dispRes.statusText);
+                    errBox.textContent = 'No se pudo verificar la disponibilidad. Reinicia el servidor e inténtalo de nuevo.';
+                    errBox.classList.remove('hidden');
+                    errBox.scrollIntoView({ behavior: 'smooth' });
+                    return;
+                }
+                const dispData = await dispRes.json();
+                console.log('[DISPONIBILIDAD]', dispData);
+                if (!dispData.disponible) {
+                    errBox.textContent = 'La habitación no está disponible en las fechas seleccionadas. Por favor elige otras fechas.';
+                    errBox.classList.remove('hidden');
+                    errBox.scrollIntoView({ behavior: 'smooth' });
+                    return;
+                }
+            } catch (err) {
+                console.error('[DISPONIBILIDAD] Error en verificación:', err);
+                errBox.textContent = 'No se pudo verificar la disponibilidad. Por favor inténtalo de nuevo.';
+                errBox.classList.remove('hidden');
+                errBox.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            const btn = $('nr-btn-confirmar');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
+
+            try {
+                const perfil  = await apiFetch('/auth/me');
+                const usuario = perfil.usuario || {};
+
+                const serviciosSeleccionados = Array.from(document.querySelectorAll('.nr-servicio-check:checked'))
+                    .map(cb => ({ IDServicio: parseInt(cb.dataset.id), cantidad: 1 }));
+
+                const idPaquete = parseInt($('nr-paquete')?.value || 0) || null;
+                const paquetesSeleccionados = idPaquete ? [{ IDPaquete: idPaquete, cantidad: 1 }] : [];
+
+                await apiFetch('/reservas', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        IDHabitacion:        parseInt(idHab),
+                        FechaInicio:         inicio,
+                        FechaFinalizacion:   fin,
+                        Sub_Total:           calculado.subTotal,
+                        Descuento:           0,
+                        MetodoPago:          metodo,
+                        IdEstadoReserva:     1,
+                        id_usuario:          usuarioActual?.id,
+                        NroDocumentoCliente: usuario.numeroDocumento || '',
+                        TipoDocumentoCliente:usuario.tipoDocumento   || '',
+                        ContactoCliente:     `${usuario.nombre || ''} ${usuario.apellido || ''}`.trim(),
+                        EmailCliente:        usuario.email    || '',
+                        TelefonoCliente:     usuario.telefono || '',
+                        PaisCliente:         usuario.pais     || '',
+                        servicios:           serviciosSeleccionados,
+                        paquetes:            paquetesSeleccionados,
+                    })
+                });
+
+                mostrarSeccion('reservas', null);
+
+                const toast = document.createElement('div');
+                toast.textContent = '¡Reserva creada exitosamente!';
+                toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#16a34a;color:#fff;padding:14px 20px;border-radius:10px;font-weight:700;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3500);
+            } catch(err) {
+                errBox.textContent = 'No se pudo crear la reserva. Intenta de nuevo.';
+                errBox.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirmar Reserva';
+            }
+        });
+
+        // ── INICIALIZAR ───────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarPerfil();
+            cargarDashboard();
+        });
+    </script>
+</body>
+</html>
