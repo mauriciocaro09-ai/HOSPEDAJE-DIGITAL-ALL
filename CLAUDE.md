@@ -36,7 +36,9 @@ BACKEND/
 ├── index.js                    # Punto de entrada
 ├── .env                        # Variables de entorno (NO subir a git)
 ├── scripts/
-│   └── poblar_habitaciones.js  # Pobla habitaciones vacías en la BD
+│   ├── poblar_habitaciones.js              # Pobla habitaciones vacías en la BD
+│   ├── ampliar_columnas_habitacion.js      # ALTER TABLE habitacion (VARCHAR→TEXT)
+│   └── update_imagenes_paquetes_servicios.js  # Pobla imgs+desc de paquetes y servicios
 ├── src/
 │   ├── app.js                  # Express app + rutas montadas
 │   ├── config/db.js            # Conexión MySQL (mysql2) con typeCast utf8
@@ -243,12 +245,14 @@ Nunca usar el tool `Edit` para archivos largos en Windows — puede truncar.
 - Imágenes de habitaciones cargan correctamente (typeCast + fallback válido)
 - mysql2 typeCast corregido (encoding 'utf8', no 'utf8mb4')
 - Habitaciones en BD: todas con nombre, descripción, costo e imágenes
+- Paquetes y servicios en BD: todos con imágenes Unsplash (4 por ítem) y descripciones completas
+- `maxlength` corregido en todos los formularios (index.html, landingpage.html, register.html)
+- `autocomplete` agregado en campos de email y contraseña (landingpage, register, index, login)
+- MySQL: `habitacion.NombreHabitacion` ampliado de VARCHAR(30) a VARCHAR(100)
+- MySQL: `habitacion.Descripcion` ampliado de VARCHAR(255) a TEXT
 
 ### 🔧 Pendiente
-- Agregar `maxlength` correcto en modal de registro de landingpage.html
-- Agregar `maxlength` correcto en register.html
-- Corregir `maxlength` inconsistentes en index.html
-- Ejecutar `BACKEND/scripts/update_imagenes_paquetes_servicios.js` para poblar BD con imágenes Unsplash en paquetes y servicios
+- (ninguno — todo funcional al 25/05/2026)
 
 ---
 
@@ -260,7 +264,7 @@ Nunca usar el tool `Edit` para archivos largos en Windows — puede truncar.
 - Tablas principales: `habitacion`, `servicio`, `paquete`, `reserva`, `clientes`, `usuarios`, `estadosreserva`, `metodopago`, `detallereservapaquetes`
 
 ### Columnas importantes
-- `habitacion`: `IDHabitacion`, `NombreHabitacion` (VARCHAR 30→recomendado ampliar a 100), `Descripcion` (VARCHAR 255→recomendado TEXT), `Costo`, `Estado`, `ImagenHabitacion`
+- `habitacion`: `IDHabitacion`, `NombreHabitacion` (VARCHAR 100), `Descripcion` (TEXT), `Costo`, `Estado`, `ImagenHabitacion`
 - `paquete`: `IDPaquete`, `NombrePaquete`, `Descripcion`, `PrecioPaquete`, `DuracionNoches`, `IncluirHabitacion`, `Imagen`, `Estado`
 - `servicio`: `IDServicio`, `NombreServicio`, `Descripcion`, `Costo`, `Imagen`, `Estado`
 - `reserva`: `IdReserva`, `IDCliente`/`IdCliente`, `IDHabitacion`, `FechaInicio`, `FechaFinalizacion`, `IdEstadoReserva`, `MontoTotal`

@@ -1,9 +1,21 @@
 (function () {
     const INTERVALO_MS = 60 * 1000;
 
+    function getApiBase() {
+        return (typeof CONFIG !== 'undefined' && CONFIG.API_URL)
+            ? CONFIG.API_URL
+            : 'http://localhost:3000/api';
+    }
+
     async function obtenerAlertas() {
         try {
-            return await requestJson('/dashboard/alertas');
+            const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const resp = await fetch(`${getApiBase()}/dashboard/alertas`, { headers });
+            if (!resp.ok) return null;
+            return await resp.json();
         } catch {
             return null;
         }
@@ -22,7 +34,12 @@
 
     function renderAlertas(data) {
         const lista = document.getElementById('notif-lista');
-        if (!lista || !data) return;
+        if (!lista) return;
+
+        if (!data) {
+            lista.innerHTML = '<div class="notif-empty"><i class="fa-solid fa-circle-xmark"></i> Sin conexión con el servidor</div>';
+            return;
+        }
 
         const items = [];
 
@@ -72,8 +89,7 @@
 
     async function refrescar() {
         const data = await obtenerAlertas();
-        if (!data) return;
-        actualizarBadge(data.total);
+        actualizarBadge(data ? data.total : 0);
         renderAlertas(data);
     }
 
@@ -91,15 +107,19 @@
 
     function iniciar() {
         const btn = document.getElementById('notif-btn');
-        const lista = document.getElementById('notif-lista');
         if (!btn) return;
 
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            panelAbierto() ? cerrarPanel() : abrirPanel();
+            if (panelAbierto()) {
+                cerrarPanel();
+            } else {
+                abrirPanel();
+                refrescar();
+            }
         });
 
-        lista?.addEventListener('click', (e) => {
+        document.getElementById('notif-lista')?.addEventListener('click', (e) => {
             const item = e.target.closest('[data-seccion]');
             if (!item) return;
             cerrarPanel();

@@ -249,6 +249,14 @@ async function guardarUsuarioAdmin(evento) {
     } catch (error) {
         console.error('Error guardando usuario:', error);
         mostrarMensajeUsuarioAdmin(error.message || 'No se pudo guardar el usuario');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo guardar el usuario',
+                text: error.message || 'Ocurrió un error inesperado.',
+                confirmButtonColor: '#e74c3c'
+            });
+        }
     }
 }
 

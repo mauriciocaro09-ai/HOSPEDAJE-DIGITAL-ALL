@@ -844,6 +844,8 @@
         .btn-block:hover { background: #111b33; }
         .btn-block:disabled { opacity: 0.6; cursor: not-allowed; }
 
+        .campo-obligatorio { color: #e74c3c; font-weight: 800; font-size: 1.1rem; line-height: 1; }
+
         /* ── SIDEBAR OVERLAY (mobile) ────────────── */
         .sidebar-overlay {
             display: none;
@@ -1069,18 +1071,18 @@
                             <div class="reserva-card">
                                 <div class="reserva-card-title"><i class="fa-solid fa-bed"></i> Habitación y Fechas</div>
                                 <div class="form-group">
-                                    <label>Habitación *</label>
+                                    <label>Habitación <span class="campo-obligatorio" aria-hidden="true">*</span></label>
                                     <select id="nr-habitacion" required>
                                         <option value="">Selecciona una habitación</option>
                                     </select>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group" style="margin-bottom:0;">
-                                        <label>Fecha de Entrada *</label>
+                                        <label>Fecha de Entrada <span class="campo-obligatorio" aria-hidden="true">*</span></label>
                                         <input type="date" id="nr-fecha-inicio" required>
                                     </div>
                                     <div class="form-group" style="margin-bottom:0;">
-                                        <label>Fecha de Salida *</label>
+                                        <label>Fecha de Salida <span class="campo-obligatorio" aria-hidden="true">*</span></label>
                                         <input type="date" id="nr-fecha-fin" required>
                                     </div>
                                 </div>
@@ -1089,7 +1091,7 @@
                             <div class="reserva-card">
                                 <div class="reserva-card-title"><i class="fa-solid fa-credit-card"></i> Método de Pago</div>
                                 <div class="form-group" style="margin-bottom:0;">
-                                    <label>Método de Pago *</label>
+                                    <label>Método de Pago <span class="campo-obligatorio" aria-hidden="true">*</span></label>
                                     <select id="nr-metodo-pago" required>
                                         <option value="" disabled selected hidden>Selecciona método de pago</option>
                                     </select>
@@ -1188,7 +1190,7 @@
                         <h3 class="perfil-card-title"><i class="fa-solid fa-lock"></i> Cambiar contraseña</h3>
                         <form id="form-cambiar-password" novalidate>
                             <div class="perfil-form-campo">
-                                <label for="cp-actual">Contraseña actual</label>
+                                <label for="cp-actual">Contraseña actual <span class="campo-obligatorio" aria-hidden="true">*</span></label>
                                 <div class="input-password-wrap">
                                     <input type="password" id="cp-actual" placeholder="Tu contraseña actual" autocomplete="current-password">
                                     <button type="button" class="btn-toggle-pass" data-target="cp-actual" tabindex="-1" aria-label="Ver contraseña">
@@ -1197,7 +1199,7 @@
                                 </div>
                             </div>
                             <div class="perfil-form-campo">
-                                <label for="cp-nueva">Nueva contraseña</label>
+                                <label for="cp-nueva">Nueva contraseña <span class="campo-obligatorio" aria-hidden="true">*</span></label>
                                 <div class="input-password-wrap">
                                     <input type="password" id="cp-nueva" placeholder="Mínimo 4 caracteres" autocomplete="new-password">
                                     <button type="button" class="btn-toggle-pass" data-target="cp-nueva" tabindex="-1" aria-label="Ver contraseña">
@@ -1206,7 +1208,7 @@
                                 </div>
                             </div>
                             <div class="perfil-form-campo">
-                                <label for="cp-confirmar">Confirmar nueva contraseña</label>
+                                <label for="cp-confirmar">Confirmar nueva contraseña <span class="campo-obligatorio" aria-hidden="true">*</span></label>
                                 <div class="input-password-wrap">
                                     <input type="password" id="cp-confirmar" placeholder="Repite la nueva contraseña" autocomplete="new-password">
                                     <button type="button" class="btn-toggle-pass" data-target="cp-confirmar" tabindex="-1" aria-label="Ver contraseña">

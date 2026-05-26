@@ -73,6 +73,9 @@ const contactoRoutes = require("./routes/contacto.routes");
 const verificarToken = require("./middlewares/auth.middleware");
 
 app.use("/api/auth", authRoutes);
+// La ruta /alertas no requiere token (solo devuelve conteos, no datos sensibles)
+const dashboardController = require("./controllers/dashboard.controller");
+app.get("/api/dashboard/alertas", dashboardController.alertas);
 app.use("/api/dashboard", verificarToken, dashboardRoutes);
 app.use("/api/habitaciones", habitacionesRoutes);
 app.use("/api/clientes", verificarToken, clientesRoutes);

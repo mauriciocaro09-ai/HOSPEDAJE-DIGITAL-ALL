@@ -8,18 +8,22 @@ let clientesCargados = [];
 let lastShownApiError = null;
 
 const paginationState = {
-    habitaciones: { page: 1, pageSize: 6 },
-    servicios: { page: 1, pageSize: 6 },
-    habitacionesAdmin: { page: 1, pageSize: 6 },
-    serviciosAdmin: { page: 1, pageSize: 8 },
-    clientesAdmin: { page: 1, pageSize: 8 }
+    habitaciones:    { page: 1, pageSize: 6 },
+    servicios:       { page: 1, pageSize: 6 },
+    habitacionesAdmin: { page: 1, pageSize: 10 },
+    serviciosAdmin:    { page: 1, pageSize: 10 },
+    clientesAdmin:     { page: 1, pageSize: 10 },
+    usuariosAdmin:     { page: 1, pageSize: 10 },
+    rolesAdmin:        { page: 1, pageSize: 10 },
+    permisosAdmin:     { page: 1, pageSize: 10 },
+    reservasAdmin:     { page: 1, pageSize: 10 }
 };
 
 const CLAVE_CONTRASTE_ALTO = 'hospedaje_alto_contraste';
 
 const ensurePaginationState = (key) => {
     if (!paginationState[key]) {
-        paginationState[key] = { page: 1, pageSize: 8 };
+        paginationState[key] = { page: 1, pageSize: 10 };
     }
 
     return paginationState[key];
@@ -62,7 +66,7 @@ const renderPaginationControls = (key, anchorElement, totalItems, totalPages, cu
         anchorElement.insertAdjacentElement('afterend', controls);
     }
 
-    if (totalItems === 0 || totalPages <= 1) {
+    if (totalItems === 0) {
         controls.innerHTML = '';
         controls.classList.add('hidden');
         return;
@@ -420,7 +424,6 @@ const abrirDetalleClienteAdmin = (cliente) => {
                 ${renderDetalleItem('Email', escaparHtml(cliente.Email || 'Sin email'))}
                 ${renderDetalleItem('Teléfono', escaparHtml(cliente.Telefono || 'Sin teléfono'))}
                 ${renderDetalleItem('Dirección', escaparHtml(cliente.Direccion || 'Sin dirección'))}
-                ${renderDetalleItem('Estado', `<span class="detalle-estado ${estadoCliente.clase}">${escaparHtml(estadoCliente.texto)}</span>`)}
                 ${renderDetalleItem('Rol', escaparHtml(cliente.IDRol ?? 'Sin rol'))}
             </div>
         </div>
@@ -509,7 +512,6 @@ const cargarClienteEnFormularioAdmin = (cliente) => {
     const campoEmail = document.getElementById('cliente-admin-email');
     const campoTelefono = document.getElementById('cliente-admin-telefono');
     const campoEstado = document.getElementById('cliente-admin-estado');
-    const campoRol = document.getElementById('cliente-admin-idrol');
     const titulo = document.getElementById('cliente-admin-form-title');
     const botonGuardar = document.getElementById('btn-cliente-admin-guardar');
 
@@ -524,7 +526,6 @@ const cargarClienteEnFormularioAdmin = (cliente) => {
     if (campoEmail) campoEmail.value = cliente.Email || '';
     if (campoTelefono) campoTelefono.value = cliente.Telefono || '';
     if (campoEstado) campoEstado.value = normalizarEstadoCliente(cliente.Estado).activo ? '1' : '0';
-    if (campoRol) campoRol.value = Number(cliente.IDRol) || 1;
     if (titulo) titulo.textContent = `Editar cliente ${obtenerIdCliente(cliente)}`;
     if (botonGuardar) botonGuardar.textContent = 'Actualizar cliente';
 
@@ -560,7 +561,6 @@ const construirPayloadCliente = ({ forzarEstado = null } = {}) => {
     const campoEmail = document.getElementById('cliente-admin-email');
     const campoTelefono = document.getElementById('cliente-admin-telefono');
     const campoEstado = document.getElementById('cliente-admin-estado');
-    const campoRol = document.getElementById('cliente-admin-idrol');
 
     return {
         NroDocumento: campoDocumento?.value?.trim(),
@@ -570,7 +570,7 @@ const construirPayloadCliente = ({ forzarEstado = null } = {}) => {
         Email: campoEmail?.value?.trim(),
         Telefono: campoTelefono?.value?.trim() || null,
         Estado: forzarEstado !== null ? Number(forzarEstado) : Number(campoEstado?.value ?? 1),
-        IDRol: Number(campoRol?.value ?? 1)
+        IDRol: 1
     };
 };
 
@@ -650,7 +650,14 @@ async function guardarClienteAdmin(evento) {
         cerrarModalClienteAdmin();
     } catch (error) {
         console.error('Error al guardar cliente:', error);
-        mostrarMensajeClienteAdmin(error.message || 'No se pudo guardar el cliente', 'error');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo guardar el cliente',
+                text: error.message || 'Ocurrió un error inesperado.',
+                confirmButtonColor: '#e74c3c'
+            });
+        }
     } finally {
         if (botonGuardar) botonGuardar.disabled = false;
     }
@@ -1127,7 +1134,7 @@ const renderGaleriaHabitacionDetalle = (imagenes, nombre) => {
     if (lista.length === 0) {
         return `
             <figure class="detalle-admin-figure detalle-admin-figure-empty">
-                <img src="assets/images/default.svg" alt="${escaparHtml(nombre || 'Habitación')}">
+                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=400" alt="${escaparHtml(nombre || '')}">
             </figure>
         `;
     }
@@ -1156,7 +1163,6 @@ const abrirDetalleHabitacionAdmin = (habitacion) => {
 
     const imagenes = obtenerImagenesHabitacionDetalle(habitacion).map((imagen) => obtenerUrlImagen(imagen));
     const estadoHabitacion = normalizarEstadoHabitacion(habitacion.Estado);
-    const totalImagenes = imagenes.length;
     const contenido = `
         ${renderDetalleCabecera(
             'Habitación',
@@ -1168,12 +1174,9 @@ const abrirDetalleHabitacionAdmin = (habitacion) => {
         <div class="detalle-admin-grid detalle-admin-grid-habitacion">
             ${renderGaleriaHabitacionDetalle(imagenes, habitacion.NombreHabitacion)}
             <div class="detalle-admin-body">
-                ${renderDetalleItem('ID', escaparHtml(obtenerIdHabitacion(habitacion)))}
                 ${renderDetalleItem('Nombre', escaparHtml(habitacion.NombreHabitacion || 'Sin nombre'))}
                 ${renderDetalleItem('Descripción', escaparHtml(habitacion.Descripcion || 'Sin descripción'))}
                 ${renderDetalleItem('Costo', escaparHtml(formatearCostoHabitacion(habitacion.Costo)))}
-                ${renderDetalleItem('Estado', `<span class="detalle-estado ${estadoHabitacion.clase}">${escaparHtml(estadoHabitacion.texto)}</span>`)}
-                ${renderDetalleItem('Imágenes', `<span class="detalle-admin-code">${escaparHtml(totalImagenes > 0 ? `${totalImagenes} imagen${totalImagenes === 1 ? '' : 'es'} cargada${totalImagenes === 1 ? '' : 's'}` : 'Sin imagen')}</span>`)}
             </div>
         </div>
     `;
@@ -1189,6 +1192,7 @@ const abrirDetalleServicioAdmin = (servicio) => {
     if (!servicio) return;
 
     const estadoServicio = normalizarEstadoServicio(servicio.Estado);
+    const imagenesServicio = obtenerImagenesDetalleHabitacion(servicio.Imagen).map((img) => obtenerUrlImagen(img));
 
     const contenido = `
         ${renderDetalleCabecera(
@@ -1198,15 +1202,14 @@ const abrirDetalleServicioAdmin = (servicio) => {
             estadoServicio.clase,
             'Información completa del servicio seleccionado.'
         )}
-        <div class="detalle-admin-grid detalle-admin-grid-servicio">
-            <div class="detalle-admin-body detalle-admin-body-full">
-                ${renderDetalleItem('ID', escaparHtml(obtenerIdServicio(servicio)))}
+        <div class="detalle-admin-grid detalle-admin-grid-habitacion">
+            ${renderGaleriaHabitacionDetalle(imagenesServicio, servicio.NombreServicio)}
+            <div class="detalle-admin-body">
                 ${renderDetalleItem('Nombre', escaparHtml(servicio.NombreServicio || 'Sin nombre'))}
                 ${renderDetalleItem('Descripción', escaparHtml(servicio.Descripcion || 'Sin descripción'))}
                 ${renderDetalleItem('Duración', escaparHtml(servicio.Duracion ? `${servicio.Duracion} min` : 'Sin duración'))}
                 ${renderDetalleItem('Personas', escaparHtml(servicio.CantidadMaximaPersonas || 'Sin dato'))}
                 ${renderDetalleItem('Costo', escaparHtml(formatearCostoServicio(servicio.Costo)))}
-                ${renderDetalleItem('Estado', `<span class="detalle-estado ${estadoServicio.clase}">${escaparHtml(estadoServicio.texto)}</span>`)}
             </div>
         </div>
     `;
@@ -1884,7 +1887,14 @@ async function guardarHabitacionAdmin(event) {
         }
     } catch (error) {
         console.error('Error al guardar habitación:', error);
-        mostrarMensajeHabitacionAdmin(error.message || 'Error al guardar la habitación', 'error');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo guardar la habitación',
+                text: error.message || 'Ocurrió un error inesperado.',
+                confirmButtonColor: '#e74c3c'
+            });
+        }
     } finally {
         if (botonGuardar) botonGuardar.disabled = false;
     }
@@ -2275,7 +2285,8 @@ const renderizarServiciosAdmin = () => {
         const idServicio = obtenerIdServicio(servicio);
         const estado = normalizarEstadoServicio(servicio.Estado);
         const switchId = `switch-servicio-${idServicio}`;
-        const imagenUrl = obtenerUrlImagen(servicio.Imagen);
+        const _imgsSrv = obtenerImagenesDetalleHabitacion(servicio.Imagen);
+        const imagenUrl = obtenerUrlImagen(_imgsSrv[0] || '');
 
         return `
             <tr>
@@ -2514,7 +2525,14 @@ async function guardarServicioAdmin(evento) {
         cerrarModalServicioAdmin();
     } catch (error) {
         console.error('Error al guardar servicio:', error);
-        mostrarMensajeServicioAdmin(error.message || 'No se pudo guardar el servicio', 'error');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo guardar el servicio',
+                text: error.message || 'Ocurrió un error inesperado.',
+                confirmButtonColor: '#e74c3c'
+            });
+        }
     }
 }
 
@@ -2750,6 +2768,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (document.getElementById('seccion-administrar-reservas') && typeof inicializarReservasAdmin === 'function') {
         inicializarReservasAdmin();
+    }
+    if (document.getElementById('form-usuario-admin') && typeof configurarUsuariosAdmin === 'function') {
+        configurarUsuariosAdmin();
+    }
+    if (document.getElementById('form-rol-admin') && typeof configurarRolesAdmin === 'function') {
+        configurarRolesAdmin();
     }
 
     const ultimaSeccion = localStorage.getItem('hospedaje_ultima_seccion') || 'dashboard';

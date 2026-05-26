@@ -76,6 +76,9 @@ exports.create = async (req, res) => {
 
     res.status(201).json({ mensaje: "Cliente creado", data: result });
   } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY' || error.errno === 1062) {
+      return res.status(409).json({ error: 'Ya existe un cliente con ese número de documento. Verifica e intenta con otro.' });
+    }
     res.status(500).json({ error: "Error creando cliente", detalle: error.message });
   }
 };

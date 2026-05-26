@@ -1,6 +1,6 @@
 -- Schema completo de Hospedaje Digital
 -- Incluye todas las columnas vigentes (migraciones 20260513 aplicadas)
--- Última actualización: 2026-05-15
+-- Última actualización: 2026-05-25
 
 CREATE DATABASE IF NOT EXISTS hospedaje;
 USE hospedaje;
@@ -77,9 +77,9 @@ CREATE TABLE IF NOT EXISTS cliente (
 -- =============================================
 CREATE TABLE IF NOT EXISTS habitacion (
     IDHabitacion    INT AUTO_INCREMENT PRIMARY KEY,
-    NombreHabitacion VARCHAR(30)  NOT NULL,
+    NombreHabitacion VARCHAR(100) NOT NULL,
     ImagenHabitacion TEXT,
-    Descripcion      VARCHAR(255) NOT NULL,
+    Descripcion      TEXT         NOT NULL,
     Costo            FLOAT        NOT NULL,
     Estado           VARCHAR(30)  NOT NULL DEFAULT 'disponible'
 );
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS estadosreserva (
 -- =============================================
 CREATE TABLE IF NOT EXISTS metodopago (
     IdMetodoPago  INT AUTO_INCREMENT PRIMARY KEY,
-    NomMetodoPago VARCHAR(30)
+    NomMetodoPago VARCHAR(50)
 );
 
 -- =============================================

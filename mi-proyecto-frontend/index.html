@@ -112,6 +112,19 @@
         <header>
             <nav>
                 <h1><i class="fa-solid fa-hotel" aria-hidden="true"></i> Hospedaje Digital</h1>
+                <!-- Campana de alertas -->
+                <div id="notif-wrap" class="notif-wrap">
+                    <button type="button" id="notif-btn" class="notif-btn" aria-label="Alertas y notificaciones">
+                        <i class="fa-solid fa-bell"></i>
+                        <span id="notif-badge" class="notif-badge notif-badge-hidden">0</span>
+                    </button>
+                    <div id="notif-panel" class="notif-panel notif-panel-hidden">
+                        <div class="notif-panel-header">
+                            <span><i class="fa-solid fa-bell"></i> Alertas del día</span>
+                        </div>
+                        <div id="notif-lista"></div>
+                    </div>
+                </div>
             </nav>
         </header>
         <!-- Contenido Principal -->
@@ -171,11 +184,11 @@
                         <input type="hidden" id="habitacion-admin-id">
                         <label>
                             <span>Nombre de la habitación <span class="campo-obligatorio" aria-hidden="true">*</span></span>
-                            <input type="text" id="habitacion-admin-nombre" required maxlength="30" placeholder="Ej. Suite Premium">
+                            <input type="text" id="habitacion-admin-nombre" required maxlength="100" placeholder="Ej. Suite Premium">
                         </label>
                         <label>
                             <span>Descripción <span class="campo-obligatorio" aria-hidden="true">*</span></span>
-                            <textarea id="habitacion-admin-descripcion" required maxlength="50" placeholder="Describe la habitación en pocas palabras"></textarea>
+                            <textarea id="habitacion-admin-descripcion" required maxlength="1000" placeholder="Describe la habitación en pocas palabras"></textarea>
                         </label>
                         <label>
                             <span>Costo <span class="campo-obligatorio" aria-hidden="true">*</span></span>
@@ -460,7 +473,7 @@
                             <details class="reserva-extra-fields">
                                 <summary>Detalles adicionales (Completar si es cliente nuevo)</summary>
                                 <div class="reserva-extra-grid">
-                                    <label><span>Tipo documento</span>
+                                    <label><span>Tipo documento <span class="campo-obligatorio" aria-hidden="true">*</span></span>
                                         <select id="reserva-admin-tipo-documento" required>
                                             <option value="">Selecciona un tipo</option>
                                             <option value="CC">Cédula de Ciudadanía</option>
@@ -469,7 +482,7 @@
                                         </select>
                                     </label>
                                     <label><span>Documento <span class="campo-obligatorio">*</span></span>
-                                        <input type="text" id="reserva-admin-cliente" maxlength="50" required>
+                                        <input type="text" id="reserva-admin-cliente" maxlength="50" required inputmode="numeric" data-filtro="numeros">
                                     </label>
                                     <label><span>Contacto</span>
                                         <input type="tel" id="reserva-admin-contacto" maxlength="50">
@@ -506,11 +519,11 @@
                             <span class="card-title"><i class="fa-solid fa-credit-card"></i> PAGO Y ESTADO</span>
                             <div class="reserva-form-group">
                                 <label>
-                                    <span>Método de pago</span>
+                                    <span>Método de pago <span class="campo-obligatorio" aria-hidden="true">*</span></span>
                                     <select id="reserva-admin-metodo-pago"></select>
                                 </label>
                                 <label>
-                                    <span>Estado de la reserva</span>
+                                    <span>Estado de la reserva <span class="campo-obligatorio" aria-hidden="true">*</span></span>
                                     <select id="reserva-admin-estado"></select>
                                 </label>
                             </div>
@@ -617,15 +630,15 @@
                         <input type="hidden" id="cliente-admin-id">
                         <label>
                             <span>Documento <span class="campo-obligatorio" aria-hidden="true">*</span></span>
-                            <input type="text" id="cliente-admin-documento" required maxlength="50" placeholder="Ej. 1234567890">
+                            <input type="text" id="cliente-admin-documento" required maxlength="50" placeholder="Ej. 1234567890" inputmode="numeric" data-filtro="numeros">
                         </label>
                         <label>
                             <span>Nombre <span class="campo-obligatorio" aria-hidden="true">*</span></span>
-                            <input type="text" id="cliente-admin-nombre" required maxlength="50" placeholder="Ej. Carlos">
+                            <input type="text" id="cliente-admin-nombre" required maxlength="50" placeholder="Ej. Carlos" data-filtro="letras">
                         </label>
                         <label>
                             <span>Apellido</span>
-                            <input type="text" id="cliente-admin-apellido" maxlength="50" placeholder="Ej. López">
+                            <input type="text" id="cliente-admin-apellido" maxlength="50" placeholder="Ej. López" data-filtro="letras">
                         </label>
                         <label>
                             <span>Dirección</span>
@@ -637,7 +650,7 @@
                         </label>
                         <label>
                             <span>Teléfono</span>
-                            <input type="text" id="cliente-admin-telefono" maxlength="50" placeholder="Ej. 3001234567">
+                            <input type="text" id="cliente-admin-telefono" maxlength="50" placeholder="Ej. 3001234567" inputmode="numeric" data-filtro="numeros">
                         </label>
                         <label>
                             <span>Estado <span class="campo-obligatorio" aria-hidden="true">*</span></span>
@@ -645,10 +658,6 @@
                                 <option value="1">Activo</option>
                                 <option value="0">Inactivo</option>
                             </select>
-                        </label>
-                        <label>
-                            <span>ID Rol</span>
-                            <input type="number" id="cliente-admin-idrol" min="1" value="1" placeholder="Ej. 1">
                         </label>
                         <div class="crud-clientes-form-actions">
                             <button type="submit" class="btn-accion-crud btn-accion-principal" id="btn-cliente-admin-guardar">Guardar cliente</button>
@@ -665,14 +674,14 @@
                     <div id="mensaje-usuario-admin-modal" class="crud-clientes-mensaje" aria-live="polite"></div>
                     <form id="form-usuario-admin" class="crud-clientes-form">
                         <input type="hidden" id="usuario-admin-id">
-                        <label><span>Nombre <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="text" id="usuario-admin-nombre" required maxlength="255"></label>
-                        <label><span>Apellido</span><input type="text" id="usuario-admin-apellido" maxlength="255"></label>
-                        <label><span>Email <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="email" id="usuario-admin-email" required maxlength="255"></label>
-                        <label><span>Contraseña <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="password" id="usuario-admin-contrasena" maxlength="255"></label>
-                        <label><span>Tipo documento</span><input type="text" id="usuario-admin-documento" maxlength="50"></label>
-                        <label><span>Número documento</span><input type="text" id="usuario-admin-numero-documento" maxlength="50"></label>
-                        <label><span>Teléfono</span><input type="text" id="usuario-admin-telefono" maxlength="50"></label>
-                        <label><span>País</span><input type="text" id="usuario-admin-pais" maxlength="100"></label>
+                        <label><span>Nombre <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="text" id="usuario-admin-nombre" required maxlength="50" data-filtro="letras"></label>
+                        <label><span>Apellido</span><input type="text" id="usuario-admin-apellido" maxlength="50" data-filtro="letras"></label>
+                        <label><span>Email <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="email" id="usuario-admin-email" required maxlength="100" autocomplete="email"></label>
+                        <label><span>Contraseña <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="password" id="usuario-admin-contrasena" maxlength="255" autocomplete="new-password"></label>
+                        <label><span>Tipo documento</span><input type="text" id="usuario-admin-documento" maxlength="20"></label>
+                        <label><span>Número documento</span><input type="text" id="usuario-admin-numero-documento" maxlength="30" inputmode="numeric" data-filtro="numeros"></label>
+                        <label><span>Teléfono</span><input type="text" id="usuario-admin-telefono" maxlength="20" inputmode="numeric" data-filtro="numeros"></label>
+                        <label><span>País</span><input type="text" id="usuario-admin-pais" maxlength="50"></label>
                         <label><span>Dirección</span><input type="text" id="usuario-admin-direccion" maxlength="255"></label>
                         <label><span>Rol</span><select id="usuario-admin-idrol"></select></label>
                         <label><span>Estado</span><select id="usuario-admin-estado"><option value="1">Activo</option><option value="0">Inactivo</option></select></label>
@@ -729,11 +738,11 @@
                         <input type="hidden" id="servicio-admin-id">
                         <label>
                             <span>Nombre del servicio <span class="campo-obligatorio" aria-hidden="true">*</span></span>
-                            <input type="text" id="servicio-admin-nombre" required maxlength="50" placeholder="Ej. Masaje relajante">
+                            <input type="text" id="servicio-admin-nombre" required maxlength="100" placeholder="Ej. Masaje relajante">
                         </label>
                         <label>
                             <span>Descripción <span class="campo-obligatorio" aria-hidden="true">*</span></span>
-                            <textarea id="servicio-admin-descripcion" required maxlength="100" placeholder="Describe el servicio en pocas palabras"></textarea>
+                            <textarea id="servicio-admin-descripcion" required maxlength="500" placeholder="Describe el servicio en pocas palabras"></textarea>
                         </label>
                         <label>
                             <span>Duración (minutos) <span class="campo-obligatorio" aria-hidden="true">*</span></span>
@@ -938,10 +947,6 @@
                                 <input type="number" id="paquete-duracion" name="DuracionNoches" required min="1" value="1">
                             </label>
                         </div>
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="paquete-incluir-habitacion" name="IncluirHabitacion" checked>
-                            <span>Incluye alojamiento</span>
-                        </label>
                         <label>
                             <span>URL de Imagen</span>
                             <input type="url" id="paquete-imagen" name="Imagen" placeholder="https://...">
@@ -1012,19 +1017,20 @@
     <script defer src="js/config.js?v=20260524b"></script>    <!-- Primero: Configuración -->
         <script defer src="js/dashboard-inject.js?v=20260524b"></script> <!-- Inyectar Dashboard HTML -->
     <script defer src="js/constants.js?v=20260524b"></script> <!-- Segundo: Constantes -->
-    <script defer src="js/validation.js?v=20260524b"></script> <!-- Tercero: Validación -->
+    <script defer src="js/validation.js?v=20260526c"></script> <!-- Tercero: Validación -->
     <script defer src="js/notifications.js?v=20260524b"></script> <!-- Cuarto: Notificaciones -->
     <script defer src="js/api.js?v=20260524b"></script>      <!-- Quinto: Funciones de API -->
     <script defer src="js/perfil.js?v=20260524b"></script>   <!-- Nuevo: Módulo de Perfil -->
-    <script defer src="js/app.js?v=20260524b"></script>      <!-- Sexto: Lógica de la aplicación -->
-    <script defer src="js/usuarios.js?v=20260524b"></script>
+    <script defer src="js/app.js?v=20260526b"></script>      <!-- Sexto: Lógica de la aplicación -->
+    <script defer src="js/usuarios.js?v=20260526a"></script>
     <script defer src="js/roles.js?v=20260524b"></script>
     <script defer src="js/eventos.js?v=20260524b"></script>  <!-- Séptimo: Eventos y formularios -->
-    <script defer src="js/paquetes.js?v=20260524b"></script> <!-- Paquetes: Módulo de Paquetes -->
+    <script defer src="js/paquetes.js?v=20260526a"></script> <!-- Paquetes: Módulo de Paquetes -->
     <script defer src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
         <script defer src="js/dashboard.js?v=20260524b"></script> <!-- Dashboard: Panel de Control -->
-    <script defer src="js/reservas.js?v=20260524b"></script> <!-- Reservas: Módulo de Reservas -->
+    <script defer src="js/reservas.js?v=20260526a"></script> <!-- Reservas: Módulo de Reservas -->
+    <script defer src="js/campana.js?v=20260525c"></script> <!-- Campana de alertas -->
     <!-- Script del Sidebar -->
     <script>
         // ============================================

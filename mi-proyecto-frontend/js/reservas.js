@@ -174,6 +174,7 @@ const cargarReservasAdmin = async () => {
         inicializarDatepickers();
         inicializarReservasAdmin();
 
+        resetPagination('reservasAdmin');
         renderizarReservasAdmin();
         actualizarResumenReservasAdmin();
         mostrarMensajeReservaAdmin('');
@@ -244,6 +245,28 @@ const fechaEnRangosReservados = (date) => {
     });
 };
 
+const actualizarOpcionesHabitacion = (fechaInicio, fechaFin) => {
+    const selectHab = document.getElementById('reserva-admin-habitacion');
+    if (!selectHab || !_habitacionesCache.length) return;
+
+    const valorActual = selectHab.value;
+    const ignorarId = reservaEnEdicion ? obtenerIdReserva(reservaEnEdicion) : null;
+
+    const habs = (fechaInicio && fechaFin)
+        ? _habitacionesCache.filter(h => !hayCruceDeFechasConReservas(h.IDHabitacion, fechaInicio, fechaFin, ignorarId))
+        : _habitacionesCache;
+
+    selectHab.innerHTML = ['<option value="">Selecciona habitación</option>']
+        .concat(habs.map(h =>
+            `<option value="${escaparHtml(String(h.IDHabitacion))}">${escaparHtml(h.NombreHabitacion || h.Nombre || 'Habitación')}</option>`
+        ))
+        .join('');
+
+    if (valorActual && habs.some(h => String(h.IDHabitacion) === valorActual)) {
+        selectHab.value = valorActual;
+    }
+};
+
 const inicializarDatepickers = () => {
     if (typeof flatpickr === 'undefined') return;
 
@@ -254,17 +277,23 @@ const inicializarDatepickers = () => {
     fpInicio = flatpickr('#reserva-admin-fecha-inicio', {
         dateFormat: 'Y-m-d',
         disable: [fechaEnRangosReservados],
-        onChange: function(selectedDates) {
+        onChange: function(selectedDates, dateStr) {
             if (selectedDates.length) {
                 const min = selectedDates[0];
                 if (fpFin) fpFin.set('minDate', min);
             }
+            const fin = document.getElementById('reserva-admin-fecha-fin')?.value || '';
+            actualizarOpcionesHabitacion(dateStr || '', fin);
         }
     });
 
     fpFin = flatpickr('#reserva-admin-fecha-fin', {
         dateFormat: 'Y-m-d',
         disable: [fechaEnRangosReservados],
+        onChange: function(selectedDates, dateStr) {
+            const inicio = document.getElementById('reserva-admin-fecha-inicio')?.value || '';
+            actualizarOpcionesHabitacion(inicio, dateStr || '');
+        }
     });
 };
 
@@ -322,12 +351,16 @@ const renderizarReservasAdmin = () => {
     const reservasFiltradas = reservasAdminCargadas.filter(r => reservasAdminCoinciden(r, filtros));
     actualizarResumenReservasAdmin(reservasAdminCargadas);
 
-    if (!reservasFiltradas.length) {
+    const paginacion = getPaginatedItems(reservasFiltradas, 'reservasAdmin');
+    const tablaWrap = contenedor.closest('.crud-clientes-tabla-wrap') || contenedor;
+    renderPaginationControls('reservasAdmin', tablaWrap, paginacion.totalItems, paginacion.totalPages, paginacion.currentPage, renderizarReservasAdmin);
+
+    if (!paginacion.items.length) {
         contenedor.innerHTML = '<tr><td colspan="7" class="mensaje-vacio">No hay reservas que coincidan con el filtro actual.</td></tr>';
         return;
     }
 
-    contenedor.innerHTML = reservasFiltradas.map(reserva => {
+    contenedor.innerHTML = paginacion.items.map(reserva => {
         const cliente = reserva.NombreCliente || '—';
         const estado = normalizarEstadoReserva(reserva.NombreEstadoReserva);
         const idReserva = obtenerIdReserva(reserva);
@@ -370,10 +403,12 @@ const renderizarReservasAdmin = () => {
 // ============================================
 
 const buscarReservasAdmin = () => {
+    resetPagination('reservasAdmin');
     renderizarReservasAdmin();
 };
 
 const filtrarReservasAdmin = () => {
+    resetPagination('reservasAdmin');
     renderizarReservasAdmin();
 };
 
@@ -618,9 +653,13 @@ const poblarSelectsReserva = async () => {
 
     if (selectMetodo) {
         const actual = selectMetodo.value;
+        const metodosPermitidos = metodosPagoCargados.filter(
+            (m) => (m.NombreMetodoPago || m.NomMetodoPago || '').toLowerCase().includes('efectivo') ||
+                   (m.NombreMetodoPago || m.NomMetodoPago || '').toLowerCase().includes('transferencia')
+        );
         selectMetodo.innerHTML = ['<option value="">Selecciona método</option>']
             .concat(
-                metodosPagoCargados.map((metodo) => `
+                metodosPermitidos.map((metodo) => `
                     <option value="${escaparHtml(metodo.IdMetodoPago)}">${escaparHtml(metodo.NombreMetodoPago || metodo.NomMetodoPago || 'Método')}</option>
                 `)
             )

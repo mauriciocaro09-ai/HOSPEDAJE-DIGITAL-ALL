@@ -324,6 +324,63 @@ function limpiarErroresValidacion(contenedorId) {
     }
 }
 
+// ============================================
+// FILTRO EN VIVO POR TIPO DE CAMPO (data-filtro)
+// ============================================
+// data-filtro="numeros" → solo dígitos 0-9
+// data-filtro="letras"  → letras, tildes, ñ, espacios y guiones
+
+(function () {
+    function aplicarFiltro(input) {
+        const filtro = input.dataset.filtro;
+        if (!filtro) return;
+        input.addEventListener('input', function () {
+            const antes = this.value;
+            const pos = this.selectionStart;
+            let despues;
+            if (filtro === 'numeros') {
+                despues = antes.replace(/[^0-9]/g, '');
+            } else if (filtro === 'letras') {
+                despues = antes.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑàèìòùÀÈÌÒÙ\s\-']/g, '');
+            } else {
+                return;
+            }
+            if (despues !== antes) {
+                this.value = despues;
+                const nuevaPos = Math.max(0, pos - (antes.length - despues.length));
+                this.setSelectionRange(nuevaPos, nuevaPos);
+            }
+        });
+    }
+
+    function activarFiltros() {
+        document.querySelectorAll('[data-filtro]').forEach(aplicarFiltro);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', activarFiltros);
+    } else {
+        activarFiltros();
+    }
+
+    // Para inputs que aparecen después del DOMContentLoaded (modales ya en el DOM)
+    // El MutationObserver detecta cambios de atributo o inputs recién añadidos
+    if (typeof MutationObserver !== 'undefined') {
+        const obs = new MutationObserver(function (mutations) {
+            mutations.forEach(function (m) {
+                m.addedNodes.forEach(function (node) {
+                    if (node.nodeType !== 1) return;
+                    if (node.matches && node.matches('[data-filtro]')) aplicarFiltro(node);
+                    node.querySelectorAll && node.querySelectorAll('[data-filtro]').forEach(aplicarFiltro);
+                });
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            obs.observe(document.body, { childList: true, subtree: true });
+        });
+    }
+}());
+
 // Exportar funciones
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {

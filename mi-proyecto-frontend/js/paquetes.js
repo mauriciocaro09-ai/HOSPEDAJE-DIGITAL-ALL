@@ -6,11 +6,12 @@ let paquetesCargados = [];
 let serviciosPaquetesCargados = [];
 let paqueteEnEdicion = null;
 let paginaPaquetesActual = 1;
-const paquetesPorPagina = 6;
+const paquetesPorPagina = 10;
 let terminoBusquedaPaquetes = '';
 let filtroEstadoPaquetes = 'all';
 
-const placeholderImagenPaquete = 'assets/images/default.svg';
+const placeholderImagenPaquete = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=400';
+const primerUrlPaquete = (valor) => valor ? valor.split(',')[0].trim() : null;
 
 // ============================================
 // NORMALIZADORES Y HELPERS
@@ -250,7 +251,7 @@ const renderizarTablapaquetes = () => {
             <tr>
                 <td class="td-imagen">
                     <div class="crud-habitaciones-imagen">
-                        <img src="${paquete.Imagen ? escaparHtml(paquete.Imagen) : placeholderImagenPaquete}" alt="${escaparHtml(paquete.NombrePaquete || 'Paquete')}" onerror="this.src='${placeholderImagenPaquete}'">
+                        <img src="${escaparHtml(primerUrlPaquete(paquete.Imagen) || placeholderImagenPaquete)}" alt="${escaparHtml(paquete.NombrePaquete || 'Paquete')}" onerror="this.onerror=null;this.src='${placeholderImagenPaquete}'">
                     </div>
                 </td>
                 <td class="td-nombre"><strong class="paquete-nombre">${escaparHtml(paquete.NombrePaquete || 'Sin nombre')}</strong></td>
@@ -369,12 +370,13 @@ const abrirModalEditar = async (id) => {
         document.getElementById('paquete-descripcion').value = paquete.Descripcion || '';
         document.getElementById('paquete-precio').value = paquete.PrecioPaquete || '';
         document.getElementById('paquete-duracion').value = paquete.DuracionNoches || 1;
-        document.getElementById('paquete-incluir-habitacion').checked = Boolean(paquete.IncluirHabitacion);
+        const elIncluir = document.getElementById('paquete-incluir-habitacion');
+        if (elIncluir) elIncluir.checked = Boolean(paquete.IncluirHabitacion);
         document.getElementById('paquete-imagen').value = paquete.Imagen || '';
 
         const preview = document.getElementById('paquete-imagen-preview');
         if (preview && paquete.Imagen) {
-            preview.src = paquete.Imagen;
+            preview.src = primerUrlPaquete(paquete.Imagen);
             preview.style.display = 'block';
             preview.onerror = () => { preview.style.display = 'none'; };
         } else if (preview) {
@@ -420,7 +422,7 @@ const cargarDetallesPaquete = async (id) => {
         
         const imgEl = document.getElementById('detalles-imagen');
         if (imgEl) {
-            imgEl.src = paquete.Imagen || placeholderImagenPaquete;
+            imgEl.src = primerUrlPaquete(paquete.Imagen) || placeholderImagenPaquete;
             imgEl.onerror = function() { this.onerror = null; this.src = placeholderImagenPaquete; };
         }
 
@@ -463,7 +465,7 @@ const guardarPaquete = async (e) => {
         Descripcion: datos.get('Descripcion').trim(),
         PrecioPaquete: Number(datos.get('PrecioPaquete')),
         DuracionNoches: Number(datos.get('DuracionNoches')),
-        IncluirHabitacion: datos.get('IncluirHabitacion') ? 1 : 0,
+        IncluirHabitacion: document.getElementById('paquete-incluir-habitacion')?.checked ? 1 : 1,
         Imagen: document.getElementById('paquete-imagen').value.trim() || null,
         Estado: Number(datos.get('Estado'))
     };

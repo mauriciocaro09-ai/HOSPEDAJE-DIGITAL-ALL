@@ -48,11 +48,20 @@ const buscar = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const { nombre, descripcion, precio } = req.body;
+    const {
+      NombreHabitacion, Descripcion, Costo, Estado, ImagenHabitacion,
+      nombre, descripcion, precio, estado, imagen
+    } = req.body;
+
+    const nombreFinal  = NombreHabitacion  ?? nombre;
+    const descFinal    = Descripcion       ?? descripcion;
+    const costoFinal   = Costo             ?? precio;
+    const estadoFinal  = Estado            ?? estado ?? 1;
+    const imagenFinal  = ImagenHabitacion  ?? imagen ?? null;
 
     await db.query(
-      `INSERT INTO habitacion (NombreHabitacion, Descripcion, Costo, Estado) VALUES (?, ?, ?, ?)`,
-      [nombre, descripcion, precio, 1]
+      `INSERT INTO habitacion (NombreHabitacion, Descripcion, Costo, Estado, ImagenHabitacion) VALUES (?, ?, ?, ?, ?)`,
+      [nombreFinal, descFinal, costoFinal, estadoFinal, imagenFinal]
     );
 
     res.status(201).json({ mensaje: "Habitación creada correctamente" });
@@ -66,11 +75,20 @@ const create = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, descripcion, precio, estado } = req.body;
+    const {
+      NombreHabitacion, Descripcion, Costo, Estado, ImagenHabitacion,
+      nombre, descripcion, precio, estado, imagen
+    } = req.body;
+
+    const nombreFinal  = NombreHabitacion  ?? nombre;
+    const descFinal    = Descripcion       ?? descripcion;
+    const costoFinal   = Costo             ?? precio;
+    const estadoFinal  = Estado            ?? estado;
+    const imagenFinal  = ImagenHabitacion  ?? imagen ?? null;
 
     await db.query(
-      `UPDATE habitacion SET NombreHabitacion = ?, Descripcion = ?, Costo = ?, Estado = ? WHERE IDHabitacion = ?`,
-      [nombre, descripcion, precio, estado, id]
+      `UPDATE habitacion SET NombreHabitacion = ?, Descripcion = ?, Costo = ?, Estado = ?, ImagenHabitacion = ? WHERE IDHabitacion = ?`,
+      [nombreFinal, descFinal, costoFinal, estadoFinal, imagenFinal, id]
     );
 
     res.json({ mensaje: "Habitación actualizada con éxito" });

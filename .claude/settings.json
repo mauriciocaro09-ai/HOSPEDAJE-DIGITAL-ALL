@@ -10,8 +10,6 @@
       "Bash(curl -s http://localhost:3000/)",
       "Bash(curl -s http://localhost:3000/api/reservas)",
       "Bash(curl -s http://localhost:3000/api/habitaciones)",
-      "Bash(taskkill /PID 17328 /F)",
-      "PowerShell(Stop-Process -Id 17328 -Force)",
       "Bash(curl -s http://localhost:3000/api/paquetes)",
       "Bash(curl -s \"http://localhost:3000/api/clientes\")",
       "Bash(curl -s \"http://localhost:3000/api/paquetes\")",

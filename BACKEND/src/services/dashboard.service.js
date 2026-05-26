@@ -55,16 +55,19 @@ const DashboardService = {
     alertas: async () => {
         const hoy = new Date().toISOString().split('T')[0];
 
+        // Solo reservas pendientes desde hoy en adelante (no históricas sin confirmar)
         const [[{ pendientes }]] = await db.query(`
             SELECT COUNT(*) AS pendientes FROM reserva
-            WHERE IdEstadoReserva = 1
+            WHERE IdEstadoReserva = 1 AND FechaInicio >= CURDATE()
         `);
 
+        // Check-ins hoy: confirmadas Y pendientes (pendiente+hoy es más urgente aún)
         const [[{ checkins }]] = await db.query(`
             SELECT COUNT(*) AS checkins FROM reserva
-            WHERE DATE(FechaInicio) = ? AND IdEstadoReserva = 2
+            WHERE DATE(FechaInicio) = ? AND IdEstadoReserva IN (1, 2)
         `, [hoy]);
 
+        // Check-outs hoy: solo confirmadas (las canceladas/finalizadas no hacen checkout)
         const [[{ checkouts }]] = await db.query(`
             SELECT COUNT(*) AS checkouts FROM reserva
             WHERE DATE(FechaFinalizacion) = ? AND IdEstadoReserva = 2

@@ -136,6 +136,9 @@ exports.create = async (req, res) => {
         const usuario = await obtenerUsuarioBase(result.insertId);
         res.status(201).json({ mensaje: "Usuario creado", usuario: mapUsuario(usuario) });
     } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY' || error.errno === 1062) {
+            return res.status(409).json({ error: 'Ya existe un usuario con ese email o número de documento.' });
+        }
         res.status(500).json({ error: "Error al crear usuario", detalle: error.message });
     }
 };
