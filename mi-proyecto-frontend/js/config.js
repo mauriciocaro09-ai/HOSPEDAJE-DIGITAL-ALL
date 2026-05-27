@@ -4,11 +4,12 @@
 
 const apiUrlPorDefecto = (() => {
     if (typeof window !== 'undefined' && window.location && window.location.origin) {
-        if (window.location.origin.includes('localhost:3000')) {
-            return '/api';
+        if (window.location.origin.includes('localhost')) {
+            return 'http://localhost:3000/api';
         }
     }
-    return 'http://localhost:3000/api';
+    // En producción (Netlify u otro host), apuntar al backend en Render
+    return 'https://hospedaje-digital-all.onrender.com/api';
 })();
 
 const CONFIG = {
