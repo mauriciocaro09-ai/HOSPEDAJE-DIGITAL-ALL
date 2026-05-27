@@ -1,42 +1,47 @@
-const { Client, LocalAuth } = require("whatsapp-web.js");
-const qrcode = require("qrcode-terminal");
-
-const client = new Client({
-  authStrategy: new LocalAuth({ dataPath: "./.wwebjs_auth" }),
-  puppeteer: { headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox"] },
-});
-
+let client = null;
 let clienteListo = false;
 
-client.on("qr", (qr) => {
-  console.log("\n📱 Escanea este QR con tu WhatsApp (Vincular dispositivo → Escanear código QR):\n");
-  qrcode.generate(qr, { small: true });
-});
+// WhatsApp solo se inicializa en entorno local (no en producción)
+if (process.env.NODE_ENV !== 'production') {
+  const { Client, LocalAuth } = require("whatsapp-web.js");
+  const qrcode = require("qrcode-terminal");
 
-client.on("ready", () => {
-  clienteListo = true;
-  console.log("✅ WhatsApp listo (evento ready).");
-});
+  client = new Client({
+    authStrategy: new LocalAuth({ dataPath: "./.wwebjs_auth" }),
+    puppeteer: { headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox"] },
+  });
 
-client.on("authenticated", () => {
-  // Fallback: en algunos entornos "ready" no llega pero "authenticated" sí
-  clienteListo = true;
-  console.log("🔐 WhatsApp autenticado — mensajes habilitados.");
-});
+  client.on("qr", (qr) => {
+    console.log("\n📱 Escanea este QR con tu WhatsApp (Vincular dispositivo → Escanear código QR):\n");
+    qrcode.generate(qr, { small: true });
+  });
 
-client.on("auth_failure", (msg) => {
-  console.error("❌ Error de autenticación WhatsApp:", msg);
-  clienteListo = false;
-});
+  client.on("ready", () => {
+    clienteListo = true;
+    console.log("✅ WhatsApp listo (evento ready).");
+  });
 
-client.on("disconnected", (reason) => {
-  console.warn("⚠️  WhatsApp desconectado:", reason);
-  clienteListo = false;
-});
+  client.on("authenticated", () => {
+    clienteListo = true;
+    console.log("🔐 WhatsApp autenticado — mensajes habilitados.");
+  });
 
-client.initialize().catch((err) => {
-  console.error("❌ Error al inicializar WhatsApp (Puppeteer):", err.message);
-});
+  client.on("auth_failure", (msg) => {
+    console.error("❌ Error de autenticación WhatsApp:", msg);
+    clienteListo = false;
+  });
+
+  client.on("disconnected", (reason) => {
+    console.warn("⚠️  WhatsApp desconectado:", reason);
+    clienteListo = false;
+  });
+
+  client.initialize().catch((err) => {
+    console.error("❌ Error al inicializar WhatsApp (Puppeteer):", err.message);
+  });
+} else {
+  console.log("ℹ️  WhatsApp desactivado en entorno de producción.");
+}
 
 const formatearNumero = (telefono) => {
   const limpio = telefono.replace(/\D/g, "");
@@ -54,7 +59,7 @@ const WhatsappService = {
 
   enviarMensaje: async (telefono, mensaje) => {
     console.log(`[WA] clienteListo=${clienteListo} | telefono="${telefono}"`);
-    if (!clienteListo) {
+    if (!client || !clienteListo) {
       console.warn("[WA] Cliente no está listo todavía.");
       return false;
     }
