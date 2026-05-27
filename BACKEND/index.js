@@ -32,14 +32,17 @@ const shutdown = (signal) => {
 };
 
 const normalizarEstadosDB = async () => {
-    // Convierte valores de texto a numérico para habitaciones con Estado 'disponible'
-    await db.query(
-        `UPDATE habitacion SET Estado = 1 WHERE Estado IN ('disponible', 'Disponible', 'activo', 'Activo', 'true', 'si', 'sí', 'yes')`
-    );
-    await db.query(
-        `UPDATE habitacion SET Estado = 0 WHERE Estado IN ('inactivo', 'Inactivo', 'inhabilitado', 'no disponible', 'false', 'no')`
-    );
-    console.log('Estados de habitaciones normalizados.');
+    try {
+        await db.query(
+            `UPDATE habitacion SET Estado = 1 WHERE CAST(Estado AS CHAR) IN ('disponible', 'Disponible', 'activo', 'Activo', 'true', 'si', 'sí', 'yes')`
+        );
+        await db.query(
+            `UPDATE habitacion SET Estado = 0 WHERE CAST(Estado AS CHAR) IN ('inactivo', 'Inactivo', 'inhabilitado', 'no disponible', 'false', 'no')`
+        );
+        console.log('Estados de habitaciones normalizados.');
+    } catch (err) {
+        console.warn('Normalización de estados omitida (ya son numéricos):', err.message);
+    }
 };
 
 const startServer = async () => {
