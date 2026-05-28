@@ -91,9 +91,10 @@ exports.create = async (req, res) => {
 
         const [result] = await db.query(
             `INSERT INTO usuarios
-                (NombreUsuario, Apellido, Email, Contrasena, TipoDocumento, NumeroDocumento, Telefono, Pais, Direccion, IDRol, IsActive)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                (NombreUsuario, Nombre, Apellido, Email, Contrasena, TipoDocumento, NumeroDocumento, Telefono, Pais, Direccion, IDRol, IsActive)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
+                NombreUsuario,
                 NombreUsuario,
                 Apellido || null,
                 Email,
