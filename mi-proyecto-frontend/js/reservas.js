@@ -794,16 +794,20 @@ const editarReservaAdmin = async (idReserva) => {
 
 const guardarReservaAdmin = async (event) => {
     event.preventDefault();
+    console.log('[RESERVA] guardarReservaAdmin llamado');
 
     if (!validarPasoWizard(1)) {
+        console.log('[RESERVA] Fallo validacion paso 1');
         mostrarPasoWizard(1);
         return;
     }
 
     if (!validarPasoWizard(2)) {
+        console.log('[RESERVA] Fallo validacion paso 2');
         mostrarPasoWizard(2);
         return;
     }
+    console.log('[RESERVA] Validacion OK, enviando al backend...');
 
     const idReserva = document.getElementById('reserva-admin-id')?.value;
     const tipoDocumento = document.getElementById('reserva-admin-tipo-documento')?.value?.trim();
