@@ -284,6 +284,7 @@ const inicializarDatepickers = () => {
             }
             const fin = document.getElementById('reserva-admin-fecha-fin')?.value || '';
             actualizarOpcionesHabitacion(dateStr || '', fin);
+            actualizarSidebarResumen();
         }
     });
 
@@ -293,6 +294,7 @@ const inicializarDatepickers = () => {
         onChange: function(selectedDates, dateStr) {
             const inicio = document.getElementById('reserva-admin-fecha-inicio')?.value || '';
             actualizarOpcionesHabitacion(inicio, dateStr || '');
+            actualizarSidebarResumen();
         }
     });
 };
@@ -597,6 +599,9 @@ const validarPasoWizard = (step) => {
         limpiarErrorInline('reserva-admin-metodo-pago');
         limpiarErrorInline('reserva-admin-estado');
 
+        // Recalcular por si las fechas/habitación se seleccionaron y el sidebar no actualizó
+        actualizarSidebarResumen();
+
         const subtotal = Number(document.getElementById('reserva-admin-subtotal')?.value);
         const descuento = Number(document.getElementById('reserva-admin-descuento')?.value || 0);
         const metodoPago = document.getElementById('reserva-admin-metodo-pago')?.value;
@@ -706,6 +711,7 @@ const poblarSelectsReserva = async () => {
             selectHab.addEventListener('change', () => {
                 try { if (fpInicio) fpInicio.redraw(); } catch{};
                 try { if (fpFin) fpFin.redraw(); } catch{};
+                actualizarSidebarResumen();
             });
         } catch (err) {
             console.error('No se pudieron cargar habitaciones:', err);
@@ -1299,10 +1305,4 @@ if (document.readyState === 'loading') {
     });
 }
 
-    // exportar las funciones necesarias al scope global
-    window.cargarReservasAdmin = cargarReservasAdmin;
-    window.inicializarReservasAdmin = inicializarReservasAdmin;
-    window.abrirModalNuevaReserva = abrirModalNuevaReserva;
-    window.cerrarModalReservaAdmin = cerrarModalReservaAdmin;
-
-})();
+    // exportar las funciones necesarias al scop
