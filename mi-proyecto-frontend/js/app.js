@@ -2713,7 +2713,7 @@ const inicializarFormularioServiciosAdmin = () => {
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Página cargada, conectando con backend...');
-    console.log('Backend URL:', 'http://localhost:3000/api');
+    console.log('Backend URL:', (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : 'http://localhost:3000/api');
     configurarModoContraste();
 
     if (
