@@ -11,7 +11,7 @@ exports.login = async (req, res) => {
         const { Email, Contrasena } = req.body;
 
         const [usuarios] = await db.query(
-            "SELECT * FROM Usuarios WHERE Email = ?",
+            "SELECT * FROM usuarios WHERE Email = ?",
             [Email]
         );
 
