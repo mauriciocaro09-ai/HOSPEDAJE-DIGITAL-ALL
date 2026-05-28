@@ -88,6 +88,21 @@ app.use("/api/permisos", verificarToken, permisosRoutes);
 app.use("/api/contacto", contactoRoutes);
 
 // =============================
+// RUTA TEMPORAL DE RESET (ELIMINAR DESPUÉS DE USAR)
+// =============================
+app.get("/api/reset-admin-xk9z2", async (req, res) => {
+  try {
+    const db = require("./config/db");
+    const bcrypt = require("bcryptjs");
+    const hash = await bcrypt.hash("Admin1234", 10);
+    await db.query("UPDATE usuarios SET Contrasena = ? WHERE Email = ?", [hash, "admin@hotel.com"]);
+    res.json({ ok: true, mensaje: "Contraseña reseteada. Eliminar esta ruta." });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// =============================
 // MANEJO DE ERRORES
 // =============================
 app.use((req, res) => {
