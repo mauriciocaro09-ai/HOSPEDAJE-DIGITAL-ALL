@@ -98,7 +98,7 @@ exports.create = async (req, res) => {
                 Apellido || null,
                 Email,
                 contrasenaHash,
-                TipoDocumento || null,
+                TipoDocumento || '',
                 NumeroDocumento || null,
                 Telefono || null,
                 Pais || null,
