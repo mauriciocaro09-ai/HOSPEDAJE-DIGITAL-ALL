@@ -5,7 +5,7 @@ let reservaColsPromise = null;
 async function getReservaCols() {
   if (!reservaColsPromise) {
     reservaColsPromise = db
-      .query("SHOW COLUMNS FROM `Reserva`")
+      .query("SHOW COLUMNS FROM `reserva`")
       .then(([rows]) => new Set(rows.map((r) => r.Field)));
   }
   return reservaColsPromise;
@@ -43,24 +43,24 @@ const Reservas = {
     let joinMetodoPago = "";
     let selectMetodoPago = "NULL AS NomMetodoPago";
     if (cols.has("MetodoPago")) {
-      joinMetodoPago = "LEFT JOIN MetodoPago mp ON r.MetodoPago = mp.IdMetodoPago";
+      joinMetodoPago = "LEFT JOIN metodopago mp ON r.MetodoPago = mp.IdMetodoPago";
       selectMetodoPago = "mp.NomMetodoPago AS NomMetodoPago";
     } else if (cols.has("IdMetodoPago")) {
-      joinMetodoPago = "LEFT JOIN MetodoPago mp ON r.IdMetodoPago = mp.IdMetodoPago";
+      joinMetodoPago = "LEFT JOIN metodopago mp ON r.IdMetodoPago = mp.IdMetodoPago";
       selectMetodoPago = "mp.NomMetodoPago AS NomMetodoPago";
     }
 
     let joinEstado = "";
     let selectEstado = "NULL AS NombreEstadoReserva";
     if (cols.has("IdEstadoReserva")) {
-      joinEstado = "LEFT JOIN EstadosReserva er ON r.IdEstadoReserva = er.IdEstadoReserva";
+      joinEstado = "LEFT JOIN estadosreserva er ON r.IdEstadoReserva = er.IdEstadoReserva";
       selectEstado = "er.NombreEstadoReserva AS NombreEstadoReserva";
     }
 
     let joinUsuario = "";
     let selectUsuario = "NULL AS NombreUsuario";
     if (cols.has("UsuarioIdusuario")) {
-      joinUsuario = "LEFT JOIN Usuarios u ON r.UsuarioIdusuario = u.IDUsuario";
+      joinUsuario = "LEFT JOIN usuarios u ON r.UsuarioIdusuario = u.IDUsuario";
       selectUsuario = "u.NombreUsuario AS NombreUsuario";
     }
 
@@ -97,17 +97,17 @@ const Reservas = {
     let joinMetodoPago = "";
     let selectMetodoPago = "NULL AS NomMetodoPago";
     if (cols.has("MetodoPago")) {
-      joinMetodoPago = "LEFT JOIN MetodoPago mp ON r.MetodoPago = mp.IdMetodoPago";
+      joinMetodoPago = "LEFT JOIN metodopago mp ON r.MetodoPago = mp.IdMetodoPago";
       selectMetodoPago = "mp.NomMetodoPago AS NomMetodoPago";
     } else if (cols.has("IdMetodoPago")) {
-      joinMetodoPago = "LEFT JOIN MetodoPago mp ON r.IdMetodoPago = mp.IdMetodoPago";
+      joinMetodoPago = "LEFT JOIN metodopago mp ON r.IdMetodoPago = mp.IdMetodoPago";
       selectMetodoPago = "mp.NomMetodoPago AS NomMetodoPago";
     }
 
     let joinEstado = "";
     let selectEstado = "NULL AS NombreEstadoReserva";
     if (cols.has("IdEstadoReserva")) {
-      joinEstado = "LEFT JOIN EstadosReserva er ON r.IdEstadoReserva = er.IdEstadoReserva";
+      joinEstado = "LEFT JOIN estadosreserva er ON r.IdEstadoReserva = er.IdEstadoReserva";
       selectEstado = "er.NombreEstadoReserva AS NombreEstadoReserva";
     }
 
@@ -256,7 +256,7 @@ const Reservas = {
     }
 
     const sql = `
-      INSERT INTO Reserva (${insertCols.join(", ")})
+      INSERT INTO reserva (${insertCols.join(", ")})
       VALUES (${insertValsSql.join(", ")})
     `;
 
@@ -295,7 +295,7 @@ const Reservas = {
 
     params.push(id);
     const [result] = await db.query(
-      `UPDATE Reserva SET ${fields.join(", ")} WHERE IdReserva=?`,
+      `UPDATE reserva SET ${fields.join(", ")} WHERE IdReserva=?`,
       params
     );
     return result;

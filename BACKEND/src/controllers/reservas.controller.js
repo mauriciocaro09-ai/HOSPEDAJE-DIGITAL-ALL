@@ -60,7 +60,7 @@ const obtenerPorEstado = async (req, res) => {
       `SELECT r.*, c.Nombre AS NombreCliente, c.Apellido AS ApellidoCliente,
               e.NombreEstadoReserva
        FROM reserva r
-       LEFT JOIN Clientes c ON r.IDCliente = c.IDCliente OR r.IdCliente = c.IDCliente
+       LEFT JOIN cliente c ON r.IDCliente = c.IDCliente OR r.IdCliente = c.IDCliente
        LEFT JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
        WHERE r.IdEstadoReserva = ?
        ORDER BY r.IdReserva DESC`,
@@ -82,7 +82,7 @@ const obtenerPorCliente = async (req, res) => {
       `SELECT r.*, e.NombreEstadoReserva
        FROM reserva r
        LEFT JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
-       JOIN Clientes c ON (r.IDCliente = c.IDCliente OR r.IdCliente = c.IDCliente OR r.NroDocumentoCliente = c.NroDocumento)
+       JOIN cliente c ON (r.IDCliente = c.IDCliente OR r.IdCliente = c.IDCliente OR r.NroDocumentoCliente = c.NroDocumento)
        WHERE c.NroDocumento = ?
        ORDER BY r.IdReserva DESC`,
       [nroDocumento]
@@ -106,7 +106,7 @@ const obtenerPorFechas = async (req, res) => {
       `SELECT r.*, c.Nombre AS NombreCliente, c.Apellido AS ApellidoCliente,
               e.NombreEstadoReserva
        FROM reserva r
-       LEFT JOIN Clientes c ON r.IDCliente = c.IDCliente OR r.IdCliente = c.IDCliente
+       LEFT JOIN cliente c ON r.IDCliente = c.IDCliente OR r.IdCliente = c.IDCliente
        LEFT JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
        WHERE r.FechaInicio >= ? AND r.FechaFinalizacion <= ?
        ORDER BY r.FechaInicio ASC`,

@@ -15,7 +15,7 @@ const Dashboard = {
     ingresosTotales: async () => {
 
         const [rows] = await db.query(
-            "SELECT SUM(Monto_Total) AS ingresos FROM reserva"
+            "SELECT SUM(MontoTotal) AS ingresos FROM reserva"
         );
 
         return rows[0];
@@ -49,7 +49,7 @@ serviciosMasVendidos: async () => {
             s.NombreServicio,
             SUM(drs.Cantidad) AS total
         FROM detallereservaservicio drs
-        JOIN Servicios s 
+        JOIN servicio s 
             ON drs.IDServicio = s.IDServicio
         GROUP BY s.NombreServicio
         ORDER BY total DESC
