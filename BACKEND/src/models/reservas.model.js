@@ -72,7 +72,7 @@ const Reservas = {
         ${selectMetodoPago},
         ${selectEstado},
         ${selectUsuario}
-      FROM Reserva r
+      FROM reserva r
       ${joinClientes}
       ${joinMetodoPago}
       ${joinEstado}
@@ -128,7 +128,7 @@ const Reservas = {
         ${selectHabitacion},
         ${selectMetodoPago},
         ${selectEstado}
-      FROM Reserva r
+      FROM reserva r
       ${joinClientes}
       ${joinHabitacion}
       ${joinMetodoPago}
@@ -302,7 +302,7 @@ const Reservas = {
   },
 
   eliminar: async (id) => {
-    const [result] = await db.query("DELETE FROM Reserva WHERE IdReserva=?", [id]);
+    const [result] = await db.query("DELETE FROM reserva WHERE IdReserva=?", [id]);
     return result;
   },
 };

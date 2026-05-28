@@ -7,7 +7,7 @@ const DashboardService = {
         // total reservas
         const [reservas] = await db.query(`
             SELECT COUNT(*) AS totalReservas
-            FROM Reserva
+            FROM reserva
         `);
 
         // ingresos totales

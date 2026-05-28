@@ -48,7 +48,7 @@ serviciosMasVendidos: async () => {
         SELECT 
             s.NombreServicio,
             SUM(drs.Cantidad) AS total
-        FROM DetalleReservaServicio drs
+        FROM detallereservaservicio drs
         JOIN Servicios s 
             ON drs.IDServicio = s.IDServicio
         GROUP BY s.NombreServicio

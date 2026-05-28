@@ -8,11 +8,11 @@ const HabitacionesService = {
 
         const [rows] = await db.query(`
             SELECT h.*
-            FROM Habitacion h
+            FROM habitacion h
             WHERE h.Costo <= ?
             AND NOT EXISTS (
                 SELECT 1
-                FROM Reserva r
+                FROM reserva r
                 WHERE r.IDHabitacion = h.IDHabitacion
                 AND (
                     r.FechaInicio BETWEEN ? AND ?
@@ -55,10 +55,10 @@ const HabitacionesService = {
 
         const [rows] = await db.query(`
             SELECT h.*
-            FROM Habitacion h
+            FROM habitacion h
             WHERE NOT EXISTS (
                 SELECT 1
-                FROM Reserva r
+                FROM reserva r
                 WHERE r.IDHabitacion = h.IDHabitacion
                 AND (
                     r.FechaInicio BETWEEN ? AND ?

@@ -59,7 +59,7 @@ const obtenerPorEstado = async (req, res) => {
     const [rows] = await db.query(
       `SELECT r.*, c.Nombre AS NombreCliente, c.Apellido AS ApellidoCliente,
               e.NombreEstadoReserva
-       FROM Reserva r
+       FROM reserva r
        LEFT JOIN Clientes c ON r.IDCliente = c.IDCliente OR r.IdCliente = c.IDCliente
        LEFT JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
        WHERE r.IdEstadoReserva = ?
@@ -80,7 +80,7 @@ const obtenerPorCliente = async (req, res) => {
     const { nroDocumento } = req.params;
     const [rows] = await db.query(
       `SELECT r.*, e.NombreEstadoReserva
-       FROM Reserva r
+       FROM reserva r
        LEFT JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
        JOIN Clientes c ON (r.IDCliente = c.IDCliente OR r.IdCliente = c.IDCliente OR r.NroDocumentoCliente = c.NroDocumento)
        WHERE c.NroDocumento = ?
@@ -105,7 +105,7 @@ const obtenerPorFechas = async (req, res) => {
     const [rows] = await db.query(
       `SELECT r.*, c.Nombre AS NombreCliente, c.Apellido AS ApellidoCliente,
               e.NombreEstadoReserva
-       FROM Reserva r
+       FROM reserva r
        LEFT JOIN Clientes c ON r.IDCliente = c.IDCliente OR r.IdCliente = c.IDCliente
        LEFT JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
        WHERE r.FechaInicio >= ? AND r.FechaFinalizacion <= ?

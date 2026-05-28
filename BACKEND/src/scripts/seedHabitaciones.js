@@ -20,7 +20,7 @@ function pickInsertData(columns, room) {
 
 async function existsByName(nombre) {
   const [rows] = await db.query(
-    "SELECT IDHabitacion FROM Habitaciones WHERE NombreHabitacion = ? LIMIT 1",
+    "SELECT IDHabitacion FROM habitacion WHERE NombreHabitacion = ? LIMIT 1",
     [nombre]
   );
   return rows.length > 0;
