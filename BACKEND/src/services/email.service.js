@@ -2,12 +2,12 @@ const nodemailer = require("nodemailer");
 
 function crearTransporter() {
   return nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: "smtp-relay.brevo.com",
     port: 587,
     secure: false,
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
+      user: process.env.BREVO_USER,
+      pass: process.env.BREVO_PASS
     }
   });
 }
@@ -27,7 +27,7 @@ const EmailService = {
       const montoStr = Number(montoTotal).toLocaleString("es-CO");
 
       await transporter.sendMail({
-        from: '"Hospedaje Digital" <' + process.env.EMAIL_USER + '>',
+        from: '"Hospedaje Digital" <' + (process.env.EMAIL_FROM || process.env.BREVO_USER) + '>',
         to: clienteEmail,
         subject: 'Confirmacion de Reserva #' + reservaId + ' - Hospedaje Digital',
         html: '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">' +
@@ -75,7 +75,7 @@ const EmailService = {
     try {
       const transporter = crearTransporter();
       await transporter.sendMail({
-        from: '"Hospedaje Digital" <' + process.env.EMAIL_USER + '>',
+        from: '"Hospedaje Digital" <' + (process.env.EMAIL_FROM || process.env.BREVO_USER) + '>',
         to: usuarioEmail,
         subject: 'Restablece tu contrasena - Hospedaje Digital',
         html: '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:8px;">' +
@@ -114,7 +114,7 @@ const EmailService = {
     try {
       const transporter = crearTransporter();
       await transporter.sendMail({
-        from: '"Hospedaje Digital" <' + process.env.EMAIL_USER + '>',
+        from: '"Hospedaje Digital" <' + (process.env.EMAIL_FROM || process.env.BREVO_USER) + '>',
         to: usuarioEmail,
         subject: 'Recuperacion de contrasena - Hospedaje Digital',
         html: '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">' +
@@ -155,7 +155,7 @@ const EmailService = {
     try {
       const transporter = crearTransporter();
       await transporter.sendMail({
-        from: '"Hospedaje Digital" <' + process.env.EMAIL_USER + '>',
+        from: '"Hospedaje Digital" <' + (process.env.EMAIL_FROM || process.env.BREVO_USER) + '>',
         to: clienteEmail,
         subject: 'Establece tu contrasena - Hospedaje Digital',
         html: '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">' +
@@ -193,7 +193,7 @@ const EmailService = {
     try {
       const transporter = crearTransporter();
       await transporter.sendMail({
-        from: '"Hospedaje Digital" <' + process.env.EMAIL_USER + '>',
+        from: '"Hospedaje Digital" <' + (process.env.EMAIL_FROM || process.env.BREVO_USER) + '>',
         to: usuarioEmail,
         subject: 'Bienvenido a Hospedaje Digital!',
         html: '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">' +
