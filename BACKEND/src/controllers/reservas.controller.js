@@ -1,5 +1,6 @@
 const ReservasService = require("../services/reservas.service");
 const db = require("../config/db");
+const EmailService = require("../services/email.service");
 
 /* ================= OBTENER TODAS ================= */
 
@@ -39,7 +40,7 @@ const obtenerEstados = async (req, res) => {
   }
 };
 
-/* ================= OBTENER MÉTODOS DE PAGO ================= */
+/* ================= OBTENER METODOS DE PAGO ================= */
 
 const obtenerMetodosPago = async (req, res) => {
   try {
@@ -47,7 +48,7 @@ const obtenerMetodosPago = async (req, res) => {
     return res.status(200).json(rows);
   } catch (error) {
     console.error("RESERVAS ERROR:", error);
-    return res.status(500).json({ error: "Error obteniendo métodos de pago", detalle: error.message });
+    return res.status(500).json({ error: "Error obteniendo metodos de pago", detalle: error.message });
   }
 };
 
@@ -100,7 +101,7 @@ const obtenerPorFechas = async (req, res) => {
   try {
     const { desde, hasta } = req.query;
     if (!desde || !hasta) {
-      return res.status(400).json({ error: "Parámetros 'desde' y 'hasta' requeridos" });
+      return res.status(400).json({ error: "Parametros 'desde' y 'hasta' requeridos" });
     }
     const [rows] = await db.query(
       `SELECT r.*, c.Nombre AS NombreCliente, c.Apellido AS ApellidoCliente,
@@ -124,7 +125,49 @@ const obtenerPorFechas = async (req, res) => {
 const crear = async (req, res) => {
   try {
     const result = await ReservasService.create(req.body);
-    return res.status(201).json({ mensaje: "Reserva creada", reservaId: result.insertId });
+    const reservaId = result.insertId;
+
+    // Preparar datos para correo de confirmacion
+    let emailData = null;
+    try {
+      const clienteId = req.body.IDCliente || req.body.IdCliente || req.body.NroDocumentoCliente;
+      const IDHabitacion = req.body.IDHabitacion || req.body.IdHabitacion;
+
+      if (clienteId) {
+        const [[clientes], [habitaciones]] = await Promise.all([
+          db.query('SELECT Nombre, Apellido, Email FROM cliente WHERE NroDocumento = ? LIMIT 1', [clienteId]),
+          IDHabitacion
+            ? db.query('SELECT NombreHabitacion FROM habitacion WHERE IDHabitacion = ? LIMIT 1', [IDHabitacion])
+            : Promise.resolve([[null]])
+        ]);
+
+        const cliente = clientes[0];
+        const hab = habitaciones[0];
+
+        if (cliente && cliente.Email) {
+          emailData = {
+            clienteNombre: ((cliente.Nombre || '') + ' ' + (cliente.Apellido || '')).trim(),
+            clienteEmail: cliente.Email,
+            reservaId,
+            habitacion: (hab && hab.NombreHabitacion) ? hab.NombreHabitacion : 'Habitacion',
+            fechaInicio: req.body.FechaInicio,
+            fechaFin: req.body.FechaFinalizacion,
+            montoTotal: req.body.MontoTotal || 0
+          };
+        }
+      }
+    } catch (emailErr) {
+      console.error('Error preparando datos para correo de confirmacion:', emailErr.message);
+    }
+
+    res.status(201).json({ mensaje: "Reserva creada", reservaId });
+
+    // Enviar correo de confirmacion sin bloquear la respuesta
+    if (emailData) {
+      EmailService.enviarConfirmacionReserva(emailData)
+        .catch(function(e) { console.error('Error enviando correo de confirmacion de reserva:', e); });
+    }
+
   } catch (error) {
     console.error("RESERVAS ERROR:", error);
     return res.status(500).json({ error: "Error creando la reserva", detalle: error.message });
