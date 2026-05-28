@@ -1305,4 +1305,10 @@ if (document.readyState === 'loading') {
     });
 }
 
-    // exportar las funciones necesarias al scop
+    // exportar las funciones necesarias al scope global
+    window.cargarReservasAdmin = cargarReservasAdmin;
+    window.inicializarReservasAdmin = inicializarReservasAdmin;
+    window.abrirModalNuevaReserva = abrirModalNuevaReserva;
+    window.cerrarModalReservaAdmin = cerrarModalReservaAdmin;
+
+})();
