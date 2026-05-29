@@ -7,6 +7,9 @@
 async function loginUsuario(email, contrasena) {
     try {
         const apiUrl = window.API_URL || (typeof CONFIG !== 'undefined' && CONFIG.API_URL) || 'http://localhost:3000/api';
+        const timeout = (typeof CONFIG !== 'undefined' && CONFIG.FETCH_TIMEOUT) || 60000;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
         const response = await fetch(`${apiUrl}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -14,7 +17,9 @@ async function loginUsuario(email, contrasena) {
                 Email: email,
                 Contrasena: contrasena,
             }),
+            signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         const data = await response.json();
 
@@ -31,6 +36,9 @@ async function loginUsuario(email, contrasena) {
         }
     } catch (error) {
         console.error("Error de conexión:", error);
+        if (error.name === 'AbortError') {
+            return { success: false, message: "El servidor tardó demasiado. Intentá de nuevo en unos segundos." };
+        }
         return { success: false, message: "No se pudo conectar con el servidor" };
     }
 }
@@ -39,11 +47,16 @@ async function loginUsuario(email, contrasena) {
 async function registrarUsuario(userData) {
     try {
         const apiUrl = window.API_URL || (typeof CONFIG !== 'undefined' && CONFIG.API_URL) || 'http://localhost:3000/api';
+        const timeout = (typeof CONFIG !== 'undefined' && CONFIG.FETCH_TIMEOUT) || 60000;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
         const response = await fetch(`${apiUrl}/auth/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(userData),
+            signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         const data = await response.json();
 
@@ -54,6 +67,9 @@ async function registrarUsuario(userData) {
         }
     } catch (error) {
         console.error("Error de conexión:", error);
+        if (error.name === 'AbortError') {
+            return { success: false, message: "El servidor tardó demasiado. Intentá de nuevo en unos segundos." };
+        }
         return { success: false, message: "Error de conexión con el servidor" };
     }
 }
