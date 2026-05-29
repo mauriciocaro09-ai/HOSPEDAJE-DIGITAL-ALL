@@ -311,6 +311,21 @@ exports.register = async (req, res) => {
             ]
         );
 
+        // Insertar también en tabla cliente si hay NumeroDocumento
+        if (NumeroDocumento) {
+            const [clienteExistente] = await db.query(
+                'SELECT NroDocumento FROM cliente WHERE NroDocumento = ? LIMIT 1',
+                [NumeroDocumento]
+            );
+            if (!clienteExistente || !clienteExistente.length) {
+                await db.query(
+                    `INSERT INTO cliente (NroDocumento, Nombre, Apellido, Email, Telefono, Direccion, Estado, IDRol)
+                     VALUES (?, ?, ?, ?, ?, ?, 1, 2)`,
+                    [NumeroDocumento, NombreUsuario, Apellido || null, Email, Telefono || null, Direccion || null]
+                ).catch(e => console.error('Error insertando en cliente:', e.message));
+            }
+        }
+
         res.status(201).json({
             success: true,
             mensaje: 'Usuario registrado exitosamente',
