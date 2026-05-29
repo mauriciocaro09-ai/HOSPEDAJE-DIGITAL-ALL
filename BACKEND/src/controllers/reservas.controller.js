@@ -130,31 +130,26 @@ const crear = async (req, res) => {
     // Preparar datos para correo de confirmacion
     let emailData = null;
     try {
-      const clienteId = req.body.IDCliente || req.body.IdCliente || req.body.NroDocumentoCliente;
+      const emailCliente = req.body.EmailCliente;
+      const nombreCliente = req.body.ContactoCliente || '';
       const IDHabitacion = req.body.IDHabitacion || req.body.IdHabitacion;
 
-      if (clienteId) {
-        const [[clientes], [habitaciones]] = await Promise.all([
-          db.query('SELECT Nombre, Apellido, Email FROM cliente WHERE NroDocumento = ? LIMIT 1', [clienteId]),
-          IDHabitacion
-            ? db.query('SELECT NombreHabitacion FROM habitacion WHERE IDHabitacion = ? LIMIT 1', [IDHabitacion])
-            : Promise.resolve([[null]])
-        ]);
+      if (emailCliente) {
+        const [habitaciones] = IDHabitacion
+          ? await db.query('SELECT NombreHabitacion FROM habitacion WHERE IDHabitacion = ? LIMIT 1', [IDHabitacion])
+          : [[null]];
 
-        const cliente = clientes[0];
-        const hab = habitaciones[0];
+        const hab = habitaciones ? habitaciones[0] : null;
 
-        if (cliente && cliente.Email) {
-          emailData = {
-            clienteNombre: ((cliente.Nombre || '') + ' ' + (cliente.Apellido || '')).trim(),
-            clienteEmail: cliente.Email,
-            reservaId,
-            habitacion: (hab && hab.NombreHabitacion) ? hab.NombreHabitacion : 'Habitacion',
-            fechaInicio: req.body.FechaInicio,
-            fechaFin: req.body.FechaFinalizacion,
-            montoTotal: req.body.MontoTotal || 0
-          };
-        }
+        emailData = {
+          clienteNombre: nombreCliente,
+          clienteEmail: emailCliente,
+          reservaId,
+          habitacion: (hab && hab.NombreHabitacion) ? hab.NombreHabitacion : 'Habitacion',
+          fechaInicio: req.body.FechaInicio,
+          fechaFin: req.body.FechaFinalizacion,
+          montoTotal: req.body.Sub_Total || req.body.MontoTotal || 0
+        };
       }
     } catch (emailErr) {
       console.error('Error preparando datos para correo de confirmacion:', emailErr.message);
