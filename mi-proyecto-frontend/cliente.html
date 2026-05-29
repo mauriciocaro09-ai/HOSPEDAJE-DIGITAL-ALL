@@ -1678,7 +1678,7 @@
                         <div class="det-fila"><span>Habitación</span><strong>${r.NombreHabitacion || '—'}</strong></div>
                         <div class="det-fila"><span>Entrada</span><strong>${fmtF(r.FechaInicio)}</strong></div>
                         <div class="det-fila"><span>Salida</span><strong>${fmtF(r.FechaFinalizacion)}</strong></div>
-                        <div class="det-fila"><span>Método de pago</span><strong>${r.NombreMetodoPago || '—'}</strong></div>
+                        <div class="det-fila"><span>Método de pago</span><strong>${r.NomMetodoPago || '—'}</strong></div>
                     </div>
                     <div class="det-seccion">
                         <h4>Servicios adicionales</h4>
@@ -1758,7 +1758,7 @@
                 const sel = $('nr-metodo-pago');
                 sel.innerHTML = '<option value="" disabled selected hidden>Selecciona método de pago</option>';
                 metodos.forEach(m => {
-                    sel.innerHTML += `<option value="${m.IdMetodoPago}">${m.NombreMetodoPago}</option>`;
+                    sel.innerHTML += `<option value="${m.IdMetodoPago}">${m.NomMetodoPago}</option>`;
                 });
             } catch(e) { console.error('Error cargando métodos de pago:', e); }
         }
