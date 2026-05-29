@@ -95,6 +95,27 @@ const obtenerPorCliente = async (req, res) => {
   }
 };
 
+/* ================= OBTENER POR USUARIO ================= */
+
+const obtenerPorUsuario = async (req, res) => {
+  try {
+    const { idUsuario } = req.params;
+    const [rows] = await db.query(
+      `SELECT r.*, e.NombreEstadoReserva, h.NombreHabitacion
+       FROM reserva r
+       LEFT JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
+       LEFT JOIN habitacion h ON r.IDHabitacion = h.IDHabitacion
+       WHERE r.id_usuario = ?
+       ORDER BY r.IdReserva DESC`,
+      [idUsuario]
+    );
+    return res.status(200).json(rows);
+  } catch (error) {
+    console.error("RESERVAS ERROR:", error);
+    return res.status(500).json({ error: "Error filtrando reservas por usuario", detalle: error.message });
+  }
+};
+
 /* ================= OBTENER POR FECHAS ================= */
 
 const obtenerPorFechas = async (req, res) => {
@@ -236,10 +257,11 @@ module.exports = {
   obtenerMetodosPago,
   obtenerPorEstado,
   obtenerPorCliente,
+  obtenerPorUsuario,
   obtenerPorFechas,
   crear,
   actualizar,
   actualizarEstado,
   cancelar,
-  eliminar
+  eliminar,
 };

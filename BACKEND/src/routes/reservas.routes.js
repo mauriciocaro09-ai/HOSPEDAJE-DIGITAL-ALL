@@ -21,6 +21,9 @@ router.get("/estado/:idEstado", reservasController.obtenerPorEstado);
 // Obtener reservas por cliente
 router.get("/cliente/:nroDocumento", reservasController.obtenerPorCliente);
 
+// Obtener reservas por usuario
+router.get("/usuario/:idUsuario", reservasController.obtenerPorUsuario);
+
 // Obtener reservas por fechas
 router.get("/filtro/fechas", reservasController.obtenerPorFechas);
 

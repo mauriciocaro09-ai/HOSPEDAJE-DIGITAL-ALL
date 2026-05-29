@@ -1443,9 +1443,10 @@
             try {
                 const perfil = await apiFetch('/auth/me');
                 const nroDoc = perfil.usuario?.numeroDocumento;
-                if (!nroDoc) return;
-
-                const reservas = await apiFetch(`/reservas/cliente/${nroDoc}`);
+                const idUsuario = perfil.usuario?.id;
+                const reservas = nroDoc
+                    ? await apiFetch(`/reservas/cliente/${nroDoc}`)
+                    : await apiFetch(`/reservas/usuario/${idUsuario}`);
                 misReservas = Array.isArray(reservas) ? reservas : [];
 
                 $('stat-total').textContent = misReservas.length;
@@ -1587,9 +1588,10 @@
             try {
                 const perfil = await apiFetch('/auth/me');
                 const nroDoc = perfil.usuario?.numeroDocumento;
-                if (!nroDoc) throw new Error('Sin documento');
-
-                const reservas = await apiFetch(`/reservas/cliente/${nroDoc}`);
+                const idUsuario = perfil.usuario?.id;
+                const reservas = nroDoc
+                    ? await apiFetch(`/reservas/cliente/${nroDoc}`)
+                    : await apiFetch(`/reservas/usuario/${idUsuario}`);
                 misReservas = Array.isArray(reservas) ? reservas : [];
 
                 if (!misReservas.length) {
