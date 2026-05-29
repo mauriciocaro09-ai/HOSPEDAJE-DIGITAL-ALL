@@ -1940,7 +1940,7 @@
 
             // Verificar disponibilidad de la habitación en esas fechas
             try {
-                const dispRes = await fetch(`${API_URL}/habitaciones/${idHab}/disponibilidad?inicio=${inicio}&fin=${fin}`);
+                const dispRes = await fetch(`${API_URL}/habitaciones/${idHab}/disponibilidad?fechaInicio=${inicio}&fechaFin=${fin}`);
                 if (!dispRes.ok) {
                     console.error('[DISPONIBILIDAD] HTTP', dispRes.status, dispRes.statusText);
                     errBox.textContent = 'No se pudo verificar la disponibilidad. Reinicia el servidor e inténtalo de nuevo.';
