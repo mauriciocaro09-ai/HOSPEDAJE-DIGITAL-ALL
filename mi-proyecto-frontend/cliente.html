@@ -1271,6 +1271,7 @@
     <!-- SECCIÓN: NUEVA RESERVA (vista completa) -->
     <!-- Se inserta dentro de main-content via JS al hacer mostrarNuevaReserva() -->
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="js/config.js"></script>
     <script>
         // ── CONFIGURACIÓN ─────────────────────────
@@ -1352,6 +1353,7 @@
 
             if (window.innerWidth <= 768) cerrarSidebar();
 
+            if (nombre === 'dashboard')       cargarDashboard();
             if (nombre === 'habitaciones')    cargarHabitaciones();
             if (nombre === 'paquetes')        cargarPaquetes();
             if (nombre === 'reservas')        cargarMisReservas();
@@ -1413,7 +1415,19 @@
             const btn = e.target.closest('.btn-cancelar-res');
             if (!btn) return;
             const id = btn.dataset.id;
-            if (!confirm(`¿Seguro que deseas cancelar la reserva #${id}? Esta acción no se puede deshacer.`)) return;
+
+            const confirmacion = await Swal.fire({
+                title: '¿Cancelar reserva?',
+                text: `La reserva #${id} se cancelará y no podrás revertir esta acción.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, cancelar reserva',
+                cancelButtonText: 'No, volver'
+            });
+            if (!confirmacion.isConfirmed) return;
+
             btn.disabled = true;
             btn.textContent = 'Cancelando...';
             try {
@@ -1425,10 +1439,16 @@
                 });
                 if (!resp.ok) throw new Error();
                 cargarMisReservas();
+                cargarDashboard();
             } catch {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-xmark"></i> Cancelar';
-                alert('No se pudo cancelar la reserva. Intenta de nuevo.');
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo cancelar la reserva. Intentá de nuevo.',
+                    icon: 'error',
+                    confirmButtonColor: '#1a2744'
+                });
             }
         });
 
@@ -1973,19 +1993,23 @@
                 errBox.classList.remove('hidden');
                 return;
             }
+            if (calculado.noches > 90) {
+                errBox.textContent = 'La estadía no puede superar los 90 días.';
+                errBox.classList.remove('hidden');
+                errBox.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
 
             // Verificar disponibilidad de la habitación en esas fechas
             try {
                 const dispRes = await fetch(`${API_URL}/habitaciones/${idHab}/disponibilidad?fechaInicio=${inicio}&fechaFin=${fin}`);
                 if (!dispRes.ok) {
-                    console.error('[DISPONIBILIDAD] HTTP', dispRes.status, dispRes.statusText);
                     errBox.textContent = 'No se pudo verificar la disponibilidad. Reinicia el servidor e inténtalo de nuevo.';
                     errBox.classList.remove('hidden');
                     errBox.scrollIntoView({ behavior: 'smooth' });
                     return;
                 }
                 const dispData = await dispRes.json();
-                console.log('[DISPONIBILIDAD]', dispData);
                 if (!dispData.disponible) {
                     errBox.textContent = 'La habitación no está disponible en las fechas seleccionadas. Por favor elige otras fechas.';
                     errBox.classList.remove('hidden');
@@ -1993,7 +2017,6 @@
                     return;
                 }
             } catch (err) {
-                console.error('[DISPONIBILIDAD] Error en verificación:', err);
                 errBox.textContent = 'No se pudo verificar la disponibilidad. Por favor inténtalo de nuevo.';
                 errBox.classList.remove('hidden');
                 errBox.scrollIntoView({ behavior: 'smooth' });
@@ -2039,12 +2062,13 @@
                 });
 
                 mostrarSeccion('reservas', null);
+                cargarDashboard();
 
                 const toast = document.createElement('div');
-                toast.textContent = '¡Reserva creada exitosamente!';
-                toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#16a34a;color:#fff;padding:14px 20px;border-radius:10px;font-weight:700;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+                toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#16a34a;color:#fff;padding:14px 20px;border-radius:10px;font-weight:700;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);display:flex;align-items:center;gap:12px;';
+                toast.innerHTML = '<i class="fa-solid fa-circle-check"></i> ¡Reserva creada exitosamente! <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1;padding:0;opacity:0.8;">×</button>';
                 document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 3500);
+                setTimeout(() => { if (toast.isConnected) toast.remove(); }, 5000);
             } catch(err) {
                 errBox.textContent = 'No se pudo crear la reserva. Intenta de nuevo.';
                 errBox.classList.remove('hidden');
