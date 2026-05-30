@@ -299,22 +299,16 @@ const renderizarTablapaquetes = () => {
 
             try {
                 mostrarMensajePaquete('Actualizando estado...', 'info');
-                console.log(`[SWITCH] Actualizando paquete ${id} a estado ${nuevoEstado}`);
                 await requestJson(`/paquetes/${id}`, {
                     method: 'PUT',
                     body: { Estado: nuevoEstado }
                 });
-
                 mostrarMensajePaquete('Estado actualizado', 'exito');
-                console.log(`[SWITCH] Paquete ${id} actualizado correctamente`);
-                // Recargar paquetes para mantener consistencia
                 cargarPaquetes();
             } catch (error) {
                 mostrarMensajePaquete('Error actualizando estado', 'error');
-                console.error(`[SWITCH] Error actualizando paquete ${id}:`, error.message);
-                // revertir visualmente el checkbox
+                console.error('Error actualizando estado de paquete:', error);
                 checkbox.checked = !checkbox.checked;
-                console.error('Error actualizando estado:', error);
             }
         });
     });

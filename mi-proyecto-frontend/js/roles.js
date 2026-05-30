@@ -207,7 +207,7 @@ async function guardarRolAdmin(evento) {
     const payload = construirPayloadRol();
 
     if (!payload.Nombre) {
-        alert('El nombre del rol es obligatorio.');
+        Swal.fire({ title: 'Campo requerido', text: 'El nombre del rol es obligatorio.', icon: 'warning', confirmButtonColor: '#1a2744' });
         return;
     }
 
@@ -224,7 +224,7 @@ async function guardarRolAdmin(evento) {
         cerrarModalRolAdmin();
     } catch (error) {
         console.error('Error guardando rol:', error);
-        alert(error.message || 'No se pudo guardar el rol');
+        Swal.fire({ title: 'Error', text: error.message || 'No se pudo guardar el rol.', icon: 'error', confirmButtonColor: '#1a2744' });
     }
 }
 async function cambiarEstadoRolAdmin(id) {

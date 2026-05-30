@@ -204,7 +204,6 @@ function mostrarHabitaciones(habitaciones) {
     const contenedor = document.getElementById('habitaciones');
     if (!contenedor) return;
     
-    console.log('Habitaciones recibidas:', habitaciones);
     contenedor.innerHTML = '';
 
     const lista = Array.isArray(habitaciones) ? habitaciones : [];
@@ -249,7 +248,6 @@ function mostrarServicios(servicios) {
     const contenedor = document.getElementById('servicios');
     if (!contenedor) return;
     
-    console.log('Servicios recibidos:', servicios);
     contenedor.innerHTML = '';
 
     const lista = Array.isArray(servicios) ? servicios : [];
@@ -281,10 +279,8 @@ function mostrarServicios(servicios) {
 // ============================================
 
 async function cargarHabitaciones() {
-    console.log('Cargando habitaciones...');
     try {
         const habitaciones = await obtenerHabitaciones();
-        console.log('Habitaciones obtenidas:', habitaciones);
         resetPagination('habitaciones');
         mostrarHabitaciones(habitaciones);
         return habitaciones;
@@ -300,9 +296,7 @@ async function cargarHabitaciones() {
 
 
 async function cargarServicios() {
-    console.log('Cargando servicios...');
     const servicios = await obtenerServicios();
-    console.log('Servicios obtenidos:', servicios);
     notificarErrorBackend('No se pudieron cargar servicios');
     resetPagination('servicios');
     mostrarServicios(servicios);
@@ -2091,10 +2085,7 @@ function configurarCRUDHabitaciones() {
 // ============================================
 
 function verDetalles(id) {
-    console.log('Ver detalles de habitación:', id);
-    // Aquí puedes redirigir a una página de detalles
-    // window.location.href = `pages/detalle.html?id=${id}`;
-    alert(`Ver detalles de habitación ID: ${id}`);
+    // Funcionalidad pendiente de implementación
 }
 
 // ============================================
@@ -2712,8 +2703,6 @@ const inicializarFormularioServiciosAdmin = () => {
 // INICIALIZAR
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Página cargada, conectando con backend...');
-    console.log('Backend URL:', (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : 'http://localhost:3000/api');
     configurarModoContraste();
 
     if (
