@@ -1174,7 +1174,14 @@
                 <div class="perfil-grid">
                     <!-- Datos del usuario -->
                     <div class="reserva-card">
-                        <h3 class="perfil-card-title"><i class="fa-solid fa-user"></i> Datos de la cuenta</h3>
+                        <h3 class="perfil-card-title" style="justify-content:space-between;">
+                            <span><i class="fa-solid fa-user"></i> Datos de la cuenta</span>
+                            <button type="button" id="btn-editar-perfil" class="btn-primary" style="font-size:12px;padding:6px 14px;" onclick="toggleEditarPerfil()">
+                                <i class="fa-solid fa-pen"></i> Editar
+                            </button>
+                        </h3>
+
+                        <!-- Vista de datos -->
                         <div class="perfil-datos" id="perfil-datos">
                             <div class="perfil-fila"><span class="perfil-label">Nombre</span><span id="pd-nombre">—</span></div>
                             <div class="perfil-fila"><span class="perfil-label">Apellido</span><span id="pd-apellido">—</span></div>
@@ -1183,6 +1190,39 @@
                             <div class="perfil-fila"><span class="perfil-label">País</span><span id="pd-pais">—</span></div>
                             <div class="perfil-fila"><span class="perfil-label">Rol</span><span id="pd-rol">—</span></div>
                         </div>
+
+                        <!-- Formulario de edición (oculto por defecto) -->
+                        <form id="form-editar-perfil" style="display:none;" novalidate>
+                            <div class="perfil-form-campo">
+                                <label for="ep-nombre">Nombre</label>
+                                <input type="text" id="ep-nombre" maxlength="100" autocomplete="given-name">
+                            </div>
+                            <div class="perfil-form-campo">
+                                <label for="ep-apellido">Apellido</label>
+                                <input type="text" id="ep-apellido" maxlength="100" autocomplete="family-name">
+                            </div>
+                            <div class="perfil-form-campo">
+                                <label for="ep-email">Correo</label>
+                                <input type="email" id="ep-email" maxlength="100" autocomplete="email">
+                            </div>
+                            <div class="perfil-form-campo">
+                                <label for="ep-telefono">Teléfono</label>
+                                <input type="text" id="ep-telefono" maxlength="50" autocomplete="tel">
+                            </div>
+                            <div class="perfil-form-campo">
+                                <label for="ep-pais">País</label>
+                                <input type="text" id="ep-pais" maxlength="100" autocomplete="country-name">
+                            </div>
+                            <p id="ep-mensaje" class="perfil-mensaje"></p>
+                            <div style="display:flex;gap:10px;margin-top:8px;">
+                                <button type="submit" class="btn-primary" style="flex:1;">
+                                    <i class="fa-solid fa-check"></i> Guardar cambios
+                                </button>
+                                <button type="button" class="btn-cancelar-reserva" style="flex:1;margin:0;" onclick="toggleEditarPerfil()">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
                     </div>
 
                     <!-- Cambiar contraseña -->
@@ -2011,6 +2051,86 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirmar Reserva';
+            }
+        });
+
+        // ── EDITAR PERFIL ─────────────────────────
+        function toggleEditarPerfil() {
+            const datos  = $('perfil-datos');
+            const form   = $('form-editar-perfil');
+            const btn    = $('btn-editar-perfil');
+            const editando = form.style.display !== 'none';
+
+            if (editando) {
+                form.style.display = 'none';
+                datos.style.display = 'block';
+                btn.innerHTML = '<i class="fa-solid fa-pen"></i> Editar';
+            } else {
+                // Pre-llenar con valores actuales
+                $('ep-nombre').value   = $('pd-nombre').textContent  .replace('—','').trim();
+                $('ep-apellido').value = $('pd-apellido').textContent .replace('—','').trim();
+                $('ep-email').value    = $('pd-email').textContent    .replace('—','').trim();
+                $('ep-telefono').value = $('pd-telefono').textContent .replace('—','').trim();
+                $('ep-pais').value     = $('pd-pais').textContent     .replace('—','').trim();
+                $('ep-mensaje').textContent = '';
+                $('ep-mensaje').className = 'perfil-mensaje';
+                datos.style.display = 'none';
+                form.style.display  = 'block';
+                btn.innerHTML = '<i class="fa-solid fa-xmark"></i> Cancelar';
+            }
+        }
+
+        $('form-editar-perfil').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msg = $('ep-mensaje');
+            const btn = e.target.querySelector('button[type="submit"]');
+
+            const nombre   = $('ep-nombre').value.trim();
+            const apellido = $('ep-apellido').value.trim();
+            const email    = $('ep-email').value.trim();
+            const telefono = $('ep-telefono').value.trim();
+            const pais     = $('ep-pais').value.trim();
+
+            if (!nombre || !email) {
+                msg.textContent = 'Nombre y correo son obligatorios.';
+                msg.className = 'perfil-mensaje perfil-error';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+
+            try {
+                await apiFetch('/auth/me', {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        NombreUsuario: nombre,
+                        Apellido:  apellido,
+                        Email:     email,
+                        Telefono:  telefono || null,
+                        Pais:      pais     || null,
+                    })
+                });
+
+                // Actualizar vista
+                $('pd-nombre').textContent   = nombre;
+                $('pd-apellido').textContent  = apellido || '—';
+                $('pd-email').textContent     = email;
+                $('pd-telefono').textContent  = telefono || '—';
+                $('pd-pais').textContent      = pais     || '—';
+                $('user-name').textContent    = nombre;
+                $('user-avatar').textContent  = nombre.charAt(0).toUpperCase();
+                $('welcome-nombre').textContent = `¡Bienvenido, ${nombre}!`;
+
+                toggleEditarPerfil();
+            } catch (err) {
+                msg.textContent = err.message.includes('409')
+                    ? 'Ese correo ya está en uso por otro usuario.'
+                    : 'No se pudo actualizar el perfil. Intentá de nuevo.';
+                msg.className = 'perfil-mensaje perfil-error';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Guardar cambios';
             }
         });
 
