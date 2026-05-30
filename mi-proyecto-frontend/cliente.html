@@ -1442,11 +1442,8 @@
         async function cargarDashboard() {
             try {
                 const perfil = await apiFetch('/auth/me');
-                const nroDoc = perfil.usuario?.numeroDocumento;
                 const idUsuario = perfil.usuario?.id;
-                const reservas = nroDoc
-                    ? await apiFetch(`/reservas/cliente/${nroDoc}`)
-                    : await apiFetch(`/reservas/usuario/${idUsuario}`);
+                const reservas = await apiFetch(`/reservas/usuario/${idUsuario}`);
                 misReservas = Array.isArray(reservas) ? reservas : [];
 
                 $('stat-total').textContent = misReservas.length;
@@ -1587,11 +1584,8 @@
             $('reservas-wrap').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><span>Cargando reservas...</span></div>';
             try {
                 const perfil = await apiFetch('/auth/me');
-                const nroDoc = perfil.usuario?.numeroDocumento;
                 const idUsuario = perfil.usuario?.id;
-                const reservas = nroDoc
-                    ? await apiFetch(`/reservas/cliente/${nroDoc}`)
-                    : await apiFetch(`/reservas/usuario/${idUsuario}`);
+                const reservas = await apiFetch(`/reservas/usuario/${idUsuario}`);
                 misReservas = Array.isArray(reservas) ? reservas : [];
 
                 if (!misReservas.length) {
