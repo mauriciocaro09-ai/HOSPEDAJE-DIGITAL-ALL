@@ -105,7 +105,7 @@ const obtenerPorUsuario = async (req, res) => {
        FROM reserva r
        LEFT JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
        LEFT JOIN habitacion h ON r.IDHabitacion = h.IDHabitacion
-       WHERE r.UsuarioIdusuario = ?
+       WHERE r.id_usuario = ?
        ORDER BY r.IdReserva DESC`,
       [idUsuario]
     );

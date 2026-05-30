@@ -149,14 +149,14 @@ const Reservas = {
     const FechaInicio = reserva.FechaInicio;
     const FechaFinalizacion = reserva.FechaFinalizacion;
 
-    const SubTotal = n(reserva.SubTotal);
+    const SubTotal = n(reserva.Sub_Total ?? reserva.SubTotal);
     const Descuento = n(reserva.Descuento);
     const IVA = n(reserva.IVA);
-    const MontoTotal = n(reserva.MontoTotal);
+    const MontoTotal = n(reserva.Monto_Total ?? reserva.MontoTotal);
 
     const MetodoPago = firstDefined(reserva.MetodoPago, reserva.IdMetodoPago, 1);
     const IdEstadoReserva = firstDefined(reserva.IdEstadoReserva, 1);
-    const UsuarioIdusuario = firstDefined(reserva.UsuarioIdusuario, reserva.id_usuario, reserva.IDUsuario);
+    const IdUsuario = firstDefined(reserva.id_usuario, reserva.UsuarioIdusuario, reserva.IDUsuario);
 
     const insertCols = [];
     const insertValsSql = [];
@@ -210,8 +210,12 @@ const Reservas = {
     insertValsSql.push("?");
     params.push(FechaFinalizacion);
 
-    // Totales
-    if (cols.has("SubTotal")) {
+    // Totales (soporta Sub_Total y SubTotal)
+    if (cols.has("Sub_Total")) {
+      insertCols.push("Sub_Total");
+      insertValsSql.push("?");
+      params.push(SubTotal);
+    } else if (cols.has("SubTotal")) {
       insertCols.push("SubTotal");
       insertValsSql.push("?");
       params.push(SubTotal);
@@ -226,7 +230,12 @@ const Reservas = {
       insertValsSql.push("?");
       params.push(IVA);
     }
-    if (cols.has("MontoTotal")) {
+    // Soporta Monto_Total y MontoTotal
+    if (cols.has("Monto_Total")) {
+      insertCols.push("Monto_Total");
+      insertValsSql.push("?");
+      params.push(MontoTotal);
+    } else if (cols.has("MontoTotal")) {
       insertCols.push("MontoTotal");
       insertValsSql.push("?");
       params.push(MontoTotal);
@@ -249,10 +258,15 @@ const Reservas = {
       params.push(IdEstadoReserva);
     }
 
-    if (cols.has("UsuarioIdusuario")) {
+    // Soporta id_usuario y UsuarioIdusuario
+    if (cols.has("id_usuario")) {
+      insertCols.push("id_usuario");
+      insertValsSql.push("?");
+      params.push(IdUsuario);
+    } else if (cols.has("UsuarioIdusuario")) {
       insertCols.push("UsuarioIdusuario");
       insertValsSql.push("?");
-      params.push(UsuarioIdusuario);
+      params.push(IdUsuario);
     }
 
     const sql = `
