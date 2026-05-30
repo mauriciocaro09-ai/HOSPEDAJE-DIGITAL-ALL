@@ -439,6 +439,52 @@
 
         .paquete-precio span { font-size: 12px; color: var(--muted); font-weight: 400; }
 
+        /* ── FILTROS DE RESERVAS ─────────────────── */
+        .filtros-reservas {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .filtro-chip {
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1.5px solid var(--border);
+            background: #fff;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .filtro-chip:hover { border-color: var(--primary); color: var(--primary); }
+        .filtro-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+        /* ── PAGINACIÓN ──────────────────────────── */
+        .paginacion {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+        .pag-btn {
+            padding: 6px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: #fff;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .pag-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+        .pag-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .pag-info { font-size: 13px; color: var(--muted); }
+
         /* ── RESERVAS TABLE ──────────────────────── */
         .section-toolbar {
             display: flex;
@@ -1033,8 +1079,16 @@
                         <i class="fa-solid fa-plus"></i> Nueva Reserva
                     </button>
                 </div>
+                <div class="filtros-reservas" id="filtros-reservas">
+                    <button class="filtro-chip active" data-filtro="todas">Todas</button>
+                    <button class="filtro-chip" data-filtro="pendiente">Pendiente</button>
+                    <button class="filtro-chip" data-filtro="confirmada">Confirmada</button>
+                    <button class="filtro-chip" data-filtro="cancelada">Cancelada</button>
+                    <button class="filtro-chip" data-filtro="finalizada">Finalizada</button>
+                </div>
                 <div class="table-wrapper">
                     <div id="reservas-wrap"></div>
+                    <div id="reservas-paginacion"></div>
                 </div>
             </section>
 
@@ -1640,62 +1694,124 @@
         }
 
         // ── MIS RESERVAS ──────────────────────────
+        const RESERVAS_POR_PAGINA = 5;
+        let _filtroActivo = 'todas';
+        let _paginaActual = 1;
+
         async function cargarMisReservas() {
             $('reservas-wrap').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><span>Cargando reservas...</span></div>';
+            $('reservas-paginacion').innerHTML = '';
             try {
                 const perfil = await apiFetch('/auth/me');
                 const idUsuario = perfil.usuario?.id;
                 const reservas = await apiFetch(`/reservas/usuario/${idUsuario}`);
                 misReservas = Array.isArray(reservas) ? reservas : [];
-
-                if (!misReservas.length) {
-                    $('reservas-wrap').innerHTML = '<div class="empty-state"><i class="fa-solid fa-calendar"></i><p>Aún no tienes reservas. ¡Haz tu primera reserva!</p></div>';
-                    return;
-                }
-
-                $('reservas-wrap').innerHTML = `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Habitación</th>
-                                <th>Entrada</th>
-                                <th>Salida</th>
-                                <th>Estado</th>
-                                <th>Total</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${misReservas.map(r => {
-                                const estado = (r.NombreEstadoReserva || '').toLowerCase();
-                                const cancelable = estado !== 'cancelada' && estado !== 'completada';
-                                return `
-                                <tr>
-                                    <td>#${r.IdReserva || r.id || '-'}</td>
-                                    <td>${r.NombreHabitacion || '-'}</td>
-                                    <td>${formatFecha(r.FechaInicio || r.fechaInicio)}</td>
-                                    <td>${formatFecha(r.FechaFinalizacion || r.fechaFin)}</td>
-                                    <td>${badgeEstado(r.NombreEstadoReserva || r.EstadoReserva)}</td>
-                                    <td>$${fmt(r.Monto_Total || r.Sub_Total || 0)}</td>
-                                    <td style="display:flex;gap:6px;flex-wrap:wrap;">
-                                        <button class="btn-ver-res" data-id="${r.IdReserva}"><i class="fa-solid fa-eye"></i> Ver</button>
-                                        ${cancelable ? `<button class="btn-cancelar-res" data-id="${r.IdReserva}"><i class="fa-solid fa-xmark"></i> Cancelar</button>` : ''}
-                                    </td>
-                                </tr>`;
-                            }).join('')}
-                        </tbody>
-                    </table>`;
-                // event delegation para botones Ver
-                $('reservas-wrap').addEventListener('click', async (e) => {
-                    const btnVer = e.target.closest('.btn-ver-res');
-                    if (btnVer) verDetalleReserva(btnVer.dataset.id);
-                }, { once: true });
-
+                _filtroActivo = 'todas';
+                _paginaActual = 1;
+                actualizarChips();
+                renderReservas();
             } catch (e) {
                 $('reservas-wrap').innerHTML = '<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>No se pudieron cargar las reservas</p></div>';
             }
         }
+
+        function actualizarChips() {
+            document.querySelectorAll('.filtro-chip').forEach(chip => {
+                const f = chip.dataset.filtro;
+                const count = f === 'todas'
+                    ? misReservas.length
+                    : misReservas.filter(r => (r.NombreEstadoReserva || '').toLowerCase() === f).length;
+                chip.textContent = f.charAt(0).toUpperCase() + f.slice(1) + (count > 0 ? ` (${count})` : '');
+                chip.classList.toggle('active', f === _filtroActivo);
+            });
+        }
+
+        function renderReservas() {
+            const filtradas = _filtroActivo === 'todas'
+                ? misReservas
+                : misReservas.filter(r => (r.NombreEstadoReserva || '').toLowerCase() === _filtroActivo);
+
+            if (!filtradas.length) {
+                $('reservas-wrap').innerHTML = misReservas.length
+                    ? '<div class="empty-state"><i class="fa-solid fa-filter"></i><p>No hay reservas con ese estado.</p></div>'
+                    : '<div class="empty-state"><i class="fa-solid fa-calendar"></i><p>Aún no tienes reservas. ¡Haz tu primera reserva!</p></div>';
+                $('reservas-paginacion').innerHTML = '';
+                return;
+            }
+
+            const totalPaginas = Math.ceil(filtradas.length / RESERVAS_POR_PAGINA);
+            if (_paginaActual > totalPaginas) _paginaActual = totalPaginas;
+            const inicio = (_paginaActual - 1) * RESERVAS_POR_PAGINA;
+            const pagina = filtradas.slice(inicio, inicio + RESERVAS_POR_PAGINA);
+
+            $('reservas-wrap').innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Habitación</th>
+                            <th>Entrada</th>
+                            <th>Salida</th>
+                            <th>Estado</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${pagina.map(r => {
+                            const estado = (r.NombreEstadoReserva || '').toLowerCase();
+                            const cancelable = estado !== 'cancelada' && estado !== 'completada' && estado !== 'finalizada';
+                            return `
+                            <tr>
+                                <td>#${r.IdReserva || r.id || '-'}</td>
+                                <td>${r.NombreHabitacion || '-'}</td>
+                                <td>${formatFecha(r.FechaInicio || r.fechaInicio)}</td>
+                                <td>${formatFecha(r.FechaFinalizacion || r.fechaFin)}</td>
+                                <td>${badgeEstado(r.NombreEstadoReserva || r.EstadoReserva)}</td>
+                                <td>$${fmt(r.Monto_Total || r.Sub_Total || 0)}</td>
+                                <td style="display:flex;gap:6px;flex-wrap:wrap;">
+                                    <button class="btn-ver-res" data-id="${r.IdReserva}"><i class="fa-solid fa-eye"></i> Ver</button>
+                                    ${cancelable ? `<button class="btn-cancelar-res" data-id="${r.IdReserva}"><i class="fa-solid fa-xmark"></i> Cancelar</button>` : ''}
+                                </td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>`;
+
+            // Paginación
+            $('reservas-paginacion').innerHTML = totalPaginas > 1 ? `
+                <div class="paginacion">
+                    <button class="pag-btn" id="pag-ant" ${_paginaActual === 1 ? 'disabled' : ''}>
+                        <i class="fa-solid fa-chevron-left"></i> Anterior
+                    </button>
+                    <span class="pag-info">Página ${_paginaActual} de ${totalPaginas} &nbsp;·&nbsp; ${filtradas.length} reservas</span>
+                    <button class="pag-btn" id="pag-sig" ${_paginaActual === totalPaginas ? 'disabled' : ''}>
+                        Siguiente <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>` : '';
+
+            if (totalPaginas > 1) {
+                $('pag-ant').addEventListener('click', () => { _paginaActual--; renderReservas(); });
+                $('pag-sig').addEventListener('click', () => { _paginaActual++; renderReservas(); });
+            }
+        }
+
+        // Event delegation para filtros
+        $('filtros-reservas').addEventListener('click', (e) => {
+            const chip = e.target.closest('.filtro-chip');
+            if (!chip) return;
+            _filtroActivo = chip.dataset.filtro;
+            _paginaActual = 1;
+            actualizarChips();
+            renderReservas();
+        });
+
+        // Event delegation para botón "Ver" de reservas
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-ver-res');
+            if (!btn) return;
+            verDetalleReserva(btn.dataset.id);
+        });
 
         async function verDetalleReserva(id) {
             const modal = $('modal-detalle-reserva');
