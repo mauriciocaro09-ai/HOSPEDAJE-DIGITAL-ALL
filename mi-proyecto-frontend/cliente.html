@@ -1481,7 +1481,7 @@
                                 <td>${formatFecha(r.FechaInicio || r.fechaInicio)}</td>
                                 <td>${formatFecha(r.FechaFinalizacion || r.fechaFin)}</td>
                                 <td>${badgeEstado(r.NombreEstadoReserva || r.EstadoReserva)}</td>
-                                <td>$${fmt(r.Sub_Total || r.Monto_Total || 0)}</td>
+                                <td>$${fmt(r.Monto_Total || r.Sub_Total || 0)}</td>
                             </tr>
                         `).join('')}
                     </tbody>
