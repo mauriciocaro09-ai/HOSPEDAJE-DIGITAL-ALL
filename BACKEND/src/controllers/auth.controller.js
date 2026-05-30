@@ -170,22 +170,28 @@ exports.actualizarPerfil = async (req, res) => {
             }
         }
 
-        await db.query(
-            `UPDATE usuarios
-             SET NombreUsuario = ?, Apellido = ?, Email = ?, TipoDocumento = ?, NumeroDocumento = ?, Telefono = ?, Pais = ?, Direccion = ?
-             WHERE IDUsuario = ?`,
-            [
-                NombreUsuario,
-                Apellido,
-                Email,
-                TipoDocumento,
-                NumeroDocumento,
-                Telefono,
-                Pais,
-                Direccion,
-                id
-            ]
-        );
+        // Construir UPDATE dinámico — solo actualiza campos que vienen en el body
+        const campos = [];
+        const valores = [];
+        const setIf = (col, val) => {
+            if (val !== undefined) { campos.push(`${col} = ?`); valores.push(val ?? null); }
+        };
+        setIf('NombreUsuario', NombreUsuario);
+        setIf('Apellido',      Apellido);
+        setIf('Email',         Email);
+        setIf('TipoDocumento', TipoDocumento);
+        setIf('NumeroDocumento', NumeroDocumento);
+        setIf('Telefono',      Telefono);
+        setIf('Pais',          Pais);
+        setIf('Direccion',     Direccion);
+
+        if (campos.length) {
+            valores.push(id);
+            await db.query(
+                `UPDATE usuarios SET ${campos.join(', ')} WHERE IDUsuario = ?`,
+                valores
+            );
+        }
 
         const [usuarios] = await db.query(
             `SELECT
