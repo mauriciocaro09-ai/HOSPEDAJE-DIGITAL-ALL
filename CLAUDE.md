@@ -9,8 +9,26 @@
 Sistema de gestión hotelera "Hospedaje Digital".
 - **Backend**: Node.js + Express + MySQL (mysql2) — carpeta `BACKEND/`
 - **Frontend**: HTML/CSS/JS vanilla — carpeta `mi-proyecto-frontend/`
-- **DB**: MySQL corriendo en XAMPP (Windows), puerto 3306
-- **Puerto backend**: 3000
+- **DB local (desarrollo)**: MySQL vía XAMPP, puerto 3306
+- **Puerto backend local**: 3000
+
+## Arquitectura en producción (cloud)
+
+| Componente | Servicio | URL |
+|---|---|---|
+| Frontend | Vercel | `hospedaje-digital-all.vercel.app` |
+| Backend | Render (free, Node.js) | `hospedaje-digital-all.onrender.com` |
+| Base de datos | Clever Cloud (MySQL) | `b7e34wumurbndvqprjto-mysql.services.clever-cloud.com` |
+| Emails | Brevo API | — |
+
+**Netlify reemplazado por Vercel** el 29/05/2026 (cuenta suspendida).
+**Cold start de Render**: hasta 50s en instancia free — el frontend tiene `FETCH_TIMEOUT: 30000ms`.
+
+### Variables de entorno en Render
+- `CORS_ORIGIN`: `https://hospedaje-digital-all.vercel.app`
+- `FRONTEND_URL`: `https://hospedaje-digital-all.vercel.app` (links en emails de reset password)
+- `DB_HOST`: Clever Cloud
+- `BREVO_API_KEY`, `BREVO_USER`, `BREVO_PASS`: configurados
 
 ---
 
@@ -226,48 +244,57 @@ Nunca usar el tool `Edit` para archivos largos en Windows — puede truncar.
 
 ---
 
-## Estado de funcionalidades (al 25/05/2026)
+## Estado de funcionalidades (al 30/05/2026)
 
-### ✅ Funcionando
+### ✅ Funcionando — Admin
 - Login y autenticación JWT — al hacer login siempre arranca en el dashboard
-- CRUD habitaciones (admin): crear, editar, eliminar con SweetAlert2, toggle estado, imagen
-- CRUD servicios (admin): crear, editar, eliminar con SweetAlert2, toggle estado, imagen
-- CRUD clientes (admin): crear, editar, eliminar con SweetAlert2
-- CRUD paquetes (admin): crear, editar, eliminar con SweetAlert2, toggle estado, subir imagen
-- CRUD reservas (admin): ver, crear, actualizar estado, cancelar, eliminar con SweetAlert2
-- CRUD usuarios y roles (admin) con SweetAlert2
-- Landing page: todas las hab/paquetes/servicios activos con modales detalle + carrusel
-- Landing page: registro de clientes con SweetAlert2
-- Landing page: sin límite de 6 items — muestra todos los activos
-- Sidebar colapsado: iconos alineados, tooltip al hover
-- Permisos eliminado del sidebar y del panel
-- Filtro activo/inactivo aplicado en todas las vistas correctamente
-- Imágenes de habitaciones cargan correctamente (typeCast + fallback válido)
-- mysql2 typeCast corregido (encoding 'utf8', no 'utf8mb4')
-- Habitaciones en BD: todas con nombre, descripción, costo e imágenes
-- Paquetes y servicios en BD: todos con imágenes Unsplash (4 por ítem) y descripciones completas
-- `maxlength` corregido en todos los formularios (index.html, landingpage.html, register.html)
-- `autocomplete` agregado en campos de email y contraseña (landingpage, register, index, login)
-- MySQL: `habitacion.NombreHabitacion` ampliado de VARCHAR(30) a VARCHAR(100)
-- MySQL: `habitacion.Descripcion` ampliado de VARCHAR(255) a TEXT
+- CRUD habitaciones, servicios, clientes, paquetes, reservas, usuarios, roles con SweetAlert2
+- Dashboard admin con estadísticas
+- Landing page: registro, modales detalle + carrusel, sin límite de items
+- Sidebar colapsado con tooltip, permisos eliminado del panel
+
+### ✅ Funcionando — Portal cliente (cliente.html)
+- Registro desde landing + correo de bienvenida (Brevo)
+- Login con redirección por rol (rol=1 → admin, resto → cliente.html)
+- Panel de Control: estadísticas de reservas del usuario
+- Mis Reservas: listado, detalle en modal (con servicios y paquetes), cancelar
+- Nueva Reserva: habitación, fechas, método de pago, servicios, paquetes, IVA, total
+- Correo de confirmación de reserva con monto total correcto
+- Mi Perfil: ver datos + editar (nombre, apellido, email, teléfono, país) + cambiar contraseña
+- Reset password: link apunta a Vercel, token JWT 30min
+
+### ✅ Infraestructura
+- Frontend en Vercel (reemplazó Netlify el 29/05/2026)
+- Backend en Render con auto-deploy desde GitHub
+- BD en Clever Cloud (MySQL)
+- Tablas `detallereservaservicio` y `detallereservapaquetes` se crean automáticamente al iniciar
 
 ### 🔧 Pendiente
-- (ninguno — todo funcional al 25/05/2026)
+- (ninguno — todo funcional al 30/05/2026)
 
 ---
 
 ## Base de datos MySQL
 
-- Motor: MySQL vía XAMPP
-- Puerto: 3306
-- DB name: `hospedaje` (minúsculas en .env, MySQL en Windows es case-insensitive)
-- Tablas principales: `habitacion`, `servicio`, `paquete`, `reserva`, `clientes`, `usuarios`, `estadosreserva`, `metodopago`, `detallereservapaquetes`
+- **Local**: MySQL vía XAMPP, puerto 3306, DB: `hospedaje`
+- **Producción**: Clever Cloud MySQL (ver `DB_HOST` en Render → Environment)
+- Tablas principales: `habitacion`, `servicio`, `paquete`, `reserva`, `cliente`, `usuarios`, `estadosreserva`, `metodopago`, `detallereservapaquetes`, `detallereservaservicio`
 
-### Columnas importantes
+### Columnas importantes — tabla `reserva` (Clever Cloud)
+| Columna real | Nota |
+|---|---|
+| `NroDocumentoCliente` | FK a `cliente.NroDocumento` |
+| `Sub_Total` | Subtotal sin IVA (con guión bajo) |
+| `Monto_Total` | Total con IVA (con guión bajo) |
+| `id_usuario` | FK a `usuarios.IDUsuario` |
+| `MetodoPago` | FK a `metodopago.IdMetodoPago` |
+
+> **CRÍTICO**: El modelo `reservas.model.js` usa `SHOW COLUMNS` dinámico. Los nombres de columna son case-sensitive. `Sub_Total` ≠ `SubTotal`.
+
+### Otras columnas importantes
 - `habitacion`: `IDHabitacion`, `NombreHabitacion` (VARCHAR 100), `Descripcion` (TEXT), `Costo`, `Estado`, `ImagenHabitacion`
-- `paquete`: `IDPaquete`, `NombrePaquete`, `Descripcion`, `PrecioPaquete`, `DuracionNoches`, `IncluirHabitacion`, `Imagen`, `Estado`
-- `servicio`: `IDServicio`, `NombreServicio`, `Descripcion`, `Costo`, `Imagen`, `Estado`
-- `reserva`: `IdReserva`, `IDCliente`/`IdCliente`, `IDHabitacion`, `FechaInicio`, `FechaFinalizacion`, `IdEstadoReserva`, `MontoTotal`
+- `paquete` (sin s): `IDPaquete`, `NombrePaquete`, `Descripcion`, `PrecioPaquete`, `DuracionNoches`, `IncluirHabitacion`, `Imagen`, `Estado`
+- `servicio` (sin s): `IDServicio`, `NombreServicio`, `Descripcion`, `Costo`, `Imagen`, `Estado`
 
 ### Script útil para poblar habitaciones vacías
 ```bash
@@ -293,3 +320,9 @@ node BACKEND/scripts/poblar_habitaciones.js
 7. **Tooltip del sidebar clipeado**: NO usar `position: absolute` con `::after` — el `overflow-x: hidden` del sidebar lo corta. Usar el div `#sidebar-nav-tip` con `position: fixed` fuera del sidebar en el DOM.
 
 8. **URLs Unsplash inválidas**: al asignar fotos nuevas, verificar con `curl -s -o /dev/null -w "%{http_code}" URL`. Códigos 404 = photo ID inválido → imagen rota.
+
+9. **`FRONTEND_URL` con salto de línea invisible**: Render puede agregar `\n` al copiar/pegar env vars. El email service tiene `.trim()` para prevenirlo. Si los links del correo rompen, verificar que `FRONTEND_URL` no tenga caracteres invisibles.
+
+10. **`actualizarPerfil` con campos undefined**: mysql2 lanza error si recibe `undefined` como parámetro SQL. El controller usa UPDATE dinámico — solo actualiza campos presentes en el body.
+
+11. **Tabla `paquete` vs `paquetes`**: la tabla real con datos es `paquete` (sin s). Existe también `paquetes` (con s) del schema.sql pero con estructura diferente. Siempre hacer JOIN con `paquete` en queries de detalle de reserva.
