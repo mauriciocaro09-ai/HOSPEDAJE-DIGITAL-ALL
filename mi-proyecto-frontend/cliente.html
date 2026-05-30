@@ -2122,7 +2122,9 @@
                 $('user-avatar').textContent  = nombre.charAt(0).toUpperCase();
                 $('welcome-nombre').textContent = `¡Bienvenido, ${nombre}!`;
 
-                toggleEditarPerfil();
+                msg.textContent = '✓ Perfil actualizado correctamente.';
+                msg.className = 'perfil-mensaje perfil-ok';
+                setTimeout(() => toggleEditarPerfil(), 1500);
             } catch (err) {
                 msg.textContent = err.message.includes('409')
                     ? 'Ese correo ya está en uso por otro usuario.'
