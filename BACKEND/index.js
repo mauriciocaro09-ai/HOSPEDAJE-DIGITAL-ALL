@@ -45,12 +45,41 @@ const normalizarEstadosDB = async () => {
     }
 };
 
+const crearTablasDetalle = async () => {
+    try {
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS detallereservaservicio (
+                IDDetalleReservaServicio INT AUTO_INCREMENT PRIMARY KEY,
+                IDReserva INT,
+                IDServicio INT,
+                Cantidad INT DEFAULT 1,
+                Precio FLOAT DEFAULT 0,
+                Estado TINYINT(1) DEFAULT 1
+            )
+        `);
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS detallereservapaquetes (
+                IDDetalleReservaPaquetes INT AUTO_INCREMENT PRIMARY KEY,
+                IDReserva INT,
+                IDPaquete INT,
+                Cantidad INT DEFAULT 1,
+                Precio FLOAT DEFAULT 0,
+                Estado TINYINT(1) DEFAULT 1
+            )
+        `);
+        console.log('Tablas de detalle verificadas.');
+    } catch (err) {
+        console.warn('No se pudieron crear tablas de detalle:', err.message);
+    }
+};
+
 const startServer = async () => {
     try {
         await db.query('SELECT 1');
         console.log('Conexión a base de datos verificada.');
 
         await normalizarEstadosDB();
+        await crearTablasDetalle();
 
         server = app.listen(port, () => {
             console.log(`Servidor corriendo en http://localhost:${port}`);
