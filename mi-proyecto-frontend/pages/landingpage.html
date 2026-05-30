@@ -300,13 +300,13 @@
                     Tu plataforma de reservas moderna y segura. Disfruta una experiencia de hospedaje sin complicaciones en San Roque, Antioquia.
                 </p>
                 <div class="flex items-center gap-3">
-                    <a href="#" aria-label="Instagram" class="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:text-accent hover:border-accent transition-all">
+                    <a href="https://www.instagram.com/hospedajedigital" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:text-accent hover:border-accent transition-all">
                         <i class="fa-brands fa-instagram text-sm"></i>
                     </a>
-                    <a href="#" aria-label="Facebook" class="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:text-accent hover:border-accent transition-all">
+                    <a href="https://www.facebook.com/hospedajedigital" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:text-accent hover:border-accent transition-all">
                         <i class="fa-brands fa-facebook text-sm"></i>
                     </a>
-                    <a href="#" aria-label="WhatsApp" class="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:text-accent hover:border-accent transition-all">
+                    <a href="https://wa.me/573044305969" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" class="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:text-accent hover:border-accent transition-all">
                         <i class="fa-brands fa-whatsapp text-sm"></i>
                     </a>
                 </div>
@@ -430,7 +430,7 @@
                     <div class="rm-grid">
                         <div class="rm-field">
                             <label for="rm_email">Correo Electrónico <span class="rm-req">*</span></label>
-                            <input type="email" id="rm_email" maxlength="50" autocomplete="email" required>
+                            <input type="email" id="rm_email" maxlength="254" autocomplete="email" required>
                         </div>
                         <div class="rm-field">
                             <label for="rm_password">Contraseña <span class="rm-req">*</span></label>
@@ -447,7 +447,7 @@
                 <button type="submit" class="rm-btn" id="rm-submit">Registrarse</button>
             </form>
 
-            <p class="rm-footer">¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
+            <p class="rm-footer">¿Ya tienes cuenta? <a href="../login.html">Inicia sesión</a></p>
         </div>
     </dialog>
 
@@ -782,8 +782,7 @@
                 container.innerHTML = html;
                 initCardCarousels();
             } catch (error) {
-                console.error('[Landing] Error habitaciones:', error);
-                container.innerHTML = `<p class="col-span-full text-center text-red-400">Error: ${error.message}</p>`;
+                container.innerHTML = `<p class="col-span-full text-center text-red-400">No se pudieron cargar las habitaciones. Intentá más tarde.</p>`;
             }
         }
 
