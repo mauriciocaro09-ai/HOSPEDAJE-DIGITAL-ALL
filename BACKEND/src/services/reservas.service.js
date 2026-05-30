@@ -9,36 +9,44 @@ const ReservasService = {
     const reservaId = result.insertId;
 
     if (Array.isArray(data.servicios) && data.servicios.length) {
-      for (const s of data.servicios) {
-        const idServicio = s.IDServicio || s.idServicio;
-        const cantidad = s.cantidad || 1;
-        if (!idServicio) continue;
-        const [[srv]] = await db.query(
-          'SELECT Costo FROM servicio WHERE IDServicio = ? LIMIT 1',
-          [idServicio]
-        );
-        const precio = srv ? Number(srv.Costo || 0) * cantidad : 0;
-        await db.query(
-          'INSERT INTO detallereservaservicio (IDReserva, IDServicio, Cantidad, Precio, Estado) VALUES (?, ?, ?, ?, 1)',
-          [reservaId, idServicio, cantidad, precio]
-        );
+      try {
+        for (const s of data.servicios) {
+          const idServicio = s.IDServicio || s.idServicio;
+          const cantidad = s.cantidad || 1;
+          if (!idServicio) continue;
+          const [[srv]] = await db.query(
+            'SELECT Costo FROM servicio WHERE IDServicio = ? LIMIT 1',
+            [idServicio]
+          );
+          const precio = srv ? Number(srv.Costo || 0) * cantidad : 0;
+          await db.query(
+            'INSERT INTO detallereservaservicio (IDReserva, IDServicio, Cantidad, Precio, Estado) VALUES (?, ?, ?, ?, 1)',
+            [reservaId, idServicio, cantidad, precio]
+          );
+        }
+      } catch (e) {
+        console.error('Error insertando servicios en detalle:', e.message);
       }
     }
 
     if (Array.isArray(data.paquetes) && data.paquetes.length) {
-      for (const p of data.paquetes) {
-        const idPaquete = p.IDPaquete || p.idPaquete;
-        const cantidad = p.cantidad || 1;
-        if (!idPaquete) continue;
-        const [[paq]] = await db.query(
-          'SELECT PrecioPaquete FROM paquetes WHERE IDPaquete = ? LIMIT 1',
-          [idPaquete]
-        );
-        const precio = paq ? Number(paq.PrecioPaquete || 0) * cantidad : 0;
-        await db.query(
-          'INSERT INTO detallereservapaquetes (IDReserva, IDPaquete, Cantidad, Precio, Estado) VALUES (?, ?, ?, ?, 1)',
-          [reservaId, idPaquete, cantidad, precio]
-        );
+      try {
+        for (const p of data.paquetes) {
+          const idPaquete = p.IDPaquete || p.idPaquete;
+          const cantidad = p.cantidad || 1;
+          if (!idPaquete) continue;
+          const [[paq]] = await db.query(
+            'SELECT PrecioPaquete FROM paquetes WHERE IDPaquete = ? LIMIT 1',
+            [idPaquete]
+          );
+          const precio = paq ? Number(paq.PrecioPaquete || 0) * cantidad : 0;
+          await db.query(
+            'INSERT INTO detallereservapaquetes (IDReserva, IDPaquete, Cantidad, Precio, Estado) VALUES (?, ?, ?, ?, 1)',
+            [reservaId, idPaquete, cantidad, precio]
+          );
+        }
+      } catch (e) {
+        console.error('Error insertando paquetes en detalle:', e.message);
       }
     }
 

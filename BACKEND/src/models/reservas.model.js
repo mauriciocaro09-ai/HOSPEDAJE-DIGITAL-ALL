@@ -139,24 +139,34 @@ const Reservas = {
     const reserva = rows[0];
     if (!reserva) return null;
 
-    const [servicios] = await db.query(`
-      SELECT ds.IDServicio, ds.Cantidad, ds.Precio AS SubtotalItem,
-             s.NombreServicio, s.Costo
-      FROM detallereservaservicio ds
-      JOIN servicio s ON ds.IDServicio = s.IDServicio
-      WHERE ds.IDReserva = ?
-    `, [id]);
+    try {
+      const [servicios] = await db.query(`
+        SELECT ds.IDServicio, ds.Cantidad, ds.Precio AS SubtotalItem,
+               s.NombreServicio, s.Costo
+        FROM detallereservaservicio ds
+        JOIN servicio s ON ds.IDServicio = s.IDServicio
+        WHERE ds.IDReserva = ?
+      `, [id]);
+      reserva.servicios = servicios;
+    } catch (e) {
+      console.error('detallereservaservicio query error:', e.message);
+      reserva.servicios = [];
+    }
 
-    const [paquetes] = await db.query(`
-      SELECT dp.IDPaquete, dp.Cantidad, dp.Precio AS SubtotalItem,
-             p.NombrePaquete, p.PrecioPaquete
-      FROM detallereservapaquetes dp
-      JOIN paquetes p ON dp.IDPaquete = p.IDPaquete
-      WHERE dp.IDReserva = ?
-    `, [id]);
+    try {
+      const [paquetes] = await db.query(`
+        SELECT dp.IDPaquete, dp.Cantidad, dp.Precio AS SubtotalItem,
+               p.NombrePaquete, p.PrecioPaquete
+        FROM detallereservapaquetes dp
+        JOIN paquetes p ON dp.IDPaquete = p.IDPaquete
+        WHERE dp.IDReserva = ?
+      `, [id]);
+      reserva.paquetes = paquetes;
+    } catch (e) {
+      console.error('detallereservapaquetes query error:', e.message);
+      reserva.paquetes = [];
+    }
 
-    reserva.servicios = servicios;
-    reserva.paquetes  = paquetes;
     return reserva;
   },
 
