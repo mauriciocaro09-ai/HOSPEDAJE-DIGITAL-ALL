@@ -78,7 +78,7 @@ const EmailService = {
   enviarResetPassword: async ({ usuarioNombre, usuarioEmail, token }) => {
     const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usuarioEmail && usuarioEmail.trim());
     if (!emailValido) { console.warn("Correo invalido para reset: " + usuarioEmail); return false; }
-    const frontendUrl = process.env.FRONTEND_URL || "https://hospedaje-digital.netlify.app";
+    const frontendUrl = process.env.FRONTEND_URL || "https://hospedaje-digital-all.vercel.app";
     const link = frontendUrl + "/login.html?reset-token=" + encodeURIComponent(token);
     try {
       await enviarBrevo({
@@ -128,7 +128,7 @@ const EmailService = {
   enviarSetupPassword: async ({ clienteNombre, clienteEmail, token }) => {
     const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clienteEmail && clienteEmail.trim());
     if (!emailValido) { return false; }
-    const frontendUrl = process.env.FRONTEND_URL || "https://hospedaje-digital.netlify.app";
+    const frontendUrl = process.env.FRONTEND_URL || "https://hospedaje-digital-all.vercel.app";
     const link = frontendUrl + "/pages/perfil.html?resetToken=" + encodeURIComponent(token);
     try {
       await enviarBrevo({

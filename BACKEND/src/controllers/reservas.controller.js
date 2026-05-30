@@ -169,7 +169,7 @@ const crear = async (req, res) => {
           habitacion: (hab && hab.NombreHabitacion) ? hab.NombreHabitacion : 'Habitacion',
           fechaInicio: req.body.FechaInicio,
           fechaFin: req.body.FechaFinalizacion,
-          montoTotal: req.body.Sub_Total || req.body.MontoTotal || 0
+          montoTotal: req.body.Monto_Total || req.body.MontoTotal || req.body.Sub_Total || 0
         };
       }
     } catch (emailErr) {
