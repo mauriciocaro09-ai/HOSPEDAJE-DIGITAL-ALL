@@ -158,7 +158,7 @@ const Reservas = {
         SELECT dp.IDPaquete, dp.Cantidad, dp.Precio AS SubtotalItem,
                p.NombrePaquete, p.PrecioPaquete
         FROM detallereservapaquetes dp
-        JOIN paquetes p ON dp.IDPaquete = p.IDPaquete
+        JOIN paquete p ON dp.IDPaquete = p.IDPaquete
         WHERE dp.IDReserva = ?
       `, [id]);
       reserva.paquetes = paquetes;

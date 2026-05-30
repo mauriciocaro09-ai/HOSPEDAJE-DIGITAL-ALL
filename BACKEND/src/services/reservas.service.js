@@ -36,7 +36,7 @@ const ReservasService = {
           const cantidad = p.cantidad || 1;
           if (!idPaquete) continue;
           const [[paq]] = await db.query(
-            'SELECT PrecioPaquete FROM paquetes WHERE IDPaquete = ? LIMIT 1',
+            'SELECT PrecioPaquete FROM paquete WHERE IDPaquete = ? LIMIT 1',
             [idPaquete]
           );
           const precio = paq ? Number(paq.PrecioPaquete || 0) * cantidad : 0;
