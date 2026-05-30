@@ -17,7 +17,7 @@ const CONFIG = {
     API_URL: apiUrlPorDefecto,
     
     // Timeout para peticiones fetch (en milisegundos)
-    FETCH_TIMEOUT: 10000,
+    FETCH_TIMEOUT: 30000,
     
     // Habilitar logs en consola
     ENABLE_LOGS: true,

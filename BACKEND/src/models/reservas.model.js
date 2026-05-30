@@ -156,7 +156,7 @@ const Reservas = {
 
     const MetodoPago = firstDefined(reserva.MetodoPago, reserva.IdMetodoPago, 1);
     const IdEstadoReserva = firstDefined(reserva.IdEstadoReserva, 1);
-    const UsuarioIdusuario = firstDefined(reserva.UsuarioIdusuario, 1);
+    const UsuarioIdusuario = firstDefined(reserva.UsuarioIdusuario, reserva.id_usuario, reserva.IDUsuario);
 
     const insertCols = [];
     const insertValsSql = [];
