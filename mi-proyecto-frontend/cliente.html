@@ -1486,10 +1486,9 @@
             btn.textContent = 'Cancelando...';
             try {
                 const token = sessionStorage.getItem('token') || localStorage.getItem('token');
-                const resp = await fetch(`${API_URL}/reservas/${id}/estado`, {
+                const resp = await fetch(`${API_URL}/reservas/${id}/cancelar`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ IdEstadoReserva: 3 })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
                 });
                 if (!resp.ok) throw new Error();
                 cargarMisReservas();

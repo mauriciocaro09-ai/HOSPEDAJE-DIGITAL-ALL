@@ -39,6 +39,9 @@ router.put("/:id", reservasController.actualizar);
 // Cambiar estado de reserva
 router.put("/:id/estado", reservasController.actualizarEstado);
 
+// Cancelar reserva (busca el estado "Cancelada" dinámicamente)
+router.put("/:id/cancelar", reservasController.cancelar);
+
 // Eliminar reserva
 router.delete("/:id", reservasController.eliminar);
 
