@@ -1,6 +1,7 @@
 const ReservasService = require("../services/reservas.service");
 const db = require("../config/db");
 const EmailService = require("../services/email.service");
+const WhatsappService = require("../services/whatsapp.service");
 
 /* ================= OBTENER TODAS ================= */
 
@@ -165,6 +166,7 @@ const crear = async (req, res) => {
         emailData = {
           clienteNombre: nombreCliente,
           clienteEmail: emailCliente,
+          clienteTelefono: req.body.TelefonoCliente || req.body.Telefono || null,
           reservaId,
           habitacion: (hab && hab.NombreHabitacion) ? hab.NombreHabitacion : 'Habitacion',
           fechaInicio: req.body.FechaInicio,
@@ -178,10 +180,15 @@ const crear = async (req, res) => {
 
     res.status(201).json({ mensaje: "Reserva creada", reservaId });
 
-    // Enviar correo de confirmacion sin bloquear la respuesta
+    // Enviar correo y WhatsApp de confirmacion sin bloquear la respuesta
     if (emailData) {
       EmailService.enviarConfirmacionReserva(emailData)
         .catch(function(e) { console.error('Error enviando correo de confirmacion de reserva:', e); });
+
+      if (emailData.clienteTelefono) {
+        WhatsappService.enviarConfirmacionReserva(emailData)
+          .catch(function(e) { console.error('Error enviando WhatsApp de confirmacion:', e); });
+      }
     }
 
   } catch (error) {
