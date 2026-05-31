@@ -244,7 +244,7 @@ Nunca usar el tool `Edit` para archivos largos en Windows — puede truncar.
 
 ---
 
-## Estado de funcionalidades (al 30/05/2026)
+## Estado de funcionalidades (al 31/05/2026)
 
 ### ✅ Funcionando — Admin
 - Login y autenticación JWT — al hacer login siempre arranca en el dashboard
@@ -260,17 +260,25 @@ Nunca usar el tool `Edit` para archivos largos en Windows — puede truncar.
 - Mis Reservas: listado, detalle en modal (con servicios y paquetes), cancelar
 - Nueva Reserva: habitación, fechas, método de pago, servicios, paquetes, IVA, total
 - Correo de confirmación de reserva con monto total correcto
+- **WhatsApp de confirmación de reserva** (WhatsApp Cloud API — Meta)
 - Mi Perfil: ver datos + editar (nombre, apellido, email, teléfono, país) + cambiar contraseña
 - Reset password: link apunta a Vercel, token JWT 30min
+- Cancelar reserva: usa `PUT /reservas/:id/cancelar` (busca estado por nombre, no hardcodeado)
 
 ### ✅ Infraestructura
 - Frontend en Vercel (reemplazó Netlify el 29/05/2026)
 - Backend en Render con auto-deploy desde GitHub
 - BD en Clever Cloud (MySQL)
 - Tablas `detallereservaservicio` y `detallereservapaquetes` se crean automáticamente al iniciar
+- WhatsApp Cloud API (Meta): `WHATSAPP_TOKEN` y `WHATSAPP_PHONE_ID` configurados en Render
+
+### WhatsApp — nota importante (modo sandbox)
+- El token de Meta expira cada 24h — si el WA deja de funcionar, regenerar en Meta For Developers → "Generar token de acceso" y actualizar `WHATSAPP_TOKEN` en Render
+- En modo sandbox, solo números verificados en Meta pueden recibir mensajes
+- Para producción real: crear plantillas aprobadas en Meta Business Manager (evita restricción de ventana 24h)
 
 ### 🔧 Pendiente
-- (ninguno — todo funcional al 30/05/2026)
+- (ninguno — todo funcional al 31/05/2026)
 
 ---
 
