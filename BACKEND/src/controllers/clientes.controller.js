@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const bcrypt = require("bcryptjs");
 
 /* ================= LISTAR CLIENTES ================= */
 exports.getAll = async (req, res) => {
@@ -73,6 +74,24 @@ exports.create = async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [NroDocumento, Nombre, Apellido, Direccion || null, Email, Telefono || null, Estado || 1, IDRol || 3]
     );
+
+    // Sincronizar con tabla usuarios si no existe ya
+    try {
+      const [existe] = await db.query(
+        'SELECT IDUsuario FROM usuarios WHERE Email = ? OR NumeroDocumento = ? LIMIT 1',
+        [Email, NroDocumento]
+      );
+      if (!existe.length) {
+        const hash = await bcrypt.hash(String(NroDocumento), 10);
+        await db.query(
+          `INSERT INTO usuarios (NombreUsuario, Nombre, Apellido, Email, Contrasena, TipoDocumento, NumeroDocumento, Telefono, Direccion, IDRol, IsActive)
+           VALUES (?, ?, ?, ?, ?, 'CC', ?, ?, ?, ?, 1)`,
+          [NroDocumento, Nombre || null, Apellido || null, Email, hash, NroDocumento, Telefono || null, Direccion || null, IDRol || 2]
+        );
+      }
+    } catch (syncErr) {
+      console.error('Advertencia: no se pudo sincronizar cliente a usuarios:', syncErr.message);
+    }
 
     res.status(201).json({ mensaje: "Cliente creado", data: result });
   } catch (error) {
