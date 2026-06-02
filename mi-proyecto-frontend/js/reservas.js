@@ -749,8 +749,8 @@ const editarReservaAdmin = async (idReserva) => {
                 document.getElementById('reserva-admin-contacto').value = reserva.ContactoCliente || reserva.Telefono || '';
                 document.getElementById('reserva-admin-email').value = reserva.EmailCliente || reserva.Email || '';
                 document.getElementById('reserva-admin-pais').value = reserva.PaisCliente || '';
-            document.getElementById('reserva-admin-fecha-inicio').value = reserva.FechaInicio || '';
-            document.getElementById('reserva-admin-fecha-fin').value = reserva.FechaFinalizacion || '';
+            document.getElementById('reserva-admin-fecha-inicio').value = (reserva.FechaInicio || '').split('T')[0];
+            document.getElementById('reserva-admin-fecha-fin').value = (reserva.FechaFinalizacion || '').split('T')[0];
             document.getElementById('reserva-admin-subtotal').value = reserva.Sub_Total || '';
             document.getElementById('reserva-admin-descuento').value = reserva.Descuento || '0';
             document.getElementById('reserva-admin-metodo-pago').value = reserva.MetodoPago || '';
