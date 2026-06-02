@@ -1324,7 +1324,12 @@ if (document.readyState === 'loading') {
         const sel = document.getElementById('reserva-admin-paquetes');
         const det = document.getElementById('admin-paquete-detalle');
         const id = sel?.value;
-        if (!id || !det) return;
+        if (!det) return;
+        if (!id) {
+            det.innerHTML = '<div class="admin-pdi-body" style="color:#64748b">Selecciona un paquete para ver su detalle.</div>';
+            det.classList.remove('hidden');
+            return;
+        }
         try {
             const p = await requestJson(`/paquetes/${id}`);
             const servicios = p.servicios && p.servicios.length
