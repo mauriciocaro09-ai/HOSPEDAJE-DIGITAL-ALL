@@ -2006,7 +2006,7 @@
                         <input type="checkbox" class="nr-servicio-check"
                             data-id="${s.IDServicio}" data-costo="${s.Costo}" data-nombre="${s.NombreServicio}">
                         ${s.Imagen
-                            ? `<img src="${s.Imagen}" alt="${s.NombreServicio}" class="servicio-item-img" onerror="this.style.display='none'">`
+                            ? `<img src="${s.Imagen.split(',')[0].trim()}" alt="${s.NombreServicio}" class="servicio-item-img" onerror="this.outerHTML='<span class=\\'servicio-item-img-placeholder\\'><i class=\\'fa-solid fa-concierge-bell\\'></i></span>'">`
                             : `<span class="servicio-item-img-placeholder"><i class="fa-solid fa-concierge-bell"></i></span>`
                         }
                         <div class="servicio-item-info">
