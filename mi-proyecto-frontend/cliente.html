@@ -1928,9 +1928,12 @@
                 const metodos = Array.isArray(data) ? data : [];
                 const sel = $('nr-metodo-pago');
                 sel.innerHTML = '<option value="" disabled selected hidden>Selecciona método de pago</option>';
-                metodos.forEach(m => {
-                    sel.innerHTML += `<option value="${m.IdMetodoPago}">${m.NomMetodoPago}</option>`;
-                });
+                const permitidos = ['efectivo', 'transferencia bancaria'];
+                metodos
+                    .filter(m => permitidos.includes(m.NomMetodoPago.toLowerCase()))
+                    .forEach(m => {
+                        sel.innerHTML += `<option value="${m.IdMetodoPago}">${m.NomMetodoPago}</option>`;
+                    });
             } catch(e) { console.error('Error cargando métodos de pago:', e); }
         }
 

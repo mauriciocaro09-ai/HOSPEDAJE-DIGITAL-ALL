@@ -390,9 +390,6 @@ const renderizarReservasAdmin = () => {
                         <button type="button" class="btn-mini btn-mini-icon btn-mini-ver" data-accion-reserva="ver" data-id="${escaparHtml(idReserva)}" title="Ver detalles">
                             <i class="fa-solid fa-eye"></i>
                         </button>
-                        <button type="button" class="btn-mini btn-mini-icon btn-mini-eliminar" data-accion-reserva="eliminar" data-id="${escaparHtml(idReserva)}" title="Eliminar">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
                     </div>
                 </td>
             </tr>
