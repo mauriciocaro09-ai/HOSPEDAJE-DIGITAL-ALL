@@ -1449,6 +1449,61 @@ const mostrarPreviewHabitacionAdmin = (input) => {
     update(0);
 };
 
+const mostrarPreviewServicioAdmin = (input) => {
+    const wrap = document.getElementById('servicio-admin-preview-wrap');
+    const track = document.getElementById('servicio-carousel-track');
+    const btnPrev = document.getElementById('servicio-carousel-prev');
+    const btnNext = document.getElementById('servicio-carousel-next');
+    const counter = document.getElementById('servicio-carousel-counter');
+
+    if (!wrap || !track) return;
+
+    let images = [];
+    if (!input) images = [];
+    else if (Array.isArray(input)) images = input.slice();
+    else if (typeof input === 'string') {
+        images = input.split(/\r?\n|,/).map(s => s.trim()).filter(Boolean);
+    }
+
+    track.innerHTML = '';
+
+    if (images.length === 0) {
+        wrap.classList.add('hidden');
+        if (counter) counter.textContent = '';
+        return;
+    }
+
+    images.forEach((src) => {
+        const li = document.createElement('li');
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'Imagen de servicio';
+        li.appendChild(img);
+        track.appendChild(li);
+    });
+
+    let current = 0;
+    const total = images.length;
+
+    const update = (index) => {
+        current = (index + total) % total;
+        track.style.transform = `translateX(${-current * 100}%)`;
+        if (counter) counter.textContent = `${current + 1} / ${total}`;
+    };
+
+    if (btnPrev) btnPrev.replaceWith(btnPrev.cloneNode(true));
+    if (btnNext) btnNext.replaceWith(btnNext.cloneNode(true));
+
+    const newPrev = document.getElementById('servicio-carousel-prev');
+    const newNext = document.getElementById('servicio-carousel-next');
+
+    if (newPrev) newPrev.addEventListener('click', () => update(current - 1));
+    if (newNext) newNext.addEventListener('click', () => update(current + 1));
+
+    wrap.classList.remove('hidden');
+    update(0);
+};
+
 const inicializarCarruselDetalle = () => {
     const track = document.getElementById('detalle-carousel-track');
     const btnPrev = document.getElementById('detalle-carousel-prev');
@@ -2381,6 +2436,8 @@ const limpiarFormularioServicioAdmin = (mostrarMensaje = true) => {
     const titulo = document.getElementById('servicio-admin-form-title');
     const botonGuardar = document.getElementById('btn-servicio-admin-guardar');
 
+    const campoImagen = document.getElementById('servicio-admin-imagen');
+
     if (formulario) formulario.reset();
     if (campoId) campoId.value = '';
     if (campoNombre) campoNombre.value = '';
@@ -2388,6 +2445,8 @@ const limpiarFormularioServicioAdmin = (mostrarMensaje = true) => {
     if (campoDuracion) campoDuracion.value = '';
     if (campoCantidadMaxima) campoCantidadMaxima.value = '';
     if (campoCosto) campoCosto.value = '';
+    if (campoImagen) campoImagen.value = '';
+    mostrarPreviewServicioAdmin('');
     if (campoEstado) campoEstado.value = '1';
     if (titulo) titulo.textContent = 'Crear servicio';
     if (botonGuardar) botonGuardar.textContent = 'Guardar servicio';
@@ -2420,7 +2479,10 @@ const cargarServicioEnFormularioAdmin = (servicio) => {
     if (campoDuracion) campoDuracion.value = servicio.Duracion || '';
     if (campoCantidadMaxima) campoCantidadMaxima.value = servicio.CantidadMaximaPersonas || '';
     if (campoCosto) campoCosto.value = servicio.Costo || '';
-    if (campoImagen) campoImagen.value = servicio.Imagen || '';
+    if (campoImagen) {
+        campoImagen.value = servicio.Imagen || '';
+        mostrarPreviewServicioAdmin(servicio.Imagen || '');
+    }
     if (campoEstado) campoEstado.value = servicio.Estado;
     if (titulo) titulo.textContent = `Editar: ${servicio.NombreServicio}`;
     if (botonGuardar) botonGuardar.textContent = 'Actualizar servicio';
@@ -2447,7 +2509,9 @@ async function guardarServicioAdmin(evento) {
     const duracion = campoDuracion?.value.trim();
     const cantidadMaxima = campoCantidadMaxima?.value.trim();
     const costo = campoCosto?.value.trim();
-    const imagen = campoImagen?.value.trim() || null;
+    const imagen = campoImagen?.value.trim()
+        ? campoImagen.value.split(/\r?\n|,/).map(s => s.trim()).filter(Boolean).join(',')
+        : null;
     const estado = campoEstado?.value;
 
     if (!nombre || !descripcion || !duracion || !cantidadMaxima || !costo || estado === undefined) {
@@ -2611,6 +2675,14 @@ const inicializarFormularioServiciosAdmin = () => {
         campoNombre.addEventListener('input', actualizarValidacionNombreServicioAdmin);
         campoNombre.addEventListener('blur', actualizarValidacionNombreServicioAdmin);
         campoNombre.dataset.serviciosAdminInicializado = 'true';
+    }
+
+    const inputImagenServicio = document.getElementById('servicio-admin-imagen');
+    if (inputImagenServicio && !inputImagenServicio.dataset.serviciosAdminInicializado) {
+        inputImagenServicio.addEventListener('input', () => {
+            mostrarPreviewServicioAdmin(inputImagenServicio.value.trim());
+        });
+        inputImagenServicio.dataset.serviciosAdminInicializado = 'true';
     }
 
     if (modalServicio && !modalServicio.dataset.serviciosAdminInicializado) {

@@ -757,9 +757,21 @@
                             <input type="number" id="servicio-admin-costo" required min="0" step="0.01" placeholder="Ej. 150000">
                         </label>
                         <label>
-                            <span>Imagen (URL)</span>
-                            <input type="url" id="servicio-admin-imagen" placeholder="https://images.unsplash.com/...">
+                            Imágenes por URL
+                            <textarea id="servicio-admin-imagen" placeholder="Pega una o varias URL separadas por salto de línea o coma"></textarea>
+                            <small class="crud-habitaciones-help">Pega una o varias URLs para armar la galería del detalle.</small>
                         </label>
+                        <div id="servicio-admin-preview-wrap" class="crud-habitaciones-preview hidden">
+                            <p>Vista previa:</p>
+                            <div class="carousel" id="servicio-carousel" role="region" aria-roledescription="carousel" aria-label="Vista previa de imágenes del servicio">
+                                <button type="button" class="carousel-btn prev" id="servicio-carousel-prev" aria-label="Imagen anterior">‹</button>
+                                <div class="carousel-viewport">
+                                    <ul class="carousel-track" id="servicio-carousel-track" role="list"></ul>
+                                </div>
+                                <button type="button" class="carousel-btn next" id="servicio-carousel-next" aria-label="Siguiente imagen">›</button>
+                            </div>
+                            <div class="carousel-counter" id="servicio-carousel-counter" aria-hidden="true"></div>
+                        </div>
                         <label>
                             <span>Estado <span class="campo-obligatorio" aria-hidden="true">*</span></span>
                             <select id="servicio-admin-estado" required>
