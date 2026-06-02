@@ -2510,7 +2510,7 @@ async function guardarServicioAdmin(evento) {
     const cantidadMaxima = campoCantidadMaxima?.value.trim();
     const costo = campoCosto?.value.trim();
     const imagen = campoImagen?.value.trim()
-        ? campoImagen.value.split(/\r?\n|,/).map(s => s.trim()).filter(Boolean).join(',')
+        ? campoImagen.value.split(/[,\n]|(?=https?:\/\/)/).map(s => s.trim()).filter(Boolean).join(',')
         : null;
     const estado = campoEstado?.value;
 

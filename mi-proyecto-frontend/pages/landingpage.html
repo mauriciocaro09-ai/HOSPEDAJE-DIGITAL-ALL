@@ -651,8 +651,8 @@
                         if (Array.isArray(arr)) return arr.filter(v => typeof v === 'string' && (v.trim().startsWith('http') || v.trim().startsWith('data:image/'))).map(v => v.trim());
                     } catch (_) {}
                 }
-                // Separadas por coma o salto de línea
-                return txt.split(/[,\n]/).map(s => s.trim()).filter(s => s.startsWith('http') || s.startsWith('data:image/'));
+                // Separadas por coma, salto de línea, o espacio entre URLs
+                return txt.split(/[,\n]|(?=https?:\/\/)/).map(s => s.trim()).filter(s => s.startsWith('http') || s.startsWith('data:image/'));
             }
             return [];
         }
