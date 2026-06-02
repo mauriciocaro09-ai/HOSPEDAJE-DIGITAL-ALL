@@ -531,10 +531,16 @@
                         <div class="reserva-card paquetes-card">
                             <span class="card-title"><i class="fa-solid fa-box"></i> PAQUETE <small>(opcional)</small></span>
                             <div class="form-group" style="margin-bottom:0;">
-                                <select id="reserva-admin-paquetes">
-                                    <option value="">Sin paquete</option>
-                                </select>
+                                <div style="display:flex;gap:8px;align-items:center;">
+                                    <select id="reserva-admin-paquetes" style="flex:1;">
+                                        <option value="">Sin paquete</option>
+                                    </select>
+                                    <button type="button" id="admin-paquete-ver-btn" class="btn-ver-detalle-admin hidden">
+                                        <i class="fa-solid fa-circle-info"></i> Ver detalle
+                                    </button>
+                                </div>
                             </div>
+                            <div id="admin-paquete-detalle" class="admin-paquete-detalle-inline hidden"></div>
                         </div>
                         <div class="reserva-card servicios-card">
                             <span class="card-title"><i class="fa-solid fa-concierge-bell"></i> SERVICIOS ADICIONALES <small>solo activos — clic para agregar</small></span>
