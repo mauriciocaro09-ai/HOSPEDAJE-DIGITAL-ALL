@@ -689,47 +689,6 @@ const poblarSelectsReserva = async () => {
             paq = paq.filter(p => p.Estado == 1 || p.Estado === '1');
             const opciones = paq.map(p => `<option value="${escaparHtml(p.IDPaquete)}" data-precio="${Number(p.PrecioPaquete || 0)}">${escaparHtml(p.NombrePaquete || 'Paquete')} — $${fmt(p.PrecioPaquete || 0)}</option>`);
             selectPaquetes.innerHTML = '<option value="">Sin paquete</option>' + opciones.join('');
-
-            const btnVer = document.getElementById('admin-paquete-ver-btn');
-            const detalle = document.getElementById('admin-paquete-detalle');
-
-            selectPaquetes.addEventListener('change', () => {
-                actualizarSidebarResumen();
-                if (selectPaquetes.value) {
-                    if (btnVer) btnVer.classList.remove('hidden');
-                } else {
-                    if (btnVer) btnVer.classList.add('hidden');
-                    if (detalle) { detalle.classList.add('hidden'); detalle.innerHTML = ''; }
-                }
-            });
-
-            if (btnVer) {
-                btnVer.addEventListener('click', async () => {
-                    const id = selectPaquetes.value;
-                    if (!id || !detalle) return;
-                    try {
-                        const p = await requestJson(`/paquetes/${id}`);
-                        const servicios = p.servicios && p.servicios.length
-                            ? p.servicios.map(s => `<span>${escaparHtml(s.NombreServicio)}</span>`).join('')
-                            : '<span>Sin servicios adicionales</span>';
-                        detalle.innerHTML = `
-                            <div class="admin-pdi-body">
-                                <div class="admin-pdi-nombre">${escaparHtml(p.NombrePaquete)}</div>
-                                <div class="admin-pdi-desc">${escaparHtml(p.Descripcion || 'Sin descripción')}</div>
-                                <div class="admin-pdi-meta">
-                                    <span class="admin-pdi-badge">$${fmt(p.PrecioPaquete)}</span>
-                                    <span class="admin-pdi-badge">${p.DuracionNoches} noche${p.DuracionNoches !== 1 ? 's' : ''}</span>
-                                    ${p.IncluirHabitacion ? '<span class="admin-pdi-badge">Incluye alojamiento</span>' : ''}
-                                </div>
-                                <div class="admin-pdi-servicios"><strong>Servicios incluidos:</strong><br>${servicios}</div>
-                            </div>`;
-                        detalle.classList.remove('hidden');
-                    } catch(e) {
-                        detalle.innerHTML = '<div class="admin-pdi-body" style="color:#64748b">No se pudo cargar el detalle.</div>';
-                        detalle.classList.remove('hidden');
-                    }
-                });
-            }
         } catch (err) {
             console.error('No se pudieron cargar paquetes:', err);
             selectPaquetes.innerHTML = '<option value="">No disponible</option>';
@@ -1236,10 +1195,54 @@ function inicializarReservasAdmin() {
     // Asegurar que datepickers estén inicializados cuando se abra el modal
     const btnAbrir = document.getElementById('btn-nuevo-reserva-admin');
     if (btnAbrir) btnAbrir.addEventListener('click', () => {
-        // refrescar listas y datepickers
         poblarSelectsReserva();
         inicializarDatepickers();
     });
+
+    // Ver detalle de paquete — listener único
+    const selectPaq = document.getElementById('reserva-admin-paquetes');
+    const btnVerPaq = document.getElementById('admin-paquete-ver-btn');
+    const detallePaq = document.getElementById('admin-paquete-detalle');
+
+    if (selectPaq) {
+        selectPaq.addEventListener('change', () => {
+            actualizarSidebarResumen();
+            if (selectPaq.value) {
+                if (btnVerPaq) btnVerPaq.classList.remove('hidden');
+            } else {
+                if (btnVerPaq) btnVerPaq.classList.add('hidden');
+                if (detallePaq) { detallePaq.classList.add('hidden'); detallePaq.innerHTML = ''; }
+            }
+        });
+    }
+
+    if (btnVerPaq) {
+        btnVerPaq.addEventListener('click', async () => {
+            const id = selectPaq?.value;
+            if (!id || !detallePaq) return;
+            try {
+                const p = await requestJson(`/paquetes/${id}`);
+                const servicios = p.servicios && p.servicios.length
+                    ? p.servicios.map(s => `<span>${escaparHtml(s.NombreServicio)}</span>`).join('')
+                    : '<span>Sin servicios adicionales</span>';
+                detallePaq.innerHTML = `
+                    <div class="admin-pdi-body">
+                        <div class="admin-pdi-nombre">${escaparHtml(p.NombrePaquete)}</div>
+                        <div class="admin-pdi-desc">${escaparHtml(p.Descripcion || 'Sin descripción')}</div>
+                        <div class="admin-pdi-meta">
+                            <span class="admin-pdi-badge">$${fmt(p.PrecioPaquete)}</span>
+                            <span class="admin-pdi-badge">${p.DuracionNoches} noche${p.DuracionNoches !== 1 ? 's' : ''}</span>
+                            ${p.IncluirHabitacion ? '<span class="admin-pdi-badge">Incluye alojamiento</span>' : ''}
+                        </div>
+                        <div class="admin-pdi-servicios"><strong>Servicios incluidos:</strong><br>${servicios}</div>
+                    </div>`;
+                detallePaq.classList.remove('hidden');
+            } catch(e) {
+                detallePaq.innerHTML = '<div class="admin-pdi-body" style="color:#64748b">No se pudo cargar el detalle.</div>';
+                detallePaq.classList.remove('hidden');
+            }
+        });
+    }
 
     // actualizar monto total cuando subtotal/descuento cambian
     const actualizarMontoTotal = () => {
