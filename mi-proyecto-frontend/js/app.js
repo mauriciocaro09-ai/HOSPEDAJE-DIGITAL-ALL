@@ -2412,12 +2412,15 @@ const cargarServicioEnFormularioAdmin = (servicio) => {
 
     const idServicio = obtenerIdServicio(servicio);
 
+    const campoImagen = document.getElementById('servicio-admin-imagen');
+
     if (campoId) campoId.value = idServicio;
     if (campoNombre) campoNombre.value = servicio.NombreServicio || '';
     if (campoDescripcion) campoDescripcion.value = servicio.Descripcion || '';
     if (campoDuracion) campoDuracion.value = servicio.Duracion || '';
     if (campoCantidadMaxima) campoCantidadMaxima.value = servicio.CantidadMaximaPersonas || '';
     if (campoCosto) campoCosto.value = servicio.Costo || '';
+    if (campoImagen) campoImagen.value = servicio.Imagen || '';
     if (campoEstado) campoEstado.value = servicio.Estado;
     if (titulo) titulo.textContent = `Editar: ${servicio.NombreServicio}`;
     if (botonGuardar) botonGuardar.textContent = 'Actualizar servicio';
@@ -2435,6 +2438,7 @@ async function guardarServicioAdmin(evento) {
     const campoDuracion = document.getElementById('servicio-admin-duracion');
     const campoCantidadMaxima = document.getElementById('servicio-admin-cantidad-maxima');
     const campoCosto = document.getElementById('servicio-admin-costo');
+    const campoImagen = document.getElementById('servicio-admin-imagen');
     const campoEstado = document.getElementById('servicio-admin-estado');
 
     const id = campoId?.value;
@@ -2443,6 +2447,7 @@ async function guardarServicioAdmin(evento) {
     const duracion = campoDuracion?.value.trim();
     const cantidadMaxima = campoCantidadMaxima?.value.trim();
     const costo = campoCosto?.value.trim();
+    const imagen = campoImagen?.value.trim() || null;
     const estado = campoEstado?.value;
 
     if (!nombre || !descripcion || !duracion || !cantidadMaxima || !costo || estado === undefined) {
@@ -2461,6 +2466,7 @@ async function guardarServicioAdmin(evento) {
         Duracion: Number(duracion),
         CantidadMaximaPersonas: Number(cantidadMaxima),
         Costo: Number(costo),
+        Imagen: imagen,
         Estado: Number(estado)
     };
 
