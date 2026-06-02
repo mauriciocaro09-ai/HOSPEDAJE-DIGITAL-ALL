@@ -686,8 +686,10 @@ const poblarSelectsReserva = async () => {
         try {
             let paq = await requestJson('/paquetes');
             if (!Array.isArray(paq)) paq = [];
-            const opcionesPaq = paq.map(p => `<option value="${escaparHtml(p.IDPaquete)}">${escaparHtml(p.NombrePaquete || p.Nombre || 'Paquete')} - ${p.Precio ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(p.Precio) : ''}</option>`);
-            selectPaquetes.innerHTML = opcionesPaq.join('') || '<option value="">No hay paquetes</option>';
+            paq = paq.filter(p => p.Estado == 1 || p.Estado === '1');
+            const opciones = paq.map(p => `<option value="${escaparHtml(p.IDPaquete)}" data-precio="${Number(p.PrecioPaquete || 0)}">${escaparHtml(p.NombrePaquete || 'Paquete')} — $${fmt(p.PrecioPaquete || 0)}</option>`);
+            selectPaquetes.innerHTML = '<option value="">Sin paquete</option>' + opciones.join('');
+            selectPaquetes.addEventListener('change', actualizarSidebarResumen);
         } catch (err) {
             console.error('No se pudieron cargar paquetes:', err);
             selectPaquetes.innerHTML = '<option value="">No disponible</option>';
@@ -760,11 +762,8 @@ const editarReservaAdmin = async (idReserva) => {
                 if (selectHab) selectHab.value = reserva.IDHabitacion || '';
                 // seleccionar paquetes si vienen en la reserva
                 const selectPaq = document.getElementById('reserva-admin-paquetes');
-                if (selectPaq && Array.isArray(reserva.paquetes)) {
-                    const ids = reserva.paquetes.map(p => String(p.IDPaquete || p.IDPaquete || p.ID));
-                    Array.from(selectPaq.options).forEach(opt => {
-                        opt.selected = ids.includes(String(opt.value));
-                    });
+                if (selectPaq && Array.isArray(reserva.paquetes) && reserva.paquetes.length) {
+                    selectPaq.value = String(reserva.paquetes[0].IDPaquete || reserva.paquetes[0].ID || '');
                 }
                 // FechaReserva y Monto_Total
                 const fr = document.getElementById('reserva-admin-fecha-reserva');
@@ -835,11 +834,10 @@ const guardarReservaAdmin = async (event) => {
             id_usuario: resolverUsuarioActual()
         };
 
-        // paquetes seleccionados (array de { IDPaquete, cantidad })
+        // paquete seleccionado
         const paquetesSelect = document.getElementById('reserva-admin-paquetes');
-        if (paquetesSelect) {
-            const seleccionadas = Array.from(paquetesSelect.selectedOptions || []).map(o => ({ IDPaquete: Number(o.value), cantidad: 1 }));
-            if (seleccionadas.length) payload.paquetes = seleccionadas;
+        if (paquetesSelect && paquetesSelect.value) {
+            payload.paquetes = [{ IDPaquete: Number(paquetesSelect.value), cantidad: 1 }];
         }
 
         const resultado = idReserva
@@ -1045,11 +1043,12 @@ const actualizarSidebarResumen = () => {
     const costoHab = hab ? Number(hab.Costo || 0) : 0;
     const totalHab = costoHab * noches;
 
-    // sumar paquetes seleccionados visualmente
     let totalPaq = 0;
-    document.querySelectorAll('.paquete-tag.seleccionado').forEach(tag => {
-        totalPaq += Number(tag.dataset.precio || 0);
-    });
+    const paqSel = document.getElementById('reserva-admin-paquetes');
+    if (paqSel && paqSel.value) {
+        const opt = paqSel.options[paqSel.selectedIndex];
+        totalPaq = Number(opt?.dataset?.precio || 0);
+    }
 
     // sumar servicios seleccionados
     let totalServ = 0;
