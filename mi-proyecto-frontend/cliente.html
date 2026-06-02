@@ -1430,10 +1430,23 @@
 
         // ── CERRAR SESIÓN ─────────────────────────
         function cerrarSesion() {
-            sessionStorage.clear();
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'login.html';
+            Swal.fire({
+                title: '¿Cerrar sesión?',
+                text: '¿Estás seguro de que deseas salir?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#1a2744',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, salir',
+                cancelButtonText: 'Cancelar'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    sessionStorage.clear();
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                }
+            });
         }
 
         // ── CARGAR PERFIL ─────────────────────────
