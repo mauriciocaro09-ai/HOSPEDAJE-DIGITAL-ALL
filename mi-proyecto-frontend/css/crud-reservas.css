@@ -1417,3 +1417,18 @@ body.reserva-form-activa #form-reserva-admin {
 .servicio-tag.seleccionado small {
     color: #1d4ed8;
 }
+
+.paquete-tag-desc {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: #64748b;
+    margin-top: 0.2rem;
+    max-width: 180px;
+    white-space: normal;
+    line-height: 1.4;
+}
+
+.paquete-tag.seleccionado .paquete-tag-desc {
+    color: #3b82f6;
+}

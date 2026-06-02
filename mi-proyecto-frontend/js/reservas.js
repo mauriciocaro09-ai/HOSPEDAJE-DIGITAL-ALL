@@ -1092,7 +1092,8 @@ const cargarPaquetesVisuales = async () => {
         lista.innerHTML = paquetes.map(p => `
             <span class="paquete-tag" data-id="${escaparHtml(String(p.IDPaquete))}" data-precio="${Number(p.PrecioPaquete || p.Precio || 0)}" title="${escaparHtml(p.NombrePaquete || '')}">
                 ${escaparHtml(p.NombrePaquete || 'Paquete')}
-                <small>${fmt(p.PrecioPaquete || p.Precio || 0)}</small>
+                <small>$ ${fmt(p.PrecioPaquete || p.Precio || 0)}</small>
+                ${p.Descripcion ? `<span class="paquete-tag-desc">${escaparHtml(p.Descripcion)}</span>` : ''}
             </span>
         `).join('');
 
