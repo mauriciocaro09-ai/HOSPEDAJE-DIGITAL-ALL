@@ -788,17 +788,21 @@ const editarReservaAdmin = async (idReserva) => {
 };
 
 const guardarReservaAdmin = async (event) => {
-    event.preventDefault();
+    if (event?.preventDefault) event.preventDefault();
 
     if (!validarPasoWizard(1)) {
-        mostrarPasoWizard(1);
+        Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Completa los datos del cliente, habitación y fechas.', confirmButtonColor: '#1a2744' });
         return;
     }
 
     if (!validarPasoWizard(2)) {
-        mostrarPasoWizard(2);
+        Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Verifica el método de pago y el estado de la reserva.', confirmButtonColor: '#1a2744' });
         return;
     }
+
+    const btn = document.getElementById('wizard-submit');
+    const btnOrig = btn?.innerHTML;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'; }
 
     const idReserva = document.getElementById('reserva-admin-id')?.value;
     const tipoDocumento = document.getElementById('reserva-admin-tipo-documento')?.value?.trim();
@@ -855,6 +859,7 @@ const guardarReservaAdmin = async (event) => {
         });
     } catch (error) {
         console.error('Error al guardar reserva:', error);
+        if (btn) { btn.disabled = false; btn.innerHTML = btnOrig; }
         Swal.fire({
             icon: 'error',
             title: 'Error al guardar',

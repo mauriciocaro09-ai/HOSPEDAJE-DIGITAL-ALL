@@ -575,7 +575,7 @@
                             </div>
                         </div>
                         <div class="reserva-sidebar-actions">
-                            <button type="submit" class="btn-reserva-guardar" id="wizard-submit">
+                            <button type="button" class="btn-reserva-guardar" id="wizard-submit" onclick="if(typeof guardarReservaAdmin==='function'){guardarReservaAdmin(event)}">
                                 <i class="fa-solid fa-lock"></i> Guardar reserva
                             </button>
                             <button type="button" class="btn-reserva-limpiar" id="btn-reserva-admin-limpiar">
