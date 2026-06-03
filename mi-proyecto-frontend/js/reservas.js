@@ -848,7 +848,7 @@ const guardarReservaAdmin = async (event) => {
             : await requestJson('/reservas', { method: 'POST', body: payload });
 
         cerrarModalReservaAdmin();
-        cargarReservasAdmin();
+        await cargarReservasAdmin();
         Swal.fire({
             icon: 'success',
             title: idReserva ? '¡Reserva actualizada!' : '¡Reserva creada!',
