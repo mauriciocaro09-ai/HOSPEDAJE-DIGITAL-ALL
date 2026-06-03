@@ -26,14 +26,14 @@ const Reservas = {
     const cols = await getReservaCols();
 
     const joinClientes = cols.has("IDCliente")
-      ? "INNER JOIN cliente c ON r.IDCliente = c.NroDocumento"
+      ? "LEFT JOIN cliente c ON r.IDCliente = c.NroDocumento"
       : cols.has("IdCliente")
-        ? "INNER JOIN cliente c ON r.IdCliente = c.NroDocumento"
+        ? "LEFT JOIN cliente c ON r.IdCliente = c.NroDocumento"
         : cols.has("NroDocumentoCliente")
-          ? "INNER JOIN cliente c ON r.NroDocumentoCliente = c.NroDocumento"
-          : null;
+          ? "LEFT JOIN cliente c ON r.NroDocumentoCliente = c.NroDocumento"
+          : "-- sin join cliente";
 
-    if (!joinClientes) {
+    if (joinClientes === "-- sin join cliente") {
       throw new Error(
         "La tabla `Reserva` no tiene `IDCliente`/`IdCliente` ni `NroDocumentoCliente`. No se puede relacionar con Clientes."
       );
