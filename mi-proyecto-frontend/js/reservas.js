@@ -843,12 +843,24 @@ const guardarReservaAdmin = async (event) => {
             ? await requestJson(`/reservas/${idReserva}`, { method: 'PUT', body: payload })
             : await requestJson('/reservas', { method: 'POST', body: payload });
 
-        mostrarMensajeReservaAdmin(resultado?.message || 'Reserva guardada correctamente.', 'ok');
         cerrarModalReservaAdmin();
         cargarReservasAdmin();
+        Swal.fire({
+            icon: 'success',
+            title: idReserva ? '¡Reserva actualizada!' : '¡Reserva creada!',
+            text: resultado?.message || (idReserva ? 'La reserva fue actualizada correctamente.' : 'La reserva fue creada correctamente.'),
+            confirmButtonColor: '#1a2744',
+            timer: 3000,
+            timerProgressBar: true
+        });
     } catch (error) {
         console.error('Error al guardar reserva:', error);
-        mostrarMensajeReservaAdmin('Error al guardar la reserva', 'error');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al guardar',
+            text: error?.message || 'Ocurrió un error al guardar la reserva. Revisá los datos e intentá de nuevo.',
+            confirmButtonColor: '#1a2744'
+        });
     }
 };
 
