@@ -1209,6 +1209,71 @@ function inicializarReservasAdmin() {
         });
     }
 
+    // ── Autocomplete buscador de clientes ──────────────────────────
+    const searchInput = document.getElementById('reserva-admin-search-cliente');
+    if (searchInput) {
+        // Crear dropdown dinámico
+        const dropdown = document.createElement('div');
+        dropdown.id = 'reserva-cliente-dropdown';
+        dropdown.style.cssText = 'position:absolute;z-index:9999;background:#fff;border:1px solid #cbd5e1;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.12);max-height:220px;overflow-y:auto;width:100%;display:none;';
+        searchInput.parentElement.style.position = 'relative';
+        searchInput.parentElement.appendChild(dropdown);
+
+        const llenarClienteEnForm = (c) => {
+            const tipoDoc = document.getElementById('reserva-admin-tipo-documento');
+            const docInput = document.getElementById('reserva-admin-cliente');
+            const contacto = document.getElementById('reserva-admin-contacto');
+            const email    = document.getElementById('reserva-admin-email');
+            const pais     = document.getElementById('reserva-admin-pais');
+
+            searchInput.value = `${c.Nombre || ''} ${c.Apellido || ''}`.trim() + ` (${c.NroDocumento})`;
+            if (tipoDoc) tipoDoc.value = 'CC';
+            if (docInput) docInput.value = c.NroDocumento || '';
+            if (contacto) contacto.value = c.Telefono || '';
+            if (email)    email.value    = c.Email    || '';
+            if (pais)     pais.value     = c.Pais     || '';
+
+            // Abrir el details si está cerrado
+            const details = document.querySelector('.reserva-extra-fields');
+            if (details && !details.open) details.open = true;
+
+            dropdown.style.display = 'none';
+            limpiarErrorInline('reserva-admin-cliente');
+        };
+
+        searchInput.addEventListener('input', () => {
+            const q = normalizarTexto(searchInput.value.trim());
+            dropdown.innerHTML = '';
+            if (!q || q.length < 2) { dropdown.style.display = 'none'; return; }
+
+            const resultados = clientesCargados.filter(c =>
+                normalizarTexto(c.NroDocumento || '').includes(q) ||
+                normalizarTexto(c.Nombre || '').includes(q) ||
+                normalizarTexto(c.Apellido || '').includes(q)
+            ).slice(0, 8);
+
+            if (!resultados.length) {
+                dropdown.innerHTML = '<div style="padding:10px 14px;color:#94a3b8;font-size:13px;">Sin resultados</div>';
+                dropdown.style.display = 'block';
+                return;
+            }
+
+            resultados.forEach(c => {
+                const item = document.createElement('div');
+                item.style.cssText = 'padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f1f5f9;';
+                item.innerHTML = `<strong>${escaparHtml(c.NroDocumento)}</strong> — ${escaparHtml(c.Nombre || '')} ${escaparHtml(c.Apellido || '')}`;
+                item.addEventListener('mousedown', (e) => { e.preventDefault(); llenarClienteEnForm(c); });
+                item.addEventListener('mouseover', () => item.style.background = '#f0f9ff');
+                item.addEventListener('mouseout',  () => item.style.background = '#fff');
+                dropdown.appendChild(item);
+            });
+            dropdown.style.display = 'block';
+        });
+
+        searchInput.addEventListener('blur', () => setTimeout(() => { dropdown.style.display = 'none'; }, 150));
+        document.addEventListener('click', (e) => { if (!dropdown.contains(e.target) && e.target !== searchInput) dropdown.style.display = 'none'; });
+    }
+
     // Asegurar que datepickers estén inicializados cuando se abra el modal
     const btnAbrir = document.getElementById('btn-nuevo-reserva-admin');
     if (btnAbrir) btnAbrir.addEventListener('click', () => {
