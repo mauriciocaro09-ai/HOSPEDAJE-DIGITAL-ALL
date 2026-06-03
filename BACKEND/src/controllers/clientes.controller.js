@@ -86,7 +86,7 @@ exports.create = async (req, res) => {
         await db.query(
           `INSERT INTO usuarios (NombreUsuario, Nombre, Apellido, Email, Contrasena, TipoDocumento, NumeroDocumento, Telefono, Direccion, IDRol, IsActive)
            VALUES (?, ?, ?, ?, ?, 'CC', ?, ?, ?, ?, 1)`,
-          [Nombre || NroDocumento, Nombre || null, Apellido || null, Email, hash, NroDocumento, Telefono || null, Direccion || null, IDRol || 2]
+          [Nombre || NroDocumento, Nombre || null, Apellido || null, Email, hash, NroDocumento, Telefono || null, Direccion || null, 2]
         );
       }
     } catch (syncErr) {
