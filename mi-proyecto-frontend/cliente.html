@@ -2138,9 +2138,16 @@
                 }
                 const dispData = await dispRes.json();
                 if (!dispData.disponible) {
-                    errBox.textContent = 'La habitación no está disponible en las fechas seleccionadas. Por favor elige otras fechas.';
-                    errBox.classList.remove('hidden');
-                    errBox.scrollIntoView({ behavior: 'smooth' });
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: 'Fechas no disponibles',
+                        text: 'La habitación ya tiene una reserva en esas fechas. Por favor selecciona otras fechas.',
+                        confirmButtonColor: '#1a2744',
+                        confirmButtonText: 'Elegir otras fechas'
+                    });
+                    $('nr-fecha-inicio').value = '';
+                    $('nr-fecha-fin').value = '';
+                    actualizarResumen();
                     return;
                 }
             } catch (err) {
