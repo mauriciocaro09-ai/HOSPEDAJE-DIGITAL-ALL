@@ -687,7 +687,7 @@ const poblarSelectsReserva = async () => {
             let paq = await requestJson('/paquetes');
             if (!Array.isArray(paq)) paq = [];
             paq = paq.filter(p => p.Estado == 1 || p.Estado === '1');
-            const opciones = paq.map(p => `<option value="${escaparHtml(p.IDPaquete)}" data-precio="${Number(p.PrecioPaquete || 0)}">${escaparHtml(p.NombrePaquete || 'Paquete')} — $${fmt(p.PrecioPaquete || 0)}</option>`);
+            const opciones = paq.map(p => { const pIva = Math.round(Number(p.PrecioPaquete || 0) * 1.19); return `<option value="${escaparHtml(p.IDPaquete)}" data-precio="${pIva}">${escaparHtml(p.NombrePaquete || 'Paquete')} — $${fmt(pIva)}</option>`; });
             selectPaquetes.innerHTML = '<option value="">Sin paquete</option>' + opciones.join('');
         } catch (err) {
             console.error('No se pudieron cargar paquetes:', err);
@@ -1056,8 +1056,8 @@ const actualizarSidebarResumen = () => {
 
     const habId = habSelect?.value;
     const hab = _habitacionesCache.find(h => String(h.IDHabitacion) === String(habId));
-    const costoHab = hab ? Number(hab.Costo || 0) : 0;
-    const totalHab = costoHab * noches;
+    const costoHabIva = hab ? Math.round(Number(hab.Costo || 0) * 1.19) : 0;
+    const totalHab = costoHabIva * noches;
 
     let totalPaq = 0;
     const paqSel = document.getElementById('reserva-admin-paquetes');
@@ -1072,14 +1072,14 @@ const actualizarSidebarResumen = () => {
         totalServ += Number(tag.dataset.precio || 0);
     });
 
-    const subtotal = totalHab + totalPaq + totalServ;
-    const iva = subtotal * 0.19;
-    const total = subtotal - descuento + iva;
+    const total    = totalHab + totalPaq + totalServ - descuento;
+    const subtotal = Math.round(total / 1.19);
+    const iva      = total - subtotal;
 
     if (sumHab) sumHab.textContent = fmt(totalHab);
     if (sumPaq) sumPaq.textContent = fmt(totalPaq);
     if (sumServ) sumServ.textContent = fmt(totalServ);
-    if (sumIva) sumIva.textContent = fmt(iva);
+    if (sumIva) sumIva.textContent = 'Incluido';
     if (montoDisplay) montoDisplay.textContent = fmt(total);
     if (montoHidden) montoHidden.value = Math.round(total * 100) / 100;
     if (subtotalHidden) subtotalHidden.value = subtotal;
@@ -1143,12 +1143,14 @@ const cargarServiciosVisuales = async () => {
             return;
         }
 
-        lista.innerHTML = servicios.map(s => `
-            <span class="servicio-tag" data-id="${escaparHtml(String(s.IDServicio))}" data-precio="${Number(s.Costo || 0)}" title="${escaparHtml(s.NombreServicio || '')}">
+        lista.innerHTML = servicios.map(s => {
+            const costoIva = Math.round(Number(s.Costo || 0) * 1.19);
+            return `
+            <span class="servicio-tag" data-id="${escaparHtml(String(s.IDServicio))}" data-precio="${costoIva}" title="${escaparHtml(s.NombreServicio || '')}">
                 ${escaparHtml(s.NombreServicio || 'Servicio')}
-                <small>${fmt(s.Costo || 0)}</small>
-            </span>
-        `).join('');
+                <small>$ ${fmt(costoIva)}</small>
+            </span>`;
+        }).join('');
 
         lista.querySelectorAll('.servicio-tag').forEach(tag => {
             tag.addEventListener('click', () => {

@@ -1924,7 +1924,8 @@
                 const sel = $('nr-habitacion');
                 sel.innerHTML = '<option value="">Selecciona una habitación</option>';
                 habitacionesDisponibles.forEach(h => {
-                    sel.innerHTML += `<option value="${h.IDHabitacion}" data-costo="${h.Costo}">${h.NombreHabitacion} — $${fmt(h.Costo)}/noche</option>`;
+                    const costoIva = Math.round(h.Costo * 1.19);
+                    sel.innerHTML += `<option value="${h.IDHabitacion}" data-costo="${costoIva}">${h.NombreHabitacion} — $${fmt(costoIva)}/noche</option>`;
                 });
                 if (idPreselecc) sel.value = idPreselecc;
                 actualizarResumen();
@@ -1956,7 +1957,8 @@
 
                 sel.innerHTML = '<option value="">Sin paquete</option>';
                 paquetes.forEach(p => {
-                    sel.innerHTML += `<option value="${p.IDPaquete}" data-precio="${p.PrecioPaquete}">${p.NombrePaquete} — $${fmt(p.PrecioPaquete)}</option>`;
+                    const precioIva = Math.round(p.PrecioPaquete * 1.19);
+                    sel.innerHTML += `<option value="${p.IDPaquete}" data-precio="${precioIva}">${p.NombrePaquete} — $${fmt(precioIva)}</option>`;
                 });
 
                 sel.addEventListener('change', () => {
@@ -2010,10 +2012,12 @@
                     lista.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No hay servicios disponibles</div>';
                     return;
                 }
-                lista.innerHTML = servicios.map(s => `
+                lista.innerHTML = servicios.map(s => {
+                    const costoIva = Math.round(s.Costo * 1.19);
+                    return `
                     <label class="servicio-item">
                         <input type="checkbox" class="nr-servicio-check"
-                            data-id="${s.IDServicio}" data-costo="${s.Costo}" data-nombre="${s.NombreServicio}">
+                            data-id="${s.IDServicio}" data-costo="${costoIva}" data-nombre="${s.NombreServicio}">
                         ${s.Imagen
                             ? `<img src="${s.Imagen.split(',')[0].trim()}" alt="${s.NombreServicio}" class="servicio-item-img" onerror="this.outerHTML='<span class=\\'servicio-item-img-placeholder\\'><i class=\\'fa-solid fa-concierge-bell\\'></i></span>'">`
                             : `<span class="servicio-item-img-placeholder"><i class="fa-solid fa-concierge-bell"></i></span>`
@@ -2027,9 +2031,9 @@
                                 ${s.Horario ? `<span class="servicio-item-horario"><i class="fa-regular fa-calendar"></i> ${s.Horario}</span>` : ''}
                             </div>` : ''}
                         </div>
-                        <div class="servicio-item-precio">$${fmt(s.Costo)}</div>
+                        <div class="servicio-item-precio">$${fmt(costoIva)}</div>
                     </label>
-                `).join('');
+                `}).join('');
                 lista.querySelectorAll('.nr-servicio-check').forEach(cb => cb.addEventListener('change', actualizarResumen));
             } catch(e) {
                 lista.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No se pudieron cargar los servicios</div>';
@@ -2060,20 +2064,20 @@
                 if (d2 > d1) {
                     const noches   = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
                     const totalHab = noches * costo;
-                    const subTotal = totalHab + costoServicios + costoPaquete;
-                    const iva      = Math.round(subTotal * 0.19);
-                    const total    = subTotal + iva;
+                    const total    = totalHab + costoServicios + costoPaquete;
+                    const subTotal = Math.round(total / 1.19);
+                    const iva      = total - subTotal;
 
                     $('nr-sum-noches').textContent = noches;
                     $('nr-sum-hab').textContent    = `$${fmt(totalHab)}`;
-                    $('nr-sum-iva').textContent    = `$${fmt(iva)}`;
+                    $('nr-sum-iva').textContent    = `Incluido`;
                     $('nr-sum-total').textContent  = `$${fmt(total)}`;
                     return { noches, totalHab, costoServicios, costoPaquete, subTotal, iva, total };
                 }
             }
             $('nr-sum-noches').textContent = '--';
             $('nr-sum-hab').textContent    = '$0';
-            $('nr-sum-iva').textContent    = '$0';
+            $('nr-sum-iva').textContent    = 'Incluido';
             $('nr-sum-total').textContent  = '$0';
             return null;
         }
