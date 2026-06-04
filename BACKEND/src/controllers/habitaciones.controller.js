@@ -123,9 +123,9 @@ const verificarDisponibilidad = async (req, res) => {
     const [[{ total }]] = await db.query(
       `SELECT COUNT(*) AS total
        FROM reserva r
-       JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
+       LEFT JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
        WHERE r.IDHabitacion = ?
-         AND LOWER(e.NombreEstadoReserva) NOT IN ('cancelada', 'completada')
+         AND LOWER(COALESCE(e.NombreEstadoReserva, '')) IN ('confirmada', 'pendiente')
          AND r.FechaInicio < ?
          AND r.FechaFinalizacion > ?`,
       [id, fechaFin, fechaInicio]
