@@ -166,7 +166,7 @@ const crear = async (req, res) => {
         emailData = {
           clienteNombre: nombreCliente,
           clienteEmail: emailCliente,
-          clienteTelefono: req.body.TelefonoCliente || req.body.Telefono || null,
+          clienteTelefono: req.body.TelefonoCliente || req.body.Telefono || req.body.ContactoCliente || null,
           reservaId,
           habitacion: (hab && hab.NombreHabitacion) ? hab.NombreHabitacion : 'Habitacion',
           fechaInicio: req.body.FechaInicio,
