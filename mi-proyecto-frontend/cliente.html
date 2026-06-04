@@ -2057,27 +2057,29 @@
             const fmtFecha = f => f ? new Date(f + 'T12:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }) : '--';
             $('nr-sum-entrada').textContent = fmtFecha(inicio);
             $('nr-sum-salida').textContent  = fmtFecha(fin);
-            $('nr-sum-serv').textContent    = `$${fmt(costoServicios)}`;
 
             if (inicio && fin && costo) {
                 const d1 = new Date(inicio), d2 = new Date(fin);
                 if (d2 > d1) {
-                    const noches   = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
-                    const totalHab = noches * costo;
-                    const total    = totalHab + costoServicios + costoPaquete;
-                    const subTotal = Math.round(total / 1.19);
-                    const iva      = total - subTotal;
+                    const noches      = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+                    const totalConIva = noches * costo + costoServicios + costoPaquete;
+                    const subTotal    = Math.round(totalConIva / 1.19);
+                    const iva         = totalConIva - subTotal;
+                    const habBase     = Math.round(noches * costo / 1.19);
+                    const servBase    = Math.round(costoServicios / 1.19);
 
                     $('nr-sum-noches').textContent = noches;
-                    $('nr-sum-hab').textContent    = `$${fmt(totalHab)}`;
-                    $('nr-sum-iva').textContent    = `Incluido`;
-                    $('nr-sum-total').textContent  = `$${fmt(total)}`;
-                    return { noches, totalHab, costoServicios, costoPaquete, subTotal, iva, total };
+                    $('nr-sum-hab').textContent    = `$${fmt(habBase)}`;
+                    $('nr-sum-serv').textContent   = `$${fmt(servBase)}`;
+                    $('nr-sum-iva').textContent    = `$${fmt(iva)}`;
+                    $('nr-sum-total').textContent  = `$${fmt(totalConIva)}`;
+                    return { noches, totalHab: habBase, costoServicios: servBase, costoPaquete, subTotal, iva, total: totalConIva };
                 }
             }
             $('nr-sum-noches').textContent = '--';
             $('nr-sum-hab').textContent    = '$0';
-            $('nr-sum-iva').textContent    = 'Incluido';
+            $('nr-sum-serv').textContent   = '$0';
+            $('nr-sum-iva').textContent    = '$0';
             $('nr-sum-total').textContent  = '$0';
             return null;
         }
