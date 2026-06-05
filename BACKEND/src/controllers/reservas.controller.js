@@ -1,4 +1,5 @@
 const ReservasService = require("../services/reservas.service");
+const CargosService = require("../services/cargos.service");
 const db = require("../config/db");
 const EmailService = require("../services/email.service");
 const WhatsappService = require("../services/whatsapp.service");
@@ -258,7 +259,7 @@ const cancelar = async (req, res) => {
   }
 };
 
-/* ================= AGREGAR SERVICIOS ================= */
+/* ================= AGREGAR SERVICIOS (crea cargo adicional) ================= */
 
 const agregarServicios = async (req, res) => {
   try {
@@ -267,13 +268,13 @@ const agregarServicios = async (req, res) => {
     if (!Array.isArray(servicios) || servicios.length === 0) {
       return res.status(400).json({ error: 'Se requiere al menos un servicio' });
     }
-    const result = await ReservasService.agregarServicios(id, servicios);
-    return res.status(200).json({ mensaje: 'Servicios agregados correctamente', ...result });
+    const cargos = await CargosService.crear(id, servicios);
+    return res.status(201).json({ mensaje: 'Cargo adicional creado', cargos });
   } catch (error) {
     if (error.code === 'ESTADO_INVALIDO') return res.status(400).json({ error: error.message });
     if (error.code === 'NOT_FOUND') return res.status(404).json({ error: error.message });
     console.error('RESERVAS ERROR:', error);
-    return res.status(500).json({ error: 'Error al agregar servicios', detalle: error.message });
+    return res.status(500).json({ error: 'Error al crear cargo adicional', detalle: error.message });
   }
 };
 

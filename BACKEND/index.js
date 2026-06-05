@@ -67,6 +67,20 @@ const crearTablasDetalle = async () => {
                 Estado TINYINT(1) DEFAULT 1
             )
         `);
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS cargo_adicional (
+                IDCargo INT AUTO_INCREMENT PRIMARY KEY,
+                IDReserva INT NOT NULL,
+                IDServicio INT NOT NULL,
+                Cantidad INT NOT NULL DEFAULT 1,
+                PrecioUnitario DECIMAL(10,2) NOT NULL DEFAULT 0,
+                PrecioTotal DECIMAL(10,2) NOT NULL DEFAULT 0,
+                Estado VARCHAR(20) NOT NULL DEFAULT 'pendiente',
+                IDMetodoPago INT NULL,
+                FechaCreacion DATETIME DEFAULT NOW(),
+                FechaPago DATETIME NULL
+            )
+        `);
         console.log('Tablas de detalle verificadas.');
     } catch (err) {
         console.warn('No se pudieron crear tablas de detalle:', err.message);

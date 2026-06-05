@@ -1111,6 +1111,22 @@
                 </div>
             </div>
 
+            <!-- MODAL: PAGAR CARGO ADICIONAL -->
+            <div id="modal-pagar-cargo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1200;align-items:center;justify-content:center;padding:16px;">
+                <div style="background:#fff;border-radius:16px;width:min(380px,100%);padding:28px;position:relative;">
+                    <button onclick="cerrarPagarCargo()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#6b7280;">&times;</button>
+                    <h3 style="margin:0 0 6px;font-size:17px;color:#1a2744;"><i class="fa-solid fa-credit-card" style="margin-right:6px;color:var(--primary)"></i>Registrar pago</h3>
+                    <p style="margin:0 0 18px;font-size:13px;color:var(--muted)">Seleccioná el método de pago para este cargo adicional.</p>
+                    <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Método de pago</label>
+                    <select id="pagar-cargo-metodo" style="width:100%;border:1px solid #d1d5db;border-radius:8px;padding:9px 12px;font-size:14px;margin-bottom:18px;">
+                        <option value="">Seleccionar...</option>
+                    </select>
+                    <button onclick="confirmarPagarCargo()" style="width:100%;background:var(--primary);color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;">
+                        <i class="fa-solid fa-check"></i> Confirmar pago
+                    </button>
+                </div>
+            </div>
+
             <!-- SECCIÓN: NUEVA RESERVA -->
             <section class="section" id="seccion-nueva-reserva">
                 <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
@@ -1865,6 +1881,35 @@
                 const estado = (r.NombreEstadoReserva || '').toLowerCase();
                 const puedeAgregarServicios = estado === 'confirmada' || estado === 'pendiente';
 
+                // Cargar cargos adicionales
+                let cargosHtml = '';
+                try {
+                    const cargos = await apiFetch(`/cargos/reserva/${r.IdReserva}`);
+                    const badgeCargo = e => {
+                        const m = { pendiente: ['#f59e0b','#fffbeb'], pagado: ['#10b981','#ecfdf5'], cancelado: ['#6b7280','#f9fafb'] };
+                        const [c, bg] = m[e] || ['#6b7280','#f9fafb'];
+                        return `<span style="background:${bg};color:${c};border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;">${e}</span>`;
+                    };
+                    if (cargos.length) {
+                        cargosHtml = cargos.map(c => `
+                            <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0f0;" id="cargo-row-${c.IDCargo}">
+                                <div style="flex:1">
+                                    <div style="font-size:13px;font-weight:600;color:#1a2744">${c.NombreServicio} <span style="color:var(--muted);font-weight:400">x${c.Cantidad}</span></div>
+                                    <div style="font-size:12px;color:var(--muted)">$${fmt(c.PrecioTotal)} (IVA incl.) ${c.NombreMetodoPago ? '· ' + c.NombreMetodoPago : ''}</div>
+                                </div>
+                                ${badgeCargo(c.Estado)}
+                                ${c.Estado === 'pendiente' ? `
+                                    <button onclick="abrirPagarCargo(${c.IDCargo}, ${r.IdReserva})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:600;">Pagar</button>
+                                    <button onclick="cancelarCargo(${c.IDCargo}, ${r.IdReserva})" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">✕</button>
+                                ` : ''}
+                            </div>`).join('');
+                    } else {
+                        cargosHtml = '<p style="color:var(--muted);font-size:13px;margin:0">Sin cargos adicionales</p>';
+                    }
+                } catch(ce) {
+                    cargosHtml = '<p style="color:var(--muted);font-size:13px;margin:0">Sin cargos adicionales</p>';
+                }
+
                 contenido.innerHTML = `
                     <div class="det-seccion">
                         <h4>Información general</h4>
@@ -1876,10 +1921,7 @@
                         <div class="det-fila"><span>Método de pago</span><strong>${r.NomMetodoPago || '—'}</strong></div>
                     </div>
                     <div class="det-seccion">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                            <h4 style="margin:0">Servicios adicionales</h4>
-                            ${puedeAgregarServicios ? `<button onclick="abrirAgregarServicios(${r.IdReserva})" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;"><i class="fa-solid fa-plus"></i> Agregar</button>` : ''}
-                        </div>
+                        <h4>Servicios de la reserva</h4>
                         ${serviciosHtml}
                     </div>
                     <div class="det-seccion">
@@ -1887,8 +1929,15 @@
                         ${paquetesHtml}
                     </div>
                     <div class="det-total">
-                        <span>Total pagado</span>
+                        <span>Total reserva</span>
                         <span>$${fmt(r.Monto_Total || 0)}</span>
+                    </div>
+                    <div class="det-seccion" style="margin-top:16px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                            <h4 style="margin:0;color:var(--accent)"><i class="fa-solid fa-circle-plus" style="margin-right:5px;"></i>Cargos adicionales</h4>
+                            ${puedeAgregarServicios ? `<button onclick="abrirAgregarServicios(${r.IdReserva})" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fa-solid fa-plus"></i> Agregar</button>` : ''}
+                        </div>
+                        ${cargosHtml}
                     </div>`;
             } catch(e) {
                 contenido.innerHTML = '<p style="color:var(--muted);text-align:center">No se pudo cargar el detalle.</p>';
@@ -1943,10 +1992,11 @@
         async function confirmarAgregarServicio(idServicio) {
             const qty = parseInt(document.getElementById(`qty-srv-${idServicio}`)?.value || '1');
             try {
-                await apiFetch(`/reservas/${_reservaIdParaServicios}/servicios`, 'POST', {
-                    servicios: [{ IDServicio: idServicio, cantidad: qty }]
+                await apiFetch(`/reservas/${_reservaIdParaServicios}/servicios`, {
+                    method: 'POST',
+                    body: JSON.stringify({ servicios: [{ IDServicio: idServicio, cantidad: qty }] })
                 });
-                showToast('Servicio agregado correctamente', 'success');
+                showToast('Cargo adicional creado. Pendiente de pago.', 'success');
                 cerrarAgregarServicios();
                 verDetalleReserva(_reservaIdParaServicios);
             } catch(e) {
@@ -1962,6 +2012,64 @@
         $('modal-agregar-servicios').addEventListener('click', e => {
             if (e.target === $('modal-agregar-servicios')) cerrarAgregarServicios();
         });
+
+        // ── PAGAR CARGO ADICIONAL ─────────────────────
+        let _cargoIdPagar = null;
+        let _reservaIdPagar = null;
+
+        async function abrirPagarCargo(idCargo, idReserva) {
+            _cargoIdPagar = idCargo;
+            _reservaIdPagar = idReserva;
+            const modal = $('modal-pagar-cargo');
+            const sel = $('pagar-cargo-metodo');
+            modal.style.display = 'flex';
+            sel.innerHTML = '<option value="">Cargando...</option>';
+            try {
+                const metodos = await apiFetch('/reservas/metodos-pago');
+                sel.innerHTML = metodos.map(m =>
+                    `<option value="${m.IdMetodoPago}">${m.NombreMetodoPago}</option>`
+                ).join('');
+            } catch(e) {
+                sel.innerHTML = '<option value="">Error cargando métodos</option>';
+            }
+        }
+
+        async function confirmarPagarCargo() {
+            const idMetodo = $('pagar-cargo-metodo').value;
+            if (!idMetodo) return showToast('Seleccioná un método de pago', 'error');
+            try {
+                await apiFetch(`/cargos/${_cargoIdPagar}/pagar`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ IDMetodoPago: idMetodo })
+                });
+                showToast('Pago registrado correctamente', 'success');
+                cerrarPagarCargo();
+                verDetalleReserva(_reservaIdPagar);
+            } catch(e) {
+                showToast(e.message || 'Error al procesar pago', 'error');
+            }
+        }
+
+        function cerrarPagarCargo() {
+            $('modal-pagar-cargo').style.display = 'none';
+            _cargoIdPagar = null;
+            _reservaIdPagar = null;
+        }
+
+        $('modal-pagar-cargo').addEventListener('click', e => {
+            if (e.target === $('modal-pagar-cargo')) cerrarPagarCargo();
+        });
+
+        async function cancelarCargo(idCargo, idReserva) {
+            if (!confirm('¿Cancelar este cargo adicional?')) return;
+            try {
+                await apiFetch(`/cargos/${idCargo}`, { method: 'DELETE' });
+                showToast('Cargo cancelado', 'success');
+                verDetalleReserva(idReserva);
+            } catch(e) {
+                showToast(e.message || 'Error al cancelar cargo', 'error');
+            }
+        }
 
         // ── NUEVA RESERVA (vista completa) ───────
         let _nrIdPreselecc = null;
