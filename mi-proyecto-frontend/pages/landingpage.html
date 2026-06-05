@@ -920,7 +920,7 @@
                             <div class="card-slide${si === 0 ? ' active' : ''} absolute inset-0">
                                 <img src="${src}" alt="${s.NombreServicio || 'Servicio'}"
                                      class="w-full h-full object-cover"
-                                     onerror="this.onerror=null;this.style.display='none';">
+                                     onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\\'absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/80 to-primary\\'><i class=\\'fa-solid ${icono} text-white text-5xl opacity-80\\'></i></div>';">
                             </div>`).join('')
                         : srvFallbackSlide;
 
