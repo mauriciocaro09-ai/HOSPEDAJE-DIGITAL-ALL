@@ -979,9 +979,10 @@ const renderCargosAdicionalesSection = async (idReserva, estadoNombreOriginal) =
             let serviciosOptions = '<option value="">Seleccionar servicio...</option>';
             try {
                 const servicios = await requestJson('/servicios?soloActivos=true');
-                serviciosOptions += (Array.isArray(servicios) ? servicios : []).map(s =>
-                    `<option value="${escaparHtml(String(s.IDServicio))}">${escaparHtml(s.NombreServicio)} — ${fmt(s.Costo)}</option>`
-                ).join('');
+                serviciosOptions += (Array.isArray(servicios) ? servicios : []).map(s => {
+                    const costoIva = Math.round(Number(s.Costo || 0) * 1.19);
+                    return `<option value="${escaparHtml(String(s.IDServicio))}">${escaparHtml(s.NombreServicio)} — ${fmt(costoIva)} (IVA incl.)</option>`;
+                }).join('');
             } catch(e) {}
 
             html += `
