@@ -925,6 +925,30 @@ const verDetalleReserva = async (idReserva) => {
         const r = await requestJson(`/reservas/${idReserva}`);
         const estado = normalizarEstadoReserva(r.NombreEstadoReserva);
 
+        // Cargar cargos adicionales
+        let cargosHtml = '<p class="detalle-valor muted">Sin cargos adicionales</p>';
+        try {
+            const cargos = await requestJson(`/cargos/reserva/${r.IdReserva}`);
+            if (cargos && cargos.length) {
+                const badgeColor = { pendiente: '#f59e0b', pagado: '#10b981', cancelado: '#9ca3af' };
+                cargosHtml = cargos.map(c => `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f3f4f6;">
+                        <div>
+                            <span style="font-size:13px;font-weight:600;">${escaparHtml(c.NombreServicio || '')} x${c.Cantidad}</span>
+                            <span style="font-size:11px;color:#6b7280;margin-left:6px;">${c.NomMetodoPago ? '· ' + escaparHtml(c.NomMetodoPago) : ''}</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <strong style="font-size:13px;">${fmt(c.PrecioTotal)}</strong>
+                            <span style="background:${badgeColor[c.Estado] || '#9ca3af'}20;color:${badgeColor[c.Estado] || '#9ca3af'};border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;">${c.Estado}</span>
+                        </div>
+                    </div>`).join('');
+                const totalCargos = cargos.filter(c => c.Estado === 'pagado').reduce((s, c) => s + Number(c.PrecioTotal), 0);
+                if (totalCargos > 0) {
+                    cargosHtml += `<p style="text-align:right;font-size:12px;margin-top:6px;color:#6b7280;">Total pagado en extras: <strong>${fmt(totalCargos)}</strong></p>`;
+                }
+            }
+        } catch(e) { /* sin cargos */ }
+
         contenido.innerHTML = `
             <div class="detalle-reserva-seccion">
                 <h5>Reserva #${escaparHtml(String(r.IdReserva || ''))}</h5>
@@ -945,11 +969,15 @@ const verDetalleReserva = async (idReserva) => {
                 <p class="detalle-valor">${fmtFecha(r.FechaInicio)} → ${fmtFecha(r.FechaFinalizacion)}</p>
             </div>
             <div class="detalle-reserva-seccion">
-                <p class="detalle-label">Pago</p>
+                <p class="detalle-label">Pago reserva</p>
                 <p class="detalle-valor">Método: ${escaparHtml(r.NomMetodoPago || '—')}</p>
                 <p class="detalle-valor">Subtotal: ${fmt(r.Sub_Total || r.SubTotal)}</p>
                 <p class="detalle-valor">Descuento: ${fmt(r.Descuento)}</p>
                 <p class="detalle-valor"><strong>Total: ${fmt(r.Monto_Total || r.MontoTotal)}</strong></p>
+            </div>
+            <div class="detalle-reserva-seccion">
+                <p class="detalle-label" style="color:#f59e0b;">Cargos adicionales</p>
+                ${cargosHtml}
             </div>
         `;
 
