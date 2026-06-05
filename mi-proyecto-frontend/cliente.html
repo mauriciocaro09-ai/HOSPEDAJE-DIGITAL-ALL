@@ -1380,6 +1380,10 @@
             return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
         }
 
+        function showToast(msg, tipo = 'success') {
+            Swal.fire({ icon: tipo === 'error' ? 'error' : 'success', title: msg, toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true });
+        }
+
         async function apiFetch(path, options = {}) {
             const res = await fetch(`${API_URL}${path}`, {
                 ...options,
