@@ -913,6 +913,96 @@ const cerrarModalReservaAdmin = () => {
 const fmt = (v) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(v || 0);
 const fmtFecha = (f) => f ? f.toString().slice(0, 10) : '—';
 
+const renderCargosAdicionalesSection = async (idReserva, estadoNombreOriginal) => {
+    const container = document.getElementById('cargos-adicionales-container');
+    if (!container) return;
+
+    const puedeAgregar = ['confirmada', 'pendiente'].includes(
+        normalizarTexto(estadoNombreOriginal || '')
+    );
+
+    const metodosPermitidos = metodosPagoCargados.filter(m =>
+        (m.NombreMetodoPago || m.NomMetodoPago || '').toLowerCase().includes('efectivo') ||
+        (m.NombreMetodoPago || m.NomMetodoPago || '').toLowerCase().includes('transferencia')
+    );
+    const opcionesMetodo = metodosPermitidos.map(m =>
+        `<option value="${escaparHtml(String(m.IdMetodoPago))}">${escaparHtml(m.NombreMetodoPago || m.NomMetodoPago)}</option>`
+    ).join('');
+
+    try {
+        const cargos = await requestJson(`/cargos/reserva/${idReserva}`);
+        const badgeColor = { pendiente: '#f59e0b', pagado: '#10b981', cancelado: '#9ca3af' };
+
+        let html = '';
+
+        if (!cargos || !cargos.length) {
+            html = '<p style="font-size:13px;color:#9ca3af;margin:0 0 10px;">Sin cargos adicionales</p>';
+        } else {
+            html = cargos.map(c => {
+                let acciones = '';
+                if (c.Estado === 'pendiente') {
+                    acciones = `
+                        <div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                            <select id="metodo-cargo-${c.IDCargo}" style="font-size:11px;padding:3px 6px;border:1px solid #d1d5db;border-radius:4px;">
+                                <option value="">Método de pago...</option>
+                                ${opcionesMetodo}
+                            </select>
+                            <button onclick="pagarCargoAdicional(${idReserva}, ${c.IDCargo}, '${escaparHtml(estadoNombreOriginal)}')" style="font-size:11px;padding:3px 10px;background:#10b981;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;">Pagar</button>
+                            <button onclick="cancelarCargoAdicional(${idReserva}, ${c.IDCargo}, '${escaparHtml(estadoNombreOriginal)}')" style="font-size:11px;padding:3px 10px;background:#ef4444;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;">Cancelar</button>
+                        </div>`;
+                }
+                return `
+                    <div style="padding:8px 0;border-bottom:1px solid #f3f4f6;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <span style="font-size:13px;font-weight:600;">${escaparHtml(c.NombreServicio || '')} x${c.Cantidad}</span>
+                                <span style="font-size:11px;color:#6b7280;margin-left:6px;">${c.NomMetodoPago ? '· ' + escaparHtml(c.NomMetodoPago) : ''}</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <strong style="font-size:13px;">${fmt(c.PrecioTotal)}</strong>
+                                <span style="background:${badgeColor[c.Estado] || '#9ca3af'}20;color:${badgeColor[c.Estado] || '#9ca3af'};border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;">${c.Estado}</span>
+                            </div>
+                        </div>
+                        ${acciones}
+                    </div>`;
+            }).join('');
+
+            const totalPagado = cargos.filter(c => c.Estado === 'pagado').reduce((s, c) => s + Number(c.PrecioTotal), 0);
+            if (totalPagado > 0) {
+                html += `<p style="text-align:right;font-size:12px;margin-top:6px;color:#6b7280;">Total pagado en extras: <strong>${fmt(totalPagado)}</strong></p>`;
+            }
+        }
+
+        if (puedeAgregar) {
+            let serviciosOptions = '<option value="">Seleccionar servicio...</option>';
+            try {
+                const servicios = await requestJson('/servicios?soloActivos=true');
+                serviciosOptions += (Array.isArray(servicios) ? servicios : []).map(s =>
+                    `<option value="${escaparHtml(String(s.IDServicio))}">${escaparHtml(s.NombreServicio)} — ${fmt(s.Costo)}</option>`
+                ).join('');
+            } catch(e) {}
+
+            html += `
+                <div style="margin-top:12px;padding-top:12px;border-top:2px dashed #e5e7eb;">
+                    <p style="font-size:12px;font-weight:600;color:#374151;margin:0 0 8px;">Agregar cargo extra</p>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <select id="nuevo-cargo-servicio" style="flex:1;min-width:150px;font-size:12px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;">
+                            ${serviciosOptions}
+                        </select>
+                        <input id="nuevo-cargo-cantidad" type="number" min="1" value="1"
+                            style="width:60px;font-size:12px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;text-align:center;" />
+                        <button onclick="agregarCargoAdicional(${idReserva}, '${escaparHtml(estadoNombreOriginal)}')"
+                            style="font-size:12px;padding:5px 14px;background:#3b82f6;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">+ Agregar</button>
+                    </div>
+                </div>`;
+        }
+
+        container.innerHTML = html;
+    } catch(e) {
+        container.innerHTML = '<p style="font-size:12px;color:#ef4444;margin:0;">Error cargando cargos.</p>';
+    }
+};
+
 const verDetalleReserva = async (idReserva) => {
     const modal = document.getElementById('modal-detalle-reserva');
     const contenido = document.getElementById('detalle-reserva-contenido');
@@ -924,30 +1014,6 @@ const verDetalleReserva = async (idReserva) => {
     try {
         const r = await requestJson(`/reservas/${idReserva}`);
         const estado = normalizarEstadoReserva(r.NombreEstadoReserva);
-
-        // Cargar cargos adicionales
-        let cargosHtml = '<p class="detalle-valor muted">Sin cargos adicionales</p>';
-        try {
-            const cargos = await requestJson(`/cargos/reserva/${r.IdReserva}`);
-            if (cargos && cargos.length) {
-                const badgeColor = { pendiente: '#f59e0b', pagado: '#10b981', cancelado: '#9ca3af' };
-                cargosHtml = cargos.map(c => `
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f3f4f6;">
-                        <div>
-                            <span style="font-size:13px;font-weight:600;">${escaparHtml(c.NombreServicio || '')} x${c.Cantidad}</span>
-                            <span style="font-size:11px;color:#6b7280;margin-left:6px;">${c.NomMetodoPago ? '· ' + escaparHtml(c.NomMetodoPago) : ''}</span>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <strong style="font-size:13px;">${fmt(c.PrecioTotal)}</strong>
-                            <span style="background:${badgeColor[c.Estado] || '#9ca3af'}20;color:${badgeColor[c.Estado] || '#9ca3af'};border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;">${c.Estado}</span>
-                        </div>
-                    </div>`).join('');
-                const totalCargos = cargos.filter(c => c.Estado === 'pagado').reduce((s, c) => s + Number(c.PrecioTotal), 0);
-                if (totalCargos > 0) {
-                    cargosHtml += `<p style="text-align:right;font-size:12px;margin-top:6px;color:#6b7280;">Total pagado en extras: <strong>${fmt(totalCargos)}</strong></p>`;
-                }
-            }
-        } catch(e) { /* sin cargos */ }
 
         contenido.innerHTML = `
             <div class="detalle-reserva-seccion">
@@ -977,9 +1043,11 @@ const verDetalleReserva = async (idReserva) => {
             </div>
             <div class="detalle-reserva-seccion">
                 <p class="detalle-label" style="color:#f59e0b;">Cargos adicionales</p>
-                ${cargosHtml}
+                <div id="cargos-adicionales-container"><p style="text-align:center;font-size:12px;color:#9ca3af;margin:0;">Cargando...</p></div>
             </div>
         `;
+
+        renderCargosAdicionalesSection(r.IdReserva, r.NombreEstadoReserva);
 
         const btnEditar = document.getElementById('btn-detalle-editar');
         if (btnEditar) {
@@ -1411,6 +1479,52 @@ if (document.readyState === 'loading') {
         }, 100);
     });
 }
+
+    // Acciones de cargos adicionales (llamadas desde onclick inline del modal)
+    window.agregarCargoAdicional = async (idReserva, estadoNombre) => {
+        const selectSrv = document.getElementById('nuevo-cargo-servicio');
+        const inputCantidad = document.getElementById('nuevo-cargo-cantidad');
+        if (!selectSrv || !inputCantidad) return;
+        const idServicio = selectSrv.value;
+        const cantidad = parseInt(inputCantidad.value) || 1;
+        if (!idServicio) return Swal.fire('Atención', 'Seleccioná un servicio', 'warning');
+        try {
+            await requestJson(`/cargos/reserva/${idReserva}`, { method: 'POST', body: { servicios: [{ IDServicio: idServicio, cantidad }] } });
+            await renderCargosAdicionalesSection(idReserva, estadoNombre);
+        } catch(e) {
+            Swal.fire('Error', 'No se pudo agregar el cargo', 'error');
+        }
+    };
+
+    window.pagarCargoAdicional = async (idReserva, idCargo, estadoNombre) => {
+        const select = document.getElementById(`metodo-cargo-${idCargo}`);
+        const idMetodoPago = select ? select.value : '';
+        if (!idMetodoPago) return Swal.fire('Atención', 'Seleccioná un método de pago', 'warning');
+        try {
+            await requestJson(`/cargos/${idCargo}/pagar`, { method: 'PUT', body: { IDMetodoPago: idMetodoPago } });
+            await renderCargosAdicionalesSection(idReserva, estadoNombre);
+        } catch(e) {
+            Swal.fire('Error', 'No se pudo registrar el pago', 'error');
+        }
+    };
+
+    window.cancelarCargoAdicional = async (idReserva, idCargo, estadoNombre) => {
+        const result = await Swal.fire({
+            title: '¿Cancelar cargo?',
+            text: 'Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, cancelar',
+            cancelButtonText: 'No'
+        });
+        if (!result.isConfirmed) return;
+        try {
+            await requestJson(`/cargos/${idCargo}`, { method: 'DELETE' });
+            await renderCargosAdicionalesSection(idReserva, estadoNombre);
+        } catch(e) {
+            Swal.fire('Error', 'No se pudo cancelar el cargo', 'error');
+        }
+    };
 
     // exportar las funciones necesarias al scope global
     window.cargarReservasAdmin = cargarReservasAdmin;

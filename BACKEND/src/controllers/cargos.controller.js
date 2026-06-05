@@ -2,6 +2,20 @@ const CargosService = require('../services/cargos.service');
 
 const CargosController = {
 
+  crear: async (req, res) => {
+    try {
+      const { servicios } = req.body;
+      if (!servicios || !servicios.length) return res.status(400).json({ error: 'Servicios requeridos' });
+      const cargos = await CargosService.crear(req.params.idReserva, servicios);
+      res.json(cargos);
+    } catch (error) {
+      if (error.code === 'NOT_FOUND') return res.status(404).json({ error: error.message });
+      if (error.code === 'ESTADO_INVALIDO') return res.status(400).json({ error: error.message });
+      console.error(error);
+      res.status(500).json({ error: 'Error creando cargo adicional' });
+    }
+  },
+
   obtenerPorReserva: async (req, res) => {
     try {
       const data = await CargosService.obtenerPorReserva(req.params.idReserva);

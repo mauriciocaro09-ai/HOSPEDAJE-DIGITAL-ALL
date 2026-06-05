@@ -5,6 +5,7 @@ const verificarToken = require('../middlewares/auth.middleware');
 
 router.use(verificarToken);
 
+router.post('/reserva/:idReserva', CargosController.crear);
 router.get('/reserva/:idReserva', CargosController.obtenerPorReserva);
 router.put('/:id/pagar', CargosController.pagar);
 router.delete('/:id', CargosController.cancelar);
