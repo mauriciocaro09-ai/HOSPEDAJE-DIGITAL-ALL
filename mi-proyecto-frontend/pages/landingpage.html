@@ -754,6 +754,10 @@
                             <div class="absolute bottom-3 right-3 z-10 bg-primary/90 backdrop-blur text-white text-sm font-bold px-3 py-1.5 rounded-xl shadow">
                                 $${Math.round(Number(room.Costo || 0) * 1.19).toLocaleString('es-CO')} <span class="font-normal text-white/70 text-xs">/ noche</span>
                             </div>
+                            <!-- Botón ver detalle -->
+                            <button class="btn-ver-detalle absolute top-3 right-3 z-10" data-idx="${index}" aria-label="Ver detalle">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
                             <!-- Flechas -->
                             <button class="card-prev card-arrow" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
                             <button class="card-next card-arrow" aria-label="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
@@ -764,11 +768,6 @@
                         <div class="p-6">
                             <div class="flex items-start justify-between gap-2 mb-1">
                                 <h3 class="text-lg font-bold text-secondary">${room.NombreHabitacion || 'Suite Ejecutiva'}</h3>
-                                <button class="btn-ver-detalle flex-shrink-0"
-                                    data-idx="${index}"
-                                    title="Ver detalle">
-                                    <i class="fa-regular fa-eye"></i>
-                                </button>
                             </div>
                             <p class="text-gray-400 text-sm leading-relaxed mb-5 line-clamp-2">${room.Descripcion || 'Un oasis de tranquilidad con vistas espectaculares y diseño minimalista.'}</p>
                             <a href="../login.html"
