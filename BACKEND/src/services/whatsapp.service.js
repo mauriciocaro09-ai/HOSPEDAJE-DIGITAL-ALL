@@ -78,7 +78,7 @@ const enviarMensaje = async (telefono, mensaje) => {
 };
 
 /**
- * Envía mensaje de confirmación de reserva al cliente.
+ * Envía mensaje de confirmación de reserva usando la plantilla aprobada por Meta.
  */
 const enviarConfirmacionReserva = async ({
   clienteNombre,
@@ -89,18 +89,74 @@ const enviarConfirmacionReserva = async ({
   fechaFin,
   montoTotal,
 }) => {
-  const mensaje =
-    `✅ *Reserva Confirmada - Hospedaje Digital*\n\n` +
-    `Hola *${clienteNombre}*, tu reserva ha sido registrada.\n\n` +
-    `📋 *Detalles:*\n` +
-    `• Reserva N°: *#${reservaId}*\n` +
-    `• Habitación: *${habitacion}*\n` +
-    `• Entrada: *${new Date(fechaInicio).toLocaleDateString('es-CO', { dateStyle: 'long' })}*\n` +
-    `• Salida: *${new Date(fechaFin).toLocaleDateString('es-CO', { dateStyle: 'long' })}*\n` +
-    `• Total: *$${Number(montoTotal).toLocaleString('es-CO')}*\n\n` +
-    `Gracias por elegirnos. 🏨`;
+  const numero = formatearNumero(clienteTelefono);
+  if (!numero) {
+    console.warn(`[WA] Teléfono inválido: "${clienteTelefono}"`);
+    return false;
+  }
+  if (!TOKEN || !PHONE_ID) {
+    console.warn('[WA] WHATSAPP_TOKEN o WHATSAPP_PHONE_ID no configurados');
+    return false;
+  }
 
-  return enviarMensaje(clienteTelefono, mensaje);
+  const fmt = (fecha) => new Date(fecha).toLocaleDateString('es-CO', { dateStyle: 'long' });
+
+  const body = JSON.stringify({
+    messaging_product: 'whatsapp',
+    to: numero,
+    type: 'template',
+    template: {
+      name: 'confirmacion_reserva',
+      language: { code: 'es_CO' },
+      components: [{
+        type: 'body',
+        parameters: [
+          { type: 'text', text: clienteNombre },
+          { type: 'text', text: String(reservaId) },
+          { type: 'text', text: habitacion },
+          { type: 'text', text: fmt(fechaInicio) },
+          { type: 'text', text: fmt(fechaFin) },
+          { type: 'text', text: `$${Number(montoTotal).toLocaleString('es-CO')}` },
+        ],
+      }],
+    },
+  });
+
+  return new Promise((resolve) => {
+    const options = {
+      hostname: 'graph.facebook.com',
+      path: `/v25.0/${PHONE_ID}/messages`,
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${TOKEN}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        console.log(`[WA] Status: ${res.statusCode} | Body: ${data}`);
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          console.log(`[WA] ✅ Plantilla enviada a ${clienteTelefono}`);
+          resolve(true);
+        } else {
+          console.error(`[WA] ❌ Error ${res.statusCode}:`, data);
+          resolve(false);
+        }
+      });
+    });
+
+    req.on('error', (err) => {
+      console.error('[WA] Error de red:', err.message);
+      resolve(false);
+    });
+
+    req.write(body);
+    req.end();
+  });
 };
 
 const WhatsappService = {
