@@ -272,7 +272,7 @@
                 <div class="hab-detalle-meta">
                     <div class="hab-detalle-precio">
                         <span class="hab-detalle-precio-val" id="srv-detalle-precio"></span>
-                        <span class="hab-detalle-precio-label">/ servicio</span>
+                        <span class="hab-detalle-precio-label">/ servicio · IVA incl.</span>
                     </div>
                     <span id="srv-detalle-info" class="hab-detalle-badge"></span>
                 </div>
@@ -942,7 +942,7 @@
                             ${dotsHtml}
                             <!-- Precio -->
                             <div class="absolute bottom-3 right-3 z-10 bg-primary/90 backdrop-blur text-white text-sm font-bold px-3 py-1.5 rounded-xl shadow">
-                                $${Math.round(Number(s.Costo || 0) * 1.19).toLocaleString('es-CO')} <span class="font-normal text-white/70 text-xs">/ servicio</span>
+                                $${Math.round(Number(s.Costo || 0) * 1.19).toLocaleString('es-CO')} <span class="font-normal text-white/70 text-xs">/ servicio · IVA incl.</span>
                             </div>
                             <!-- Botón ver detalle -->
                             <button class="btn-ver-detalle-srv absolute top-3 right-3 z-10" data-idx="${i}" aria-label="Ver detalle">
