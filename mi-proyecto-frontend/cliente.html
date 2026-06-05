@@ -1899,7 +1899,7 @@
                             <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0f0;" id="cargo-row-${c.IDCargo}">
                                 <div style="flex:1">
                                     <div style="font-size:13px;font-weight:600;color:#1a2744">${c.NombreServicio} <span style="color:var(--muted);font-weight:400">x${c.Cantidad}</span></div>
-                                    <div style="font-size:12px;color:var(--muted)">$${fmt(c.PrecioTotal)} (IVA incl.) ${c.NombreMetodoPago ? '· ' + c.NombreMetodoPago : ''}</div>
+                                    <div style="font-size:12px;color:var(--muted)">$${fmt(c.PrecioTotal)} (IVA incl.) ${c.NomMetodoPago ? '· ' + c.NomMetodoPago : ''}</div>
                                 </div>
                                 ${badgeCargo(c.Estado)}
                                 ${c.Estado === 'pendiente' ? `

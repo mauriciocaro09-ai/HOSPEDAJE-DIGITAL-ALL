@@ -44,7 +44,7 @@ const CargosService = {
 
   obtenerPorReserva: async (idReserva) => {
     const [rows] = await db.query(
-      `SELECT ca.*, s.NombreServicio, mp.NombreMetodoPago
+      `SELECT ca.*, s.NombreServicio, mp.NomMetodoPago
        FROM cargo_adicional ca
        LEFT JOIN servicio s ON ca.IDServicio = s.IDServicio
        LEFT JOIN metodopago mp ON ca.IDMetodoPago = mp.IdMetodoPago
