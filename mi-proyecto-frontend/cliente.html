@@ -1099,6 +1099,18 @@
                 </div>
             </div>
 
+            <!-- MODAL: AGREGAR SERVICIOS A RESERVA -->
+            <div id="modal-agregar-servicios" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1100;align-items:center;justify-content:center;padding:16px;">
+                <div style="background:#fff;border-radius:16px;width:min(480px,100%);max-height:85vh;overflow-y:auto;padding:28px;position:relative;">
+                    <button onclick="cerrarAgregarServicios()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#6b7280;">&times;</button>
+                    <h3 style="margin:0 0 6px;font-size:17px;color:#1a2744;display:flex;align-items:center;gap:8px;">
+                        <i class="fa-solid fa-concierge-bell"></i> Agregar servicios
+                    </h3>
+                    <p style="margin:0 0 16px;font-size:13px;color:var(--muted)">Seleccioná la cantidad y hacé clic en <strong>+</strong> para agregar a tu reserva.</p>
+                    <div id="agregar-srv-lista"></div>
+                </div>
+            </div>
+
             <!-- SECCIÓN: NUEVA RESERVA -->
             <section class="section" id="seccion-nueva-reserva">
                 <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
@@ -1850,6 +1862,9 @@
                         </div>`).join('')
                     : '<p style="color:var(--muted);font-size:13px;margin:0">Sin paquete</p>';
 
+                const estado = (r.NombreEstadoReserva || '').toLowerCase();
+                const puedeAgregarServicios = estado === 'confirmada' || estado === 'pendiente';
+
                 contenido.innerHTML = `
                     <div class="det-seccion">
                         <h4>Información general</h4>
@@ -1861,7 +1876,10 @@
                         <div class="det-fila"><span>Método de pago</span><strong>${r.NomMetodoPago || '—'}</strong></div>
                     </div>
                     <div class="det-seccion">
-                        <h4>Servicios adicionales</h4>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                            <h4 style="margin:0">Servicios adicionales</h4>
+                            ${puedeAgregarServicios ? `<button onclick="abrirAgregarServicios(${r.IdReserva})" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;"><i class="fa-solid fa-plus"></i> Agregar</button>` : ''}
+                        </div>
                         ${serviciosHtml}
                     </div>
                     <div class="det-seccion">
@@ -1885,6 +1903,64 @@
 
         $('modal-detalle-reserva').addEventListener('click', e => {
             if (e.target === $('modal-detalle-reserva')) cerrarDetalleReserva();
+        });
+
+        // ── AGREGAR SERVICIOS A RESERVA EXISTENTE ────
+        let _reservaIdParaServicios = null;
+
+        async function abrirAgregarServicios(reservaId) {
+            _reservaIdParaServicios = reservaId;
+            const modal = $('modal-agregar-servicios');
+            const lista = $('agregar-srv-lista');
+            modal.style.display = 'flex';
+            lista.innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted)"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>';
+
+            try {
+                const servicios = await apiFetch('/servicios?soloActivos=true');
+                if (!servicios.length) {
+                    lista.innerHTML = '<p style="color:var(--muted);text-align:center">No hay servicios disponibles.</p>';
+                    return;
+                }
+                lista.innerHTML = servicios.map(s => `
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0;">
+                        <div style="flex:1">
+                            <div style="font-weight:600;font-size:14px;color:#1a2744">${s.NombreServicio}</div>
+                            <div style="font-size:12px;color:var(--muted)">$${fmt(Math.round(Number(s.Costo||0)*1.19))} c/u (IVA incl.)</div>
+                        </div>
+                        <input type="number" min="1" max="10" value="1"
+                            id="qty-srv-${s.IDServicio}"
+                            style="width:52px;border:1px solid #d1d5db;border-radius:6px;padding:4px 6px;text-align:center;font-size:13px;">
+                        <button onclick="confirmarAgregarServicio(${s.IDServicio})"
+                            style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>`).join('');
+            } catch(e) {
+                lista.innerHTML = '<p style="color:var(--muted);text-align:center">Error cargando servicios.</p>';
+            }
+        }
+
+        async function confirmarAgregarServicio(idServicio) {
+            const qty = parseInt(document.getElementById(`qty-srv-${idServicio}`)?.value || '1');
+            try {
+                await apiFetch(`/reservas/${_reservaIdParaServicios}/servicios`, 'POST', {
+                    servicios: [{ IDServicio: idServicio, cantidad: qty }]
+                });
+                showToast('Servicio agregado correctamente', 'success');
+                cerrarAgregarServicios();
+                verDetalleReserva(_reservaIdParaServicios);
+            } catch(e) {
+                showToast(e.message || 'Error al agregar servicio', 'error');
+            }
+        }
+
+        function cerrarAgregarServicios() {
+            $('modal-agregar-servicios').style.display = 'none';
+            _reservaIdParaServicios = null;
+        }
+
+        $('modal-agregar-servicios').addEventListener('click', e => {
+            if (e.target === $('modal-agregar-servicios')) cerrarAgregarServicios();
         });
 
         // ── NUEVA RESERVA (vista completa) ───────

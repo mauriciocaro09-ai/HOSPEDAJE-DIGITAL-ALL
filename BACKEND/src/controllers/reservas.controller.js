@@ -258,6 +258,25 @@ const cancelar = async (req, res) => {
   }
 };
 
+/* ================= AGREGAR SERVICIOS ================= */
+
+const agregarServicios = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { servicios } = req.body;
+    if (!Array.isArray(servicios) || servicios.length === 0) {
+      return res.status(400).json({ error: 'Se requiere al menos un servicio' });
+    }
+    const result = await ReservasService.agregarServicios(id, servicios);
+    return res.status(200).json({ mensaje: 'Servicios agregados correctamente', ...result });
+  } catch (error) {
+    if (error.code === 'ESTADO_INVALIDO') return res.status(400).json({ error: error.message });
+    if (error.code === 'NOT_FOUND') return res.status(404).json({ error: error.message });
+    console.error('RESERVAS ERROR:', error);
+    return res.status(500).json({ error: 'Error al agregar servicios', detalle: error.message });
+  }
+};
+
 /* ================= ELIMINAR ================= */
 
 const eliminar = async (req, res) => {
@@ -286,4 +305,5 @@ module.exports = {
   actualizarEstado,
   cancelar,
   eliminar,
+  agregarServicios,
 };

@@ -42,6 +42,9 @@ router.put("/:id/estado", reservasController.actualizarEstado);
 // Cancelar reserva (busca el estado "Cancelada" dinámicamente)
 router.put("/:id/cancelar", reservasController.cancelar);
 
+// Agregar servicios a reserva existente
+router.post("/:id/servicios", reservasController.agregarServicios);
+
 // Eliminar reserva
 router.delete("/:id", reservasController.eliminar);
 

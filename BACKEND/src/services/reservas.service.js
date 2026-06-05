@@ -86,6 +86,45 @@ const ReservasService = {
     const result = await Reservas.eliminar(id);
     return result && result.affectedRows > 0 ? result : null;
   },
+
+  /* ── Agregar servicios a reserva existente ─── */
+  agregarServicios: async (reservaId, servicios) => {
+    const reserva = await Reservas.obtenerPorId(reservaId);
+    if (!reserva) throw { code: 'NOT_FOUND', message: 'Reserva no encontrada' };
+
+    const estado = (reserva.NombreEstadoReserva || '').toLowerCase();
+    if (!['confirmada', 'pendiente'].includes(estado)) {
+      throw { code: 'ESTADO_INVALIDO', message: 'Solo se pueden agregar servicios a reservas confirmadas o pendientes' };
+    }
+
+    let costoBase = 0;
+    for (const s of servicios) {
+      const idServicio = s.IDServicio || s.idServicio;
+      const cantidad = Number(s.cantidad) || 1;
+      if (!idServicio) continue;
+
+      const [[srv]] = await db.query(
+        'SELECT Costo FROM servicio WHERE IDServicio = ? AND Estado = 1 LIMIT 1',
+        [idServicio]
+      );
+      if (!srv) continue;
+
+      const precio = Number(srv.Costo || 0) * cantidad;
+      await db.query(
+        'INSERT INTO detallereservaservicio (IDReserva, IDServicio, Cantidad, Precio, Estado) VALUES (?, ?, ?, ?, 1)',
+        [reservaId, idServicio, cantidad, precio]
+      );
+      costoBase += precio;
+    }
+
+    const costoConIVA = Math.round(costoBase * 1.19);
+    await db.query(
+      'UPDATE reserva SET Monto_Total = Monto_Total + ? WHERE IdReserva = ?',
+      [costoConIVA, reservaId]
+    );
+
+    return { costoAgregado: costoConIVA };
+  },
 };
 
 module.exports = ReservasService;
