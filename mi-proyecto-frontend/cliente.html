@@ -2030,9 +2030,11 @@
             sel.innerHTML = '<option value="">Cargando...</option>';
             try {
                 const metodos = await apiFetch('/reservas/metodos-pago');
-                sel.innerHTML = metodos.map(m =>
-                    `<option value="${m.IdMetodoPago}">${m.NomMetodoPago}</option>`
-                ).join('');
+                const permitidos = ['efectivo', 'transferencia'];
+                sel.innerHTML = metodos
+                    .filter(m => permitidos.some(p => (m.NomMetodoPago || '').toLowerCase().includes(p)))
+                    .map(m => `<option value="${m.IdMetodoPago}">${m.NomMetodoPago}</option>`)
+                    .join('');
             } catch(e) {
                 sel.innerHTML = '<option value="">Error cargando métodos</option>';
             }
