@@ -1995,14 +1995,15 @@
 
         async function confirmarAgregarServicio(idServicio) {
             const qty = parseInt(document.getElementById(`qty-srv-${idServicio}`)?.value || '1');
+            const reservaId = _reservaIdParaServicios;
             try {
-                await apiFetch(`/reservas/${_reservaIdParaServicios}/servicios`, {
+                await apiFetch(`/reservas/${reservaId}/servicios`, {
                     method: 'POST',
                     body: JSON.stringify({ servicios: [{ IDServicio: idServicio, cantidad: qty }] })
                 });
                 showToast('Cargo adicional creado. Pendiente de pago.', 'success');
                 cerrarAgregarServicios();
-                verDetalleReserva(_reservaIdParaServicios);
+                verDetalleReserva(reservaId);
             } catch(e) {
                 showToast(e.message || 'Error al agregar servicio', 'error');
             }
