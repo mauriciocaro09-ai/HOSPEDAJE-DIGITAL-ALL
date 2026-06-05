@@ -34,11 +34,22 @@ const DashboardService = {
         const [servicios] = await db.query(`
             SELECT
                 s.NombreServicio,
-                COUNT(d.IDServicio) AS total
+                SUM(d.Cantidad) AS total
             FROM detallereservaservicio d
-            JOIN servicio s
-            ON d.IDServicio = s.IDServicio
+            JOIN servicio s ON d.IDServicio = s.IDServicio
             GROUP BY d.IDServicio
+            ORDER BY total DESC
+            LIMIT 5
+        `);
+
+        // paquetes más vendidos
+        const [paquetes] = await db.query(`
+            SELECT
+                p.NombrePaquete,
+                SUM(dp.Cantidad) AS total
+            FROM detallereservapaquetes dp
+            JOIN paquete p ON dp.IDPaquete = p.IDPaquete
+            GROUP BY dp.IDPaquete
             ORDER BY total DESC
             LIMIT 5
         `);
@@ -47,7 +58,8 @@ const DashboardService = {
             totalReservas: reservas[0].totalReservas,
             ingresosTotales: ingresos[0].ingresosTotales || 0,
             habitacionesMasReservadas: habitaciones,
-            serviciosMasVendidos: servicios
+            serviciosMasVendidos: servicios,
+            paquetesMasVendidos: paquetes
         };
 
     },

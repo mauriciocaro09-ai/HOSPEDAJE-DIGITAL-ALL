@@ -269,24 +269,15 @@ async function cargarIngresosSemanales() {
 
 async function cargarHabitacionesMasVendidas() {
     try {
-        const reservas = asArray(await apiFetch('/reservas'));
-
-        const conteo = {};
-        reservas.forEach(r => {
-            const nombre = r.NombreHabitacion || r.Habitacion || null;
-            if (!nombre) return;
-            conteo[nombre] = (conteo[nombre] || 0) + 1;
-        });
-
-        const top = Object.entries(conteo).sort((a,b) => b[1]-a[1]).slice(0, 5);
+        const data = await apiFetch('/dashboard/estadisticas');
+        const top = asArray(data.habitacionesMasReservadas);
         chartHabitaciones = renderHorizontalBar(
             'chartHabitaciones', chartHabitaciones,
-            top.map(([n]) => n), top.map(([,c]) => c),
+            top.map(r => r.NombreHabitacion), top.map(r => Number(r.total)),
             '#3b82f6', 'Reservas'
         );
-
     } catch (e) {
-        console.error('Error habitaciones más vendidas:', e);
+        console.error('Error habitaciones más solicitadas:', e);
     }
 }
 
@@ -294,23 +285,13 @@ async function cargarHabitacionesMasVendidas() {
 
 async function cargarPaquetesMasVendidos() {
     try {
-        const reservas = asArray(await apiFetch('/reservas'));
-
-        const conteo = {};
-        reservas.forEach(r => {
-            const pkgs = r.paquetes
-                ? (Array.isArray(r.paquetes) ? r.paquetes : [r.paquetes])
-                : (r.NombrePaquete ? [r.NombrePaquete] : []);
-            pkgs.forEach(p => { if (p) conteo[p] = (conteo[p] || 0) + 1; });
-        });
-
-        const top = Object.entries(conteo).sort((a,b) => b[1]-a[1]).slice(0, 5);
+        const data = await apiFetch('/dashboard/estadisticas');
+        const top = asArray(data.paquetesMasVendidos);
         chartPaquetes = renderHorizontalBar(
             'chartPaquetes', chartPaquetes,
-            top.map(([n]) => n), top.map(([,c]) => c),
+            top.map(r => r.NombrePaquete), top.map(r => Number(r.total)),
             '#f97316', 'Veces'
         );
-
     } catch (e) {
         console.error('Error paquetes más vendidos:', e);
     }
@@ -320,23 +301,13 @@ async function cargarPaquetesMasVendidos() {
 
 async function cargarServiciosMasVendidos() {
     try {
-        const reservas = asArray(await apiFetch('/reservas'));
-
-        const conteo = {};
-        reservas.forEach(r => {
-            const srvs = r.servicios
-                ? (Array.isArray(r.servicios) ? r.servicios : [r.servicios])
-                : (r.NombreServicio ? [r.NombreServicio] : []);
-            srvs.forEach(s => { if (s) conteo[s] = (conteo[s] || 0) + 1; });
-        });
-
-        const top = Object.entries(conteo).sort((a,b) => b[1]-a[1]).slice(0, 5);
+        const data = await apiFetch('/dashboard/estadisticas');
+        const top = asArray(data.serviciosMasVendidos);
         chartServicios = renderHorizontalBar(
             'chartServicios', chartServicios,
-            top.map(([n]) => n), top.map(([,c]) => c),
+            top.map(r => r.NombreServicio), top.map(r => Number(r.total)),
             '#0d9488', 'Veces'
         );
-
     } catch (e) {
         console.error('Error servicios más vendidos:', e);
     }
