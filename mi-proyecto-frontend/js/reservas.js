@@ -771,6 +771,8 @@ const editarReservaAdmin = async (idReserva) => {
                 if (mt) mt.value = reserva.Monto_Total || '';
         }
 
+        actualizarSidebarResumen();
+
         const titulo = document.getElementById('reserva-admin-form-title');
         if (titulo) titulo.textContent = 'Editar reserva';
         const btnGuardar = document.getElementById('wizard-submit');
