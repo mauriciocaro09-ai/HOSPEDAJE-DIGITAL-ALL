@@ -163,10 +163,25 @@ const crear = async (req, res) => {
 
         const hab = habitaciones ? habitaciones[0] : null;
 
+        // Buscar teléfono del cliente en la BD si no viene en el body
+        let clienteTelefono = req.body.TelefonoCliente || req.body.Telefono || null;
+        if (!clienteTelefono) {
+          const docCliente = req.body.NroDocumentoCliente || req.body.IDCliente;
+          if (docCliente) {
+            const [clientes] = await db.query(
+              'SELECT Telefono FROM cliente WHERE NroDocumento = ? OR IDCliente = ? LIMIT 1',
+              [docCliente, docCliente]
+            );
+            if (clientes && clientes[0] && clientes[0].Telefono) {
+              clienteTelefono = clientes[0].Telefono;
+            }
+          }
+        }
+
         emailData = {
           clienteNombre: nombreCliente,
           clienteEmail: emailCliente,
-          clienteTelefono: req.body.TelefonoCliente || req.body.Telefono || req.body.ContactoCliente || null,
+          clienteTelefono,
           reservaId,
           habitacion: (hab && hab.NombreHabitacion) ? hab.NombreHabitacion : 'Habitacion',
           fechaInicio: req.body.FechaInicio,
