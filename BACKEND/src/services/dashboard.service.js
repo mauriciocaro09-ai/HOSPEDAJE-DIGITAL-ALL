@@ -67,29 +67,65 @@ const DashboardService = {
     alertas: async () => {
         const hoy = new Date().toISOString().split('T')[0];
 
-        // Solo reservas pendientes desde hoy en adelante (no históricas sin confirmar)
         const [[{ pendientes }]] = await db.query(`
             SELECT COUNT(*) AS pendientes FROM reserva
             WHERE IdEstadoReserva = 1 AND FechaInicio >= CURDATE()
         `);
 
-        // Check-ins hoy: confirmadas Y pendientes (pendiente+hoy es más urgente aún)
         const [[{ checkins }]] = await db.query(`
             SELECT COUNT(*) AS checkins FROM reserva
             WHERE DATE(FechaInicio) = ? AND IdEstadoReserva IN (1, 2)
         `, [hoy]);
 
-        // Check-outs hoy: solo confirmadas (las canceladas/finalizadas no hacen checkout)
         const [[{ checkouts }]] = await db.query(`
             SELECT COUNT(*) AS checkouts FROM reserva
             WHERE DATE(FechaFinalizacion) = ? AND IdEstadoReserva = 2
         `, [hoy]);
 
+        const [listaPendientes] = await db.query(`
+            SELECT r.IDReserva,
+                   CONCAT(c.Nombre, ' ', c.Apellido) AS NombreCliente,
+                   h.NombreHabitacion, r.FechaInicio, r.FechaFinalizacion
+            FROM reserva r
+            JOIN cliente c ON r.NroDocumentoCliente = c.NroDocumento
+            JOIN habitacion h ON r.IDHabitacion = h.IDHabitacion
+            WHERE r.IdEstadoReserva = 1 AND r.FechaInicio >= CURDATE()
+            ORDER BY r.FechaInicio ASC
+            LIMIT 10
+        `);
+
+        const [listaCheckins] = await db.query(`
+            SELECT r.IDReserva,
+                   CONCAT(c.Nombre, ' ', c.Apellido) AS NombreCliente,
+                   h.NombreHabitacion, r.FechaInicio, r.FechaFinalizacion
+            FROM reserva r
+            JOIN cliente c ON r.NroDocumentoCliente = c.NroDocumento
+            JOIN habitacion h ON r.IDHabitacion = h.IDHabitacion
+            WHERE DATE(r.FechaInicio) = ? AND r.IdEstadoReserva IN (1, 2)
+            ORDER BY r.FechaInicio ASC
+            LIMIT 10
+        `, [hoy]);
+
+        const [listaCheckouts] = await db.query(`
+            SELECT r.IDReserva,
+                   CONCAT(c.Nombre, ' ', c.Apellido) AS NombreCliente,
+                   h.NombreHabitacion, r.FechaInicio, r.FechaFinalizacion
+            FROM reserva r
+            JOIN cliente c ON r.NroDocumentoCliente = c.NroDocumento
+            JOIN habitacion h ON r.IDHabitacion = h.IDHabitacion
+            WHERE DATE(r.FechaFinalizacion) = ? AND r.IdEstadoReserva = 2
+            ORDER BY r.FechaFinalizacion ASC
+            LIMIT 10
+        `, [hoy]);
+
         return {
-            pendientes: Number(pendientes),
-            checkins:   Number(checkins),
-            checkouts:  Number(checkouts),
-            total:      Number(pendientes) + Number(checkins) + Number(checkouts)
+            pendientes:      Number(pendientes),
+            checkins:        Number(checkins),
+            checkouts:       Number(checkouts),
+            total:           Number(pendientes) + Number(checkins) + Number(checkouts),
+            listaPendientes,
+            listaCheckins,
+            listaCheckouts
         };
     }
 

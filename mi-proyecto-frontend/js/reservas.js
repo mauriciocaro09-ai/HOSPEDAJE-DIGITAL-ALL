@@ -1535,6 +1535,7 @@ if (document.readyState === 'loading') {
     window.abrirModalNuevaReserva = abrirModalNuevaReserva;
     window.cerrarModalReservaAdmin = cerrarModalReservaAdmin;
     window.guardarReservaAdmin = guardarReservaAdmin;
+    window.verDetalleReserva = verDetalleReserva;
 
     // Funciones globales para onchange/onclick inline del select de paquetes
     window.adminPaqueteOnChange = (val) => {
