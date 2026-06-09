@@ -12,7 +12,7 @@ const DashboardService = {
 
         // ingresos totales
         const [ingresos] = await db.query(`
-            SELECT SUM(MontoTotal) AS ingresosTotales
+            SELECT SUM(Monto_Total) AS ingresosTotales
             FROM reserva
             WHERE IdEstadoReserva = 2
         `);
