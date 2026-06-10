@@ -907,19 +907,33 @@ const eliminarReservaAdmin = async (idReserva) => {
 
 const cancelarReservaAdmin = async (idReserva) => {
     const resultado = await Swal.fire({
-        title: '¿Anular reserva?',
-        text: 'La reserva pasará a estado Cancelada. Esta acción no se puede deshacer.',
+        title: 'Anular reserva',
+        html: `
+            <p style="margin-bottom:12px;color:#374151;font-size:14px;">
+                La reserva pasará a estado <strong>Cancelada</strong>. Esta acción no se puede deshacer.
+            </p>
+            <textarea id="swal-motivo-cancelacion"
+                placeholder="Escribe el motivo de la cancelación (opcional)"
+                rows="3"
+                style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+        `,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#ef4444',
         cancelButtonColor: '#6b7280',
         confirmButtonText: 'Sí, anular',
-        cancelButtonText: 'No'
+        cancelButtonText: 'No',
+        preConfirm: () => {
+            return document.getElementById('swal-motivo-cancelacion')?.value?.trim() || null;
+        }
     });
     if (!resultado.isConfirmed) return;
 
     try {
-        await requestJson(`/reservas/${idReserva}/cancelar`, { method: 'PUT' });
+        await requestJson(`/reservas/${idReserva}/cancelar`, {
+            method: 'PUT',
+            body: JSON.stringify({ motivo: resultado.value || null })
+        });
         mostrarMensajeReservaAdmin('Reserva anulada correctamente.', 'ok');
         cargarReservasAdmin();
         window.refrescarAlertas?.();
@@ -1056,6 +1070,7 @@ const verDetalleReserva = async (idReserva) => {
             <div class="detalle-reserva-seccion">
                 <h5>Reserva #${escaparHtml(String(r.IdReserva || ''))}</h5>
                 <span class="estado-reserva estado-${estado.clase}" style="margin-bottom:8px;display:inline-block;">${estado.texto}</span>
+                ${r.MotivoCancelacion ? `<p style="margin-top:6px;font-size:12px;color:#6b7280;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:6px 10px;"><i class="fa-solid fa-circle-info" style="color:#ef4444;margin-right:5px;"></i><strong>Motivo:</strong> ${escaparHtml(r.MotivoCancelacion)}</p>` : ''}
             </div>
             <div class="detalle-reserva-seccion">
                 <p class="detalle-label">Cliente</p>

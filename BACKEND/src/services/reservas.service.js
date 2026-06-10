@@ -70,14 +70,19 @@ const ReservasService = {
   },
 
   /* ── Cancelar ───────────────────────────────── */
-  cancelar: async (id) => {
-    // Buscar el ID del estado "Cancelada"
+  cancelar: async (id, motivo = null) => {
     const [[estadoCancelada]] = await db.query(
       "SELECT IdEstadoReserva FROM estadosreserva WHERE LOWER(NombreEstadoReserva) LIKE '%cancelad%' LIMIT 1"
     );
     const idEstado = estadoCancelada ? estadoCancelada.IdEstadoReserva : 4;
 
     const result = await Reservas.actualizar(id, { IdEstadoReserva: idEstado });
+    if (result && result.affectedRows > 0 && motivo) {
+      await db.query(
+        "UPDATE reserva SET MotivoCancelacion = ? WHERE IdReserva = ?",
+        [motivo, id]
+      ).catch(() => {});
+    }
     return result && result.affectedRows > 0 ? result : null;
   },
 

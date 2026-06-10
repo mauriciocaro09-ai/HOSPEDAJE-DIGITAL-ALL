@@ -250,7 +250,8 @@ const actualizarEstado = async (req, res) => {
 const cancelar = async (req, res) => {
   try {
     const { id } = req.params;
-    const ok = await ReservasService.cancelar(id);
+    const motivo = req.body?.motivo || null;
+    const ok = await ReservasService.cancelar(id, motivo);
     if (!ok) return res.status(404).json({ error: "Reserva no encontrada" });
     return res.status(200).json({ mensaje: "Reserva cancelada" });
   } catch (error) {
