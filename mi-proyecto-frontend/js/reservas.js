@@ -145,6 +145,8 @@ const hayCruceDeFechasConReservas = (habitacionId, fechaInicio, fechaFin, ignora
             return false;
         }
 
+        if ((reserva.NombreEstadoReserva || '').toLowerCase().includes('cancelad')) return false;
+
         if (String(reserva.IDHabitacion || '') !== String(habitacionId)) return false;
 
         const inicioReserva = reserva.FechaInicio ? new Date(reserva.FechaInicio) : null;
@@ -231,7 +233,12 @@ const fechaEnRangosReservados = (date) => {
     const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const selectHab = document.getElementById('reserva-admin-habitacion');
     const seleccionado = selectHab ? selectHab.value : '';
+    const idEditando = reservaEnEdicion ? String(obtenerIdReserva(reservaEnEdicion)) : null;
     return reservasAdminCargadas.some(r => {
+        // ignorar la reserva que se está editando
+        if (idEditando && String(obtenerIdReserva(r)) === idEditando) return false;
+        // ignorar reservas canceladas
+        if ((r.NombreEstadoReserva || '').toLowerCase().includes('cancelad')) return false;
         // si hay habitación seleccionada, sólo considerar reservas de esa habitación
         if (seleccionado && String(r.IDHabitacion || '') !== String(seleccionado)) return false;
         try {
