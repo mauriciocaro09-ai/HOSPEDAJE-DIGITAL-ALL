@@ -112,18 +112,25 @@
         <header>
             <nav>
                 <h1><i class="fa-solid fa-hotel" aria-hidden="true"></i> Hospedaje Digital</h1>
-                <!-- Campana de alertas -->
-                <div id="notif-wrap" class="notif-wrap">
-                    <button type="button" id="notif-btn" class="notif-btn" aria-label="Alertas y notificaciones">
-                        <i class="fa-solid fa-bell"></i>
-                        <span id="notif-badge" class="notif-badge notif-badge-hidden">0</span>
-                    </button>
-                    <div id="notif-panel" class="notif-panel notif-panel-hidden">
-                        <div class="notif-panel-header">
-                            <span><i class="fa-solid fa-bell"></i> Alertas del día</span>
+                <!-- Acciones del header -->
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <!-- Campana de alertas -->
+                    <div id="notif-wrap" class="notif-wrap">
+                        <button type="button" id="notif-btn" class="notif-btn" aria-label="Alertas y notificaciones">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="notif-badge" class="notif-badge notif-badge-hidden">0</span>
+                        </button>
+                        <div id="notif-panel" class="notif-panel notif-panel-hidden">
+                            <div class="notif-panel-header">
+                                <span><i class="fa-solid fa-bell"></i> Alertas del día</span>
+                            </div>
+                            <div id="notif-lista"></div>
                         </div>
-                        <div id="notif-lista"></div>
                     </div>
+                    <!-- Perfil -->
+                    <a href="pages/perfil.html" class="notif-btn" title="Mi perfil" aria-label="Mi perfil" style="text-decoration:none;">
+                        <i class="fa-solid fa-user"></i>
+                    </a>
                 </div>
             </nav>
         </header>
