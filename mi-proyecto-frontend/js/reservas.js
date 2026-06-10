@@ -390,6 +390,10 @@ const renderizarReservasAdmin = () => {
                         <button type="button" class="btn-mini btn-mini-icon btn-mini-ver" data-accion-reserva="ver" data-id="${escaparHtml(idReserva)}" title="Ver detalles">
                             <i class="fa-solid fa-eye"></i>
                         </button>
+                        ${['pendiente','confirmada'].includes(estado.clase) ? `
+                        <button type="button" class="btn-mini btn-mini-icon" data-accion-reserva="cancelar" data-id="${escaparHtml(idReserva)}" title="Anular reserva" style="background:#ef4444;color:#fff;border-color:#ef4444;">
+                            <i class="fa-solid fa-ban"></i>
+                        </button>` : ''}
                     </div>
                 </td>
             </tr>
@@ -891,6 +895,29 @@ const eliminarReservaAdmin = async (idReserva) => {
     } catch (error) {
         console.error('Error al eliminar reserva:', error);
         mostrarMensajeReservaAdmin('Error al eliminar la reserva', 'error');
+    }
+};
+
+const cancelarReservaAdmin = async (idReserva) => {
+    const resultado = await Swal.fire({
+        title: '¿Anular reserva?',
+        text: 'La reserva pasará a estado Cancelada. Esta acción no se puede deshacer.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sí, anular',
+        cancelButtonText: 'No'
+    });
+    if (!resultado.isConfirmed) return;
+
+    try {
+        await requestJson(`/reservas/${idReserva}/cancelar`, { method: 'PUT' });
+        mostrarMensajeReservaAdmin('Reserva anulada correctamente.', 'ok');
+        cargarReservasAdmin();
+        window.refrescarAlertas?.();
+    } catch (error) {
+        mostrarMensajeReservaAdmin('Error al anular la reserva', 'error');
     }
 };
 
@@ -1434,10 +1461,12 @@ function inicializarReservasAdmin() {
         const btnEditar = e.target.closest('[data-accion-reserva="editar"]');
         const btnEliminar = e.target.closest('[data-accion-reserva="eliminar"]');
         const btnVer = e.target.closest('[data-accion-reserva="ver"]');
+        const btnCancelar = e.target.closest('[data-accion-reserva="cancelar"]');
 
         if (btnEditar) editarReservaAdmin(btnEditar.dataset.id);
         if (btnEliminar) eliminarReservaAdmin(btnEliminar.dataset.id);
         if (btnVer && btnVer.dataset.id) verDetalleReserva(btnVer.dataset.id);
+        if (btnCancelar && btnCancelar.dataset.id) cancelarReservaAdmin(btnCancelar.dataset.id);
 
         const btnEstado = e.target.closest('[data-accion-reserva="estado"]');
         if (btnEstado && btnEstado.dataset.id) abrirModalCambioEstado(btnEstado.dataset.id);
