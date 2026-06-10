@@ -663,7 +663,7 @@ const poblarSelectsReserva = async () => {
             (m) => (m.NombreMetodoPago || m.NomMetodoPago || '').toLowerCase().includes('efectivo') ||
                    (m.NombreMetodoPago || m.NomMetodoPago || '').toLowerCase().includes('transferencia')
         );
-        selectMetodo.innerHTML = ['<option value="">Selecciona método</option>']
+        selectMetodo.innerHTML = ['<option value="" disabled selected hidden>Selecciona método</option>']
             .concat(
                 metodosPermitidos.map((metodo) => `
                     <option value="${escaparHtml(metodo.IdMetodoPago)}">${escaparHtml(metodo.NombreMetodoPago || metodo.NomMetodoPago || 'Método')}</option>
@@ -675,7 +675,7 @@ const poblarSelectsReserva = async () => {
 
     if (selectEstado) {
         const actual = selectEstado.value;
-        selectEstado.innerHTML = ['<option value="">Selecciona estado</option>']
+        selectEstado.innerHTML = ['<option value="" disabled selected hidden>Selecciona estado</option>']
             .concat(
                 estadosReservasCargados.map((estado) => `
                     <option value="${escaparHtml(estado.IdEstadoReserva)}">${escaparHtml(estado.NombreEstadoReserva || 'Estado')}</option>
