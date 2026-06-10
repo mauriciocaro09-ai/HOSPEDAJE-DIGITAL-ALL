@@ -932,7 +932,7 @@ const cancelarReservaAdmin = async (idReserva) => {
     try {
         await requestJson(`/reservas/${idReserva}/cancelar`, {
             method: 'PUT',
-            body: JSON.stringify({ motivo: resultado.value || null })
+            body: { motivo: resultado.value || null }
         });
         mostrarMensajeReservaAdmin('Reserva anulada correctamente.', 'ok');
         cargarReservasAdmin();
