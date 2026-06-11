@@ -388,9 +388,10 @@ const renderizarReservasAdmin = () => {
                 <td><span class="estado-reserva estado-${estado.clase}">${estado.texto}</span></td>
                 <td>
                     <div class="crud-clientes-acciones">
+                        ${estado.clase !== 'cancelada' ? `
                         <button type="button" class="btn-mini btn-mini-icon btn-mini-editar" data-accion-reserva="editar" data-id="${escaparHtml(idReserva)}" title="Editar">
                             <i class="fa-solid fa-pencil"></i>
-                        </button>
+                        </button>` : ''}
                         <button type="button" class="btn-mini btn-mini-icon" data-accion-reserva="estado" data-id="${escaparHtml(idReserva)}" title="Cambiar estado" style="background:#6c757d;color:#fff;border-color:#6c757d;">
                             <i class="fa-solid fa-rotate"></i>
                         </button>
@@ -747,6 +748,10 @@ const editarReservaAdmin = async (idReserva) => {
         const reserva = reservasAdminCargadas.find(r => String(obtenerIdReserva(r)) === String(idReserva));
         if (!reserva) {
             mostrarMensajeReservaAdmin('Reserva no encontrada', 'error');
+            return;
+        }
+        if ((reserva.NombreEstadoReserva || '').toLowerCase().includes('cancelad')) {
+            mostrarMensajeReservaAdmin('No se puede editar una reserva cancelada.', 'error');
             return;
         }
 
