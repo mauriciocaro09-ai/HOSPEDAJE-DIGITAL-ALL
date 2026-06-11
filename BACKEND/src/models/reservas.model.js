@@ -80,7 +80,8 @@ const Reservas = {
       ORDER BY r.IdReserva DESC
     `);
 
-    return rows;
+    // excluir comprobante (MEDIUMTEXT) del listado para no penalizar el rendimiento
+    return rows.map(r => { delete r.ComprobanteTransferencia; return r; });
   },
 
   obtenerPorId: async (id) => {

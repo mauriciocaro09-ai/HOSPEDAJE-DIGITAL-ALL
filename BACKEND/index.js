@@ -81,10 +81,13 @@ const crearTablasDetalle = async () => {
                 FechaPago DATETIME NULL
             )
         `);
-        // Agregar columna MotivoCancelacion si no existe
         await db.query(`
             ALTER TABLE reserva
             ADD COLUMN IF NOT EXISTS MotivoCancelacion TEXT NULL DEFAULT NULL
+        `).catch(() => {});
+        await db.query(`
+            ALTER TABLE reserva
+            ADD COLUMN IF NOT EXISTS ComprobanteTransferencia MEDIUMTEXT NULL DEFAULT NULL
         `).catch(() => {});
         console.log('Tablas de detalle verificadas.');
     } catch (err) {

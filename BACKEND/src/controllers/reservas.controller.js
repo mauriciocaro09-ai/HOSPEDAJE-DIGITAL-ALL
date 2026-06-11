@@ -260,6 +260,24 @@ const cancelar = async (req, res) => {
   }
 };
 
+/* ================= SUBIR COMPROBANTE DE TRANSFERENCIA ================= */
+
+const subirComprobante = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { comprobante } = req.body;
+    if (!comprobante) return res.status(400).json({ error: 'Comprobante requerido' });
+    if (comprobante.length > 3 * 1024 * 1024)
+      return res.status(400).json({ error: 'El archivo supera el límite de 2 MB' });
+    const db = require('../config/db');
+    await db.query('UPDATE reserva SET ComprobanteTransferencia = ? WHERE IdReserva = ?', [comprobante, id]);
+    return res.status(200).json({ mensaje: 'Comprobante guardado' });
+  } catch (error) {
+    console.error('Error subiendo comprobante:', error);
+    return res.status(500).json({ error: 'Error al guardar el comprobante' });
+  }
+};
+
 /* ================= AGREGAR SERVICIOS (crea cargo adicional) ================= */
 
 const agregarServicios = async (req, res) => {
@@ -308,4 +326,5 @@ module.exports = {
   cancelar,
   eliminar,
   agregarServicios,
+  subirComprobante,
 };

@@ -1923,6 +1923,29 @@
                         <div class="det-fila"><span>Entrada</span><strong>${fmtF(r.FechaInicio)}</strong></div>
                         <div class="det-fila"><span>Salida</span><strong>${fmtF(r.FechaFinalizacion)}</strong></div>
                         <div class="det-fila"><span>Método de pago</span><strong>${r.NomMetodoPago || '—'}</strong></div>
+                        ${(r.NomMetodoPago || '').toLowerCase().includes('transferencia') && ['pendiente','confirmada'].includes((r.NombreEstadoReserva || '').toLowerCase()) ? `
+                        <div class="det-fila" style="align-items:flex-start;flex-direction:column;gap:8px;">
+                            <span style="font-size:12px;color:var(--muted);">Comprobante de pago</span>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <label for="comprobante-input-${r.IdReserva}" title="Subir comprobante de transferencia"
+                                    style="cursor:pointer;width:40px;height:40px;background:#1a2744;color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:background .2s;"
+                                    onmouseover="this.style.background='#2d4a8a'" onmouseout="this.style.background='#1a2744'">
+                                    <i class="fa-solid fa-file-arrow-up"></i>
+                                </label>
+                                <input type="file" id="comprobante-input-${r.IdReserva}" accept="image/*,application/pdf" style="display:none"
+                                    onchange="subirComprobante(${r.IdReserva}, this)">
+                                <span id="comprobante-status-${r.IdReserva}" style="font-size:12px;color:var(--muted);">
+                                    ${r.ComprobanteTransferencia ? '<i class="fa-solid fa-circle-check" style="color:#10b981;margin-right:4px;"></i>Comprobante cargado' : 'Sin comprobante aún'}
+                                </span>
+                            </div>
+                            ${r.ComprobanteTransferencia ? `
+                            <div id="comprobante-preview-${r.IdReserva}" style="margin-top:4px;">
+                                ${r.ComprobanteTransferencia.startsWith('data:image')
+                                    ? `<img src="${r.ComprobanteTransferencia}" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;" onclick="verComprobanteModal('${r.IdReserva}')" title="Ver comprobante">`
+                                    : `<a href="${r.ComprobanteTransferencia}" download="comprobante_reserva_${r.IdReserva}.pdf" style="font-size:12px;color:#1a2744;font-weight:600;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:5px;"></i>Ver PDF</a>`
+                                }
+                            </div>` : ''}
+                        </div>` : ''}
                     </div>
                     <div class="det-seccion">
                         <h4>Servicios de la reserva</h4>
@@ -2076,6 +2099,44 @@
             } catch(e) {
                 showToast(e.message || 'Error al cancelar cargo', 'error');
             }
+        }
+
+        // ── COMPROBANTE DE TRANSFERENCIA ───────
+
+        async function subirComprobante(idReserva, input) {
+            const file = input.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('El archivo supera 2 MB. Usá una imagen más pequeña.', 'error');
+                input.value = '';
+                return;
+            }
+            const statusEl = document.getElementById(`comprobante-status-${idReserva}`);
+            if (statusEl) statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right:4px;"></i>Subiendo...';
+            try {
+                const base64 = await new Promise((res, rej) => {
+                    const reader = new FileReader();
+                    reader.onload = e => res(e.target.result);
+                    reader.onerror = rej;
+                    reader.readAsDataURL(file);
+                });
+                await apiFetch(`/reservas/${idReserva}/comprobante`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ comprobante: base64 })
+                });
+                showToast('Comprobante subido correctamente', 'success');
+                if (statusEl) statusEl.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#10b981;margin-right:4px;"></i>Comprobante cargado';
+                const preview = document.getElementById(`comprobante-preview-${idReserva}`);
+                if (preview) {
+                    preview.innerHTML = file.type === 'application/pdf'
+                        ? `<a href="${base64}" download="comprobante_reserva_${idReserva}.pdf" style="font-size:12px;color:#1a2744;font-weight:600;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:5px;"></i>Ver PDF</a>`
+                        : `<img src="${base64}" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid #e2e8f0;" title="Comprobante">`;
+                }
+            } catch(e) {
+                showToast(e.message || 'Error al subir el comprobante', 'error');
+                if (statusEl) statusEl.innerHTML = 'Sin comprobante aún';
+            }
+            input.value = '';
         }
 
         // ── NUEVA RESERVA (vista completa) ───────
