@@ -81,14 +81,16 @@ const crearTablasDetalle = async () => {
                 FechaPago DATETIME NULL
             )
         `);
-        await db.query(`
-            ALTER TABLE reserva
-            ADD COLUMN IF NOT EXISTS MotivoCancelacion TEXT NULL DEFAULT NULL
-        `).catch(() => {});
-        await db.query(`
-            ALTER TABLE reserva
-            ADD COLUMN IF NOT EXISTS ComprobanteTransferencia MEDIUMTEXT NULL DEFAULT NULL
-        `).catch(() => {});
+        // Agregar columnas nuevas si no existen (compatible MySQL 5.7)
+        const agregarColumna = async (columna, definicion) => {
+            const [cols] = await db.query(`SHOW COLUMNS FROM reserva LIKE '${columna}'`);
+            if (cols.length === 0) {
+                await db.query(`ALTER TABLE reserva ADD COLUMN ${columna} ${definicion}`);
+                console.log(`Columna ${columna} agregada.`);
+            }
+        };
+        await agregarColumna('MotivoCancelacion', 'TEXT NULL DEFAULT NULL');
+        await agregarColumna('ComprobanteTransferencia', 'MEDIUMTEXT NULL DEFAULT NULL');
         console.log('Tablas de detalle verificadas.');
     } catch (err) {
         console.warn('No se pudieron crear tablas de detalle:', err.message);

@@ -269,7 +269,6 @@ const subirComprobante = async (req, res) => {
     if (!comprobante) return res.status(400).json({ error: 'Comprobante requerido' });
     if (comprobante.length > 3 * 1024 * 1024)
       return res.status(400).json({ error: 'El archivo supera el límite de 2 MB' });
-    const db = require('../config/db');
     await db.query('UPDATE reserva SET ComprobanteTransferencia = ? WHERE IdReserva = ?', [comprobante, id]);
     return res.status(200).json({ mensaje: 'Comprobante guardado' });
   } catch (error) {
