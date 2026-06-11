@@ -575,8 +575,9 @@ const validarPasoWizard = (step) => {
             return false;
         }
 
-        if (!habitacion) {
-            mostrarErrorInline('reserva-admin-habitacion', 'Selecciona una habitación.');
+        const tienePaquete = !!document.getElementById('reserva-admin-paquetes')?.value;
+        if (!habitacion && !tienePaquete) {
+            mostrarErrorInline('reserva-admin-habitacion', 'Selecciona una habitación o un paquete.');
             return false;
         }
 
@@ -1598,12 +1599,28 @@ if (document.readyState === 'loading') {
     window.adminPaqueteOnChange = (val) => {
         const btn = document.getElementById('admin-paquete-ver-btn');
         const det = document.getElementById('admin-paquete-detalle');
+        const selectHab = document.getElementById('reserva-admin-habitacion');
+        const hint = document.getElementById('hab-paquete-hint');
         if (!btn) return;
         if (val) {
             btn.classList.remove('hidden');
+            if (selectHab) {
+                selectHab.value = '';
+                selectHab.disabled = true;
+                selectHab.style.opacity = '0.45';
+                selectHab.title = 'El paquete ya incluye habitación';
+                limpiarErrorInline('reserva-admin-habitacion');
+            }
+            if (hint) hint.style.display = '';
         } else {
             btn.classList.add('hidden');
             if (det) { det.classList.add('hidden'); det.innerHTML = ''; }
+            if (selectHab) {
+                selectHab.disabled = false;
+                selectHab.style.opacity = '';
+                selectHab.title = '';
+            }
+            if (hint) hint.style.display = 'none';
         }
         actualizarSidebarResumen();
     };

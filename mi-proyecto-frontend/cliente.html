@@ -1149,7 +1149,7 @@
                             <div class="reserva-card">
                                 <div class="reserva-card-title"><i class="fa-solid fa-bed"></i> Habitación y Fechas</div>
                                 <div class="form-group">
-                                    <label>Habitación <span class="campo-obligatorio" aria-hidden="true">*</span></label>
+                                    <label>Habitación <span class="campo-obligatorio" aria-hidden="true">*</span> <small id="nr-hab-paquete-hint" style="display:none;color:#f59e0b;font-weight:600;font-size:11px;">— incluida en el paquete</small></label>
                                     <select id="nr-habitacion" required>
                                         <option value="">Selecciona una habitación</option>
                                     </select>
@@ -2215,12 +2215,27 @@
 
                 sel.addEventListener('change', () => {
                     actualizarResumen();
+                    const selHab = $('nr-habitacion');
+                    const hint = $('nr-hab-paquete-hint');
                     if (sel.value) {
                         btnVer.classList.remove('hidden');
+                        if (selHab) {
+                            selHab.value = '';
+                            selHab.disabled = true;
+                            selHab.style.opacity = '0.45';
+                            selHab.title = 'El paquete ya incluye habitación';
+                        }
+                        if (hint) hint.style.display = '';
                     } else {
                         btnVer.classList.add('hidden');
                         detalle.classList.add('hidden');
                         detalle.innerHTML = '';
+                        if (selHab) {
+                            selHab.disabled = false;
+                            selHab.style.opacity = '';
+                            selHab.title = '';
+                        }
+                        if (hint) hint.style.display = 'none';
                     }
                 });
 
@@ -2364,9 +2379,12 @@
             const inicio = $('nr-fecha-inicio').value;
             const fin    = $('nr-fecha-fin').value;
             const metodo = $('nr-metodo-pago').value;
+            const tienePaquete = !!$('nr-paquete')?.value;
 
-            if (!idHab || !inicio || !fin || !metodo) {
-                errBox.textContent = 'Por favor completa todos los campos obligatorios.';
+            if ((!idHab && !tienePaquete) || !inicio || !fin || !metodo) {
+                errBox.textContent = tienePaquete
+                    ? 'Por favor completa los campos obligatorios (fechas y método de pago).'
+                    : 'Por favor completa todos los campos obligatorios.';
                 errBox.classList.remove('hidden');
                 errBox.scrollIntoView({ behavior: 'smooth' });
                 return;
@@ -2385,7 +2403,8 @@
                 return;
             }
 
-            // Verificar disponibilidad de la habitación en esas fechas
+            // Verificar disponibilidad de la habitación en esas fechas (solo si se seleccionó habitación)
+            if (idHab)
             try {
                 const dispRes = await fetch(`${API_URL}/habitaciones/${idHab}/disponibilidad?fechaInicio=${inicio}&fechaFin=${fin}`);
                 if (!dispRes.ok) {
