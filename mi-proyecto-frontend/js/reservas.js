@@ -1595,25 +1595,13 @@ if (document.readyState === 'loading') {
     window.guardarReservaAdmin = guardarReservaAdmin;
     window.verDetalleReserva = verDetalleReserva;
 
-    // Funciones globales para onchange/onclick inline del select de paquetes
-    window.adminPaqueteOnChange = (val) => {
-        const btn = document.getElementById('admin-paquete-ver-btn');
+    // onchange del select de paquetes — muestra detalle inline automáticamente
+    window.adminPaqueteOnChange = async (val) => {
         const det = document.getElementById('admin-paquete-detalle');
         const selectHab = document.getElementById('reserva-admin-habitacion');
         const hint = document.getElementById('hab-paquete-hint');
-        if (!btn) return;
-        if (val) {
-            btn.classList.remove('hidden');
-            if (selectHab) {
-                selectHab.value = '';
-                selectHab.disabled = true;
-                selectHab.style.opacity = '0.45';
-                selectHab.title = 'El paquete ya incluye habitación';
-                limpiarErrorInline('reserva-admin-habitacion');
-            }
-            if (hint) hint.style.display = '';
-        } else {
-            btn.classList.add('hidden');
+
+        if (!val) {
             if (det) { det.classList.add('hidden'); det.innerHTML = ''; }
             if (selectHab) {
                 selectHab.disabled = false;
@@ -1621,41 +1609,46 @@ if (document.readyState === 'loading') {
                 selectHab.title = '';
             }
             if (hint) hint.style.display = 'none';
-        }
-        actualizarSidebarResumen();
-    };
-
-    window.adminVerDetallePaquete = async () => {
-        const sel = document.getElementById('reserva-admin-paquetes');
-        const det = document.getElementById('admin-paquete-detalle');
-        const id = sel?.value;
-        if (!det) return;
-        if (!id) {
-            det.innerHTML = '<div class="admin-pdi-body" style="color:#64748b">Selecciona un paquete para ver su detalle.</div>';
-            det.classList.remove('hidden');
+            actualizarSidebarResumen();
             return;
         }
-        try {
-            const p = await requestJson(`/paquetes/${id}`);
-            const servicios = p.servicios && p.servicios.length
-                ? p.servicios.map(s => `<span>${escaparHtml(s.NombreServicio)}</span>`).join('')
-                : '<span>Sin servicios adicionales</span>';
-            det.innerHTML = `
-                <div class="admin-pdi-body">
-                    <div class="admin-pdi-nombre">${escaparHtml(p.NombrePaquete)}</div>
-                    <div class="admin-pdi-desc">${escaparHtml(p.Descripcion || 'Sin descripción')}</div>
-                    <div class="admin-pdi-meta">
-                        <span class="admin-pdi-badge">$${fmt(p.PrecioPaquete)}</span>
-                        <span class="admin-pdi-badge">${p.DuracionNoches} noche${p.DuracionNoches !== 1 ? 's' : ''}</span>
-                        ${p.IncluirHabitacion ? '<span class="admin-pdi-badge">Incluye alojamiento</span>' : ''}
-                    </div>
-                    <div class="admin-pdi-servicios"><strong>Servicios incluidos:</strong><br>${servicios}</div>
-                </div>`;
-            det.classList.remove('hidden');
-        } catch(e) {
-            det.innerHTML = '<div class="admin-pdi-body" style="color:#64748b">No se pudo cargar el detalle.</div>';
-            det.classList.remove('hidden');
+
+        // Bloquear habitación porque el paquete incluye alojamiento
+        if (selectHab) {
+            selectHab.value = '';
+            selectHab.disabled = true;
+            selectHab.style.opacity = '0.45';
+            selectHab.title = 'El paquete ya incluye habitación';
+            limpiarErrorInline('reserva-admin-habitacion');
         }
+        if (hint) hint.style.display = '';
+
+        // Cargar detalle del paquete automáticamente
+        if (det) {
+            det.innerHTML = '<div class="admin-pdi-body" style="color:#64748b;font-size:12px;">Cargando...</div>';
+            det.classList.remove('hidden');
+            try {
+                const p = await requestJson(`/paquetes/${val}`);
+                const servicios = p.servicios && p.servicios.length
+                    ? p.servicios.map(s => `<span>${escaparHtml(s.NombreServicio)}</span>`).join('')
+                    : '<span>Sin servicios adicionales</span>';
+                det.innerHTML = `
+                    <div class="admin-pdi-body">
+                        <div class="admin-pdi-nombre">${escaparHtml(p.NombrePaquete)}</div>
+                        <div class="admin-pdi-desc">${escaparHtml(p.Descripcion || 'Sin descripción')}</div>
+                        <div class="admin-pdi-meta">
+                            <span class="admin-pdi-badge">$${fmt(p.PrecioPaquete)}</span>
+                            <span class="admin-pdi-badge">${p.DuracionNoches} noche${p.DuracionNoches !== 1 ? 's' : ''}</span>
+                            ${p.IncluirHabitacion ? '<span class="admin-pdi-badge">Incluye alojamiento</span>' : ''}
+                        </div>
+                        <div class="admin-pdi-servicios"><strong>Servicios incluidos:</strong><br>${servicios}</div>
+                    </div>`;
+            } catch(e) {
+                det.innerHTML = '<div class="admin-pdi-body" style="color:#64748b">No se pudo cargar el detalle.</div>';
+            }
+        }
+
+        actualizarSidebarResumen();
     };
 
 })();

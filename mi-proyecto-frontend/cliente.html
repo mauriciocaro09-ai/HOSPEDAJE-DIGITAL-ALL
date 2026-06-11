@@ -1182,14 +1182,9 @@
                                     <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;">(opcional)</span>
                                 </div>
                                 <div class="form-group">
-                                    <div style="display:flex;gap:8px;align-items:center;">
-                                        <select id="nr-paquete" style="flex:1;">
-                                            <option value="">Sin paquete</option>
-                                        </select>
-                                        <button type="button" id="nr-paquete-ver" class="btn-ver-detalle-paq hidden">
-                                            <i class="fa-solid fa-circle-info"></i> Ver detalle
-                                        </button>
-                                    </div>
+                                    <select id="nr-paquete" style="width:100%;">
+                                        <option value="">Sin paquete</option>
+                                    </select>
                                 </div>
                                 <div id="nr-paquete-detalle" class="paquete-detalle-inline hidden"></div>
                             </div>
@@ -2204,7 +2199,6 @@
                 const data = await fetch(`${API_URL}/paquetes`).then(r => r.json());
                 const paquetes = Array.isArray(data) ? data : [];
                 const sel = $('nr-paquete');
-                const btnVer = $('nr-paquete-ver');
                 const detalle = $('nr-paquete-detalle');
 
                 sel.innerHTML = '<option value="">Sin paquete</option>';
@@ -2213,41 +2207,36 @@
                     sel.innerHTML += `<option value="${p.IDPaquete}" data-precio="${precioIva}">${p.NombrePaquete} — $${fmt(precioIva)}</option>`;
                 });
 
-                sel.addEventListener('change', () => {
+                sel.addEventListener('change', async () => {
                     actualizarResumen();
                     const selHab = $('nr-habitacion');
                     const hint = $('nr-hab-paquete-hint');
-                    if (sel.value) {
-                        btnVer.classList.remove('hidden');
-                        if (selHab) {
-                            selHab.value = '';
-                            selHab.disabled = true;
-                            selHab.style.opacity = '0.45';
-                            selHab.title = 'El paquete ya incluye habitación';
-                        }
-                        if (hint) hint.style.display = '';
-                    } else {
-                        btnVer.classList.add('hidden');
+
+                    if (!sel.value) {
                         detalle.classList.add('hidden');
                         detalle.innerHTML = '';
-                        if (selHab) {
-                            selHab.disabled = false;
-                            selHab.style.opacity = '';
-                            selHab.title = '';
-                        }
+                        if (selHab) { selHab.disabled = false; selHab.style.opacity = ''; selHab.title = ''; }
                         if (hint) hint.style.display = 'none';
+                        return;
                     }
-                });
 
-                btnVer.addEventListener('click', async () => {
-                    const id = sel.value;
-                    if (!id) return;
+                    // Bloquear habitación
+                    if (selHab) {
+                        selHab.value = '';
+                        selHab.disabled = true;
+                        selHab.style.opacity = '0.45';
+                        selHab.title = 'El paquete ya incluye habitación';
+                    }
+                    if (hint) hint.style.display = '';
+
+                    // Cargar detalle automáticamente
+                    detalle.innerHTML = '<div class="pdi-body" style="color:var(--muted);font-size:12px;">Cargando...</div>';
+                    detalle.classList.remove('hidden');
                     try {
-                        const p = await fetch(`${API_URL}/paquetes/${id}`).then(r => r.json());
+                        const p = await fetch(`${API_URL}/paquetes/${sel.value}`).then(r => r.json());
                         const servicios = p.servicios && p.servicios.length
                             ? p.servicios.map(s => `<span>${s.NombreServicio}</span>`).join('')
                             : '<span>Sin servicios adicionales</span>';
-
                         detalle.innerHTML = `
                             <div class="pdi-body">
                                 <div class="pdi-nombre">${p.NombrePaquete}</div>
@@ -2258,14 +2247,12 @@
                                     ${p.IncluirHabitacion ? '<span class="pdi-badge">Incluye alojamiento</span>' : ''}
                                 </div>
                                 <div class="pdi-servicios"><strong>Servicios incluidos:</strong><br>${servicios}</div>
-                            </div>
-                        `;
-                        detalle.classList.remove('hidden');
+                            </div>`;
                     } catch(e) {
                         detalle.innerHTML = '<div class="pdi-body" style="color:var(--muted)">No se pudo cargar el detalle.</div>';
-                        detalle.classList.remove('hidden');
                     }
                 });
+
             } catch(e) { console.error('Error cargando paquetes:', e); }
         }
 
