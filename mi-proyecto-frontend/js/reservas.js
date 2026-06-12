@@ -1174,6 +1174,16 @@ const confirmarCambioEstado = async () => {
 
     if (!idReserva || !nuevoEstado) return;
 
+    // Si el estado elegido es "Cancelada", redirigir al flujo con política de cancelación
+    const selectEl = document.getElementById('cambio-estado-select');
+    const textoEstadoElegido = (selectEl?.options[selectEl?.selectedIndex]?.text || '').toLowerCase();
+    console.log('[cambioEstado] estado elegido texto:', textoEstadoElegido, '| nuevoEstado ID:', nuevoEstado);
+    if (textoEstadoElegido.includes('cancelad')) {
+        cerrarModalCambioEstado();
+        await cancelarConPoliticaAdmin(idReserva);
+        return;
+    }
+
     try {
         await requestJson(`/reservas/${idReserva}/estado`, {
             method: 'PUT',
@@ -1187,6 +1197,87 @@ const confirmarCambioEstado = async () => {
     } catch (err) {
         console.error('Error al cambiar estado:', err);
         if (msg) { msg.textContent = 'Error al cambiar el estado.'; msg.className = 'crud-clientes-mensaje error'; }
+    }
+};
+
+const cancelarConPoliticaAdmin = async (idReserva) => {
+    console.log('[cancelarConPolitica] buscando id:', idReserva, '| total cargadas:', reservasAdminCargadas.length);
+    console.log('[cancelarConPolitica] IDs en array:', reservasAdminCargadas.map(r => obtenerIdReserva(r)));
+    const reserva = reservasAdminCargadas.find(r => String(obtenerIdReserva(r)) === String(idReserva));
+    console.log('[cancelarConPolitica] reserva encontrada:', reserva ? 'SÍ' : 'NO', '| Monto_Total:', reserva?.Monto_Total);
+    if (!reserva) { alert('Error: no se encontró la reserva en los datos cargados. ID: ' + idReserva); return; }
+
+    const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+    const entrada = new Date(reserva.FechaInicio); entrada.setHours(0, 0, 0, 0);
+    const dias = Math.ceil((entrada - hoy) / (1000 * 60 * 60 * 24));
+    const monto = Number(reserva.Monto_Total || 0);
+    const tienesPaquetes = Array.isArray(reserva.paquetes) && reserva.paquetes.length > 0;
+    const diasCorte = tienesPaquetes ? 8 : 5;
+
+    let retencion, colorTexto, iconoTexto, mensajePolicy;
+    if (dias > diasCorte) {
+        retencion    = 0;
+        colorTexto   = '#16a34a';
+        iconoTexto   = '✓';
+        mensajePolicy = `Cancelación gratuita — más de ${diasCorte} días de anticipación`;
+    } else if (dias >= 1) {
+        retencion    = Math.round(monto * 0.5);
+        colorTexto   = '#ea580c';
+        iconoTexto   = '⚠';
+        mensajePolicy = 'Retención del 50% — entre 1 y ' + diasCorte + ' días antes';
+    } else {
+        retencion    = monto;
+        colorTexto   = '#dc2626';
+        iconoTexto   = '✗';
+        mensajePolicy = 'Sin reembolso — menos de 24 horas o fecha ya pasada';
+    }
+    const reembolso = monto - retencion;
+
+    const resultado = await Swal.fire({
+        title: 'Cancelar reserva',
+        html: `
+            <div style="text-align:left;font-size:13px;">
+                <p style="margin-bottom:12px;font-weight:600;color:${colorTexto};">${iconoTexto} ${escaparHtml(mensajePolicy)}</p>
+                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                        <span style="color:#6b7280;">Monto total</span>
+                        <strong>${fmt(monto)}</strong>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                        <span style="color:#6b7280;">Retención del hotel</span>
+                        <strong style="color:#ef4444;">${fmt(retencion)}</strong>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;border-top:1px solid #e2e8f0;padding-top:6px;">
+                        <span style="color:#6b7280;">Reembolso al cliente</span>
+                        <strong style="color:#16a34a;">${fmt(reembolso)}</strong>
+                    </div>
+                </div>
+                <textarea id="swal-motivo-cancelacion"
+                    placeholder="Motivo de cancelación (opcional)"
+                    rows="2"
+                    style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+            </div>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Confirmar cancelación',
+        cancelButtonText: 'No cancelar',
+        preConfirm: () => document.getElementById('swal-motivo-cancelacion')?.value?.trim() || null
+    });
+
+    if (!resultado.isConfirmed) return;
+
+    try {
+        await requestJson(`/reservas/${idReserva}/cancelar`, {
+            method: 'PUT',
+            body: { motivo: resultado.value || null }
+        });
+        mostrarMensajeReservaAdmin('Reserva cancelada. Se notificó al cliente por email.', 'ok');
+        cargarReservasAdmin();
+        window.refrescarAlertas?.();
+    } catch (err) {
+        mostrarMensajeReservaAdmin('Error al cancelar la reserva', 'error');
     }
 };
 
