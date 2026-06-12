@@ -2800,8 +2800,13 @@
                 document.body.appendChild(toast);
                 setTimeout(() => { if (toast.isConnected) toast.remove(); }, 5000);
             } catch(err) {
-                errBox.textContent = 'No se pudo crear la reserva. Intenta de nuevo.';
+                const msg = err?.message || '';
+                const esPendiente = msg.toLowerCase().includes('pendiente de confirmacion');
+                errBox.textContent = esPendiente
+                    ? msg
+                    : 'No se pudo crear la reserva. Intenta de nuevo.';
                 errBox.classList.remove('hidden');
+                if (esPendiente) errBox.style.background = '#fef3c7';
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirmar Reserva';

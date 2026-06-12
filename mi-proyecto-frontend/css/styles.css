@@ -3505,6 +3505,7 @@ footer {
 .notif-item-rojo .notif-item-icon    { background: #fdecea; color: #e74c3c; }
 .notif-item-amarillo .notif-item-icon { background: #fef9e7; color: #f39c12; }
 .notif-item-azul .notif-item-icon    { background: #eaf4fb; color: #2980b9; }
+.notif-item-verde .notif-item-icon   { background: #e8f8f0; color: #16a34a; }
 
 .notif-item-texto {
     flex: 1;

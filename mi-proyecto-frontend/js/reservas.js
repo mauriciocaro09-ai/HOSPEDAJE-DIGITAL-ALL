@@ -888,9 +888,10 @@ const guardarReservaAdmin = async (event) => {
     } catch (error) {
         console.error('Error al guardar reserva:', error);
         if (btn) { btn.disabled = false; btn.innerHTML = btnOrig; }
+        const esPendiente = (error?.message || '').toLowerCase().includes('pendiente de confirmacion');
         Swal.fire({
-            icon: 'error',
-            title: 'Error al guardar',
+            icon: esPendiente ? 'warning' : 'error',
+            title: esPendiente ? 'No disponible temporalmente' : 'Error al guardar',
             text: error?.message || 'Ocurrió un error al guardar la reserva. Revisá los datos e intentá de nuevo.',
             confirmButtonColor: '#1a2744'
         });
@@ -1112,7 +1113,19 @@ const verDetalleReserva = async (idReserva) => {
                 ${r.ComprobanteTransferencia.startsWith('data:image')
                     ? `<img src="${r.ComprobanteTransferencia}" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid #e2e8f0;margin-top:4px;cursor:zoom-in;" onclick="this.style.maxHeight=this.style.maxHeight==='none'?'220px':'none'">`
                     : `<a href="${r.ComprobanteTransferencia}" download="comprobante_reserva_${r.IdReserva || ''}.pdf" class="detalle-valor" style="color:#1a2744;font-weight:600;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:5px;"></i>Descargar PDF</a>`
-                }` : ''}
+                }
+                ${estado === 'pendiente' ? `
+                <div style="display:flex;gap:10px;margin-top:14px;">
+                    <button id="btn-aprobar-comprobante" type="button"
+                        style="flex:1;background:#16a34a;color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">
+                        <i class="fa-solid fa-circle-check" style="margin-right:6px;"></i>Aprobar pago
+                    </button>
+                    <button id="btn-rechazar-comprobante" type="button"
+                        style="flex:1;background:#ef4444;color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">
+                        <i class="fa-solid fa-circle-xmark" style="margin-right:6px;"></i>Rechazar
+                    </button>
+                </div>` : ''}
+                ` : ''}
             </div>
             <div class="detalle-reserva-seccion">
                 <p class="detalle-label" style="color:#f59e0b;">Cargos adicionales</p>
@@ -1121,6 +1134,12 @@ const verDetalleReserva = async (idReserva) => {
         `;
 
         renderCargosAdicionalesSection(r.IdReserva, r.NombreEstadoReserva);
+
+        const btnAprobar = document.getElementById('btn-aprobar-comprobante');
+        if (btnAprobar) btnAprobar.onclick = () => aprobarComprobanteAdmin(idReserva);
+
+        const btnRechazar = document.getElementById('btn-rechazar-comprobante');
+        if (btnRechazar) btnRechazar.onclick = () => rechazarComprobanteAdmin(idReserva);
 
         const btnEditar = document.getElementById('btn-detalle-editar');
         if (btnEditar) {
@@ -1132,6 +1151,58 @@ const verDetalleReserva = async (idReserva) => {
     } catch (err) {
         console.error('Error al cargar detalle:', err);
         contenido.innerHTML = '<p style="color:red;padding:16px;">No se pudo cargar el detalle.</p>';
+    }
+};
+
+const aprobarComprobanteAdmin = async (idReserva) => {
+    const confirm = await Swal.fire({
+        title: '¿Aprobar comprobante?',
+        text: 'El pago será verificado y la reserva pasará a estado Confirmada. Se notificará al cliente por email.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#16a34a',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sí, aprobar',
+        cancelButtonText: 'Cancelar'
+    });
+    if (!confirm.isConfirmed) return;
+    try {
+        await requestJson(`/reservas/${idReserva}/aprobar`, { method: 'PUT' });
+        cerrarDetalleReserva();
+        cargarReservasAdmin();
+        window.refrescarAlertas?.();
+        Swal.fire({ icon: 'success', title: '¡Pago aprobado!', text: 'Reserva confirmada. Se notificó al cliente.', timer: 3000, timerProgressBar: true, confirmButtonColor: '#1a2744' });
+    } catch (err) {
+        Swal.fire({ icon: 'error', title: 'Error', text: err?.message || 'No se pudo aprobar el comprobante.', confirmButtonColor: '#1a2744' });
+    }
+};
+
+const rechazarComprobanteAdmin = async (idReserva) => {
+    const result = await Swal.fire({
+        title: 'Rechazar comprobante',
+        html: `<textarea id="swal-motivo-rechazo" placeholder="Escribí el motivo del rechazo (obligatorio)" rows="3"
+            style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Rechazar y notificar',
+        cancelButtonText: 'Cancelar',
+        preConfirm: () => {
+            const motivo = document.getElementById('swal-motivo-rechazo')?.value?.trim();
+            if (!motivo) { Swal.showValidationMessage('El motivo es obligatorio'); return false; }
+            return motivo;
+        }
+    });
+    if (!result.isConfirmed) return;
+    try {
+        await requestJson(`/reservas/${idReserva}/rechazar`, { method: 'PUT', body: { motivo: result.value } });
+        cerrarDetalleReserva();
+        cargarReservasAdmin();
+        window.refrescarAlertas?.();
+        Swal.fire({ icon: 'info', title: 'Comprobante rechazado', text: 'Se notificó al cliente con el motivo de rechazo. La reserva sigue Pendiente.', timer: 3500, timerProgressBar: true, confirmButtonColor: '#1a2744' });
+    } catch (err) {
+        Swal.fire({ icon: 'error', title: 'Error', text: err?.message || 'No se pudo rechazar el comprobante.', confirmButtonColor: '#1a2744' });
     }
 };
 

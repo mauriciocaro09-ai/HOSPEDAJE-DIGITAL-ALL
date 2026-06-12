@@ -47,7 +47,7 @@
                 <span class="notif-sub-id">#${r.IDReserva}</span>
                 <span class="notif-sub-info">
                     <span class="notif-sub-nombre">${r.NombreCliente}</span>
-                    <span class="notif-sub-hab">${r.NombreHabitacion} &nbsp;·&nbsp; ${fmtFecha(r.FechaInicio)} – ${fmtFecha(r.FechaFinalizacion)}</span>
+                    <span class="notif-sub-hab">${r.NombreHabitacion || r.EmailCliente || ''} &nbsp;·&nbsp; ${fmtFecha(r.FechaInicio || r.FechaSubida)} – ${fmtFecha(r.FechaFinalizacion) || ''}</span>
                 </span>
                 <i class="fa-solid fa-arrow-right notif-sub-arrow"></i>
             </button>
@@ -96,6 +96,17 @@
                 texto: `${data.checkouts} check-out${data.checkouts !== 1 ? 's' : ''} hoy`,
                 sub:   'Clientes que salen hoy',
                 lista: data.listaCheckouts || []
+            });
+        }
+
+        if (data.comprobantes > 0) {
+            grupos.push({
+                tipo:  'comprobantes',
+                icono: 'fa-file-invoice',
+                clase: 'notif-item-verde',
+                texto: `${data.comprobantes} comprobante${data.comprobantes !== 1 ? 's' : ''} por verificar`,
+                sub:   'Transferencias pendientes de aprobación',
+                lista: data.listaComprobantes || []
             });
         }
 
