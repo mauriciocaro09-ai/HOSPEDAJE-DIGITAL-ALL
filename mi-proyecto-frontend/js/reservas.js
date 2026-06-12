@@ -1672,6 +1672,12 @@ if (document.readyState === 'loading') {
         const preview  = document.getElementById('hab-preview-card');
         if (!trigger || !list || !selectHab) return;
 
+        // Mover preview al body para que position:fixed no sea afectado
+        // por el transform:translateY del .reserva-card:hover
+        if (preview && preview.parentElement !== document.body) {
+            document.body.appendChild(preview);
+        }
+
         let sliderTimer = null;
 
         const cerrar = () => {
