@@ -703,8 +703,10 @@ const poblarSelectsReserva = async () => {
             let paq = await requestJson('/paquetes');
             if (!Array.isArray(paq)) paq = [];
             paq = paq.filter(p => p.Estado == 1 || p.Estado === '1');
-            const opciones = paq.map(p => { const pIva = Math.round(Number(p.PrecioPaquete || 0) * 1.19); return `<option value="${escaparHtml(p.IDPaquete)}" data-precio="${pIva}">${escaparHtml(p.NombrePaquete || 'Paquete')} — $${fmt(pIva)}</option>`; });
+            _paquetesCache = paq;
+            const opciones = paq.map(p => { const pIva = Math.round(Number(p.PrecioPaquete || 0) * 1.19); return `<option value="${escaparHtml(p.IDPaquete)}" data-precio="${pIva}">${escaparHtml(p.NombrePaquete || 'Paquete')}</option>`; });
             selectPaquetes.innerHTML = '<option value="">Sin paquete</option>' + opciones.join('');
+            construirDropdownCustomPaquetes(paq);
         } catch (err) {
             console.error('No se pudieron cargar paquetes:', err);
             selectPaquetes.innerHTML = '<option value="">No disponible</option>';
@@ -1193,6 +1195,7 @@ const confirmarCambioEstado = async () => {
 // ============================================
 
 let _habitacionesCache = [];
+let _paquetesCache = [];
 
 const actualizarSidebarResumen = () => {
     const habSelect = document.getElementById('reserva-admin-habitacion');
@@ -1613,13 +1616,14 @@ if (document.readyState === 'loading') {
         const selectHab = document.getElementById('reserva-admin-habitacion');
         const hint = document.getElementById('hab-paquete-hint');
 
+        const habTrigger = document.getElementById('hab-custom-trigger');
+        const habLabel   = document.getElementById('hab-selected-label');
+
         if (!val) {
             if (det) { det.classList.add('hidden'); det.innerHTML = ''; }
-            if (selectHab) {
-                selectHab.disabled = false;
-                selectHab.style.opacity = '';
-                selectHab.title = '';
-            }
+            if (selectHab) { selectHab.disabled = false; selectHab.style.opacity = ''; selectHab.title = ''; }
+            if (habTrigger) { habTrigger.style.opacity = ''; habTrigger.style.pointerEvents = ''; habTrigger.title = ''; }
+            if (habLabel && habLabel.textContent === '— incluida en el paquete —') habLabel.textContent = '-- Selecciona habitación --';
             if (hint) hint.style.display = 'none';
             actualizarSidebarResumen();
             return;
@@ -1633,6 +1637,8 @@ if (document.readyState === 'loading') {
             selectHab.title = 'El paquete ya incluye habitación';
             limpiarErrorInline('reserva-admin-habitacion');
         }
+        if (habTrigger) { habTrigger.style.opacity = '0.45'; habTrigger.style.pointerEvents = 'none'; habTrigger.title = 'El paquete ya incluye habitación'; }
+        if (habLabel) habLabel.textContent = '— incluida en el paquete —';
         if (hint) hint.style.display = '';
 
         // Cargar detalle del paquete automáticamente
@@ -1786,6 +1792,122 @@ if (document.readyState === 'loading') {
     };
 
     // Re-sincronizar label del dropdown custom cuando se cargue una reserva para editar
+    const construirDropdownCustomPaquetes = (paq) => {
+        const trigger    = document.getElementById('paq-custom-trigger');
+        const list       = document.getElementById('paq-options-list');
+        const labelSpan  = document.getElementById('paq-selected-label');
+        const selectPaq  = document.getElementById('reserva-admin-paquetes');
+        const preview    = document.getElementById('paq-preview-card');
+        if (!trigger || !list || !selectPaq) return;
+
+        if (preview && preview.parentElement !== document.body) document.body.appendChild(preview);
+
+        let sliderTimer = null;
+
+        const cerrar = () => {
+            list.classList.remove('open');
+            trigger.classList.remove('open');
+            if (preview) preview.style.display = 'none';
+        };
+
+        const sincronizar = (val, nombre) => {
+            selectPaq.value = val;
+            if (labelSpan) labelSpan.textContent = nombre || 'Sin paquete';
+            selectPaq.dispatchEvent(new Event('change'));
+            list.querySelectorAll('.hab-option').forEach(o => o.classList.toggle('selected', o.dataset.id === String(val)));
+        };
+
+        const mostrarPreview = (p, targetEl) => {
+            if (!preview) return;
+            const imgs = (p.Imagen || '').split(',').map(s => s.trim()).filter(Boolean);
+            const precio = fmt(Math.round(Number(p.PrecioPaquete || 0) * 1.19));
+            const desc = p.Descripcion || 'Sin descripción';
+            const noches = p.DuracionNoches || 0;
+
+            const dotsHtml = imgs.length > 1
+                ? imgs.map((_, i) => `<div class="hab-preview-dot${i === 0 ? ' active' : ''}"></div>`).join('')
+                : '';
+
+            preview.innerHTML = `
+                <div class="hab-preview-header">${escaparHtml(p.NombrePaquete || '')}</div>
+                <div class="hab-preview-slider">
+                    ${imgs.length
+                        ? imgs.map((u, i) => `<img src="${u}" class="${i === 0 ? 'active' : ''}" onerror="this.style.display='none'" alt="">`).join('')
+                        : `<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;"><i class="fa-solid fa-box-open" style="font-size:36px;"></i></div>`
+                    }
+                    ${dotsHtml ? `<div class="hab-preview-dots">${dotsHtml}</div>` : ''}
+                </div>
+                <div class="hab-preview-body">
+                    <div class="hab-preview-desc">${escaparHtml(desc)}</div>
+                    <div class="hab-preview-footer">
+                        <div class="hab-preview-precio">$${precio} <span>/ paquete</span></div>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">
+                            ${noches ? `<span class="hab-preview-badge">${noches} noche${noches !== 1 ? 's' : ''}</span>` : ''}
+                            ${p.IncluirHabitacion ? '<span class="hab-preview-badge" style="background:#dbeafe;color:#1e40af;">Alojamiento incl.</span>' : ''}
+                        </div>
+                    </div>
+                </div>`;
+
+            clearInterval(sliderTimer);
+            if (imgs.length > 1) {
+                let idx = 0;
+                sliderTimer = setInterval(() => {
+                    idx = (idx + 1) % imgs.length;
+                    preview.querySelectorAll('.hab-preview-slider img').forEach((img, i) => img.classList.toggle('active', i === idx));
+                    preview.querySelectorAll('.hab-preview-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+                }, 1800);
+            }
+
+            const rect = targetEl.getBoundingClientRect();
+            const cardW = 368, cardH = 430;
+            const left = Math.max(8, window.innerWidth - cardW - 8);
+            const top  = Math.max(8, Math.min(rect.top - 60, window.innerHeight - cardH - 8));
+            preview.style.left = left + 'px';
+            preview.style.top  = top + 'px';
+            preview.style.display = 'block';
+        };
+
+        // Construir opciones
+        list.innerHTML = '<div class="hab-option" data-id="">' +
+            '<span style="color:#9ca3af;">Sin paquete</span></div>' +
+            paq.map(p => `
+                <div class="hab-option" data-id="${p.IDPaquete}">
+                    <div class="hab-option-dot" style="background:#f59e0b;"></div>
+                    <span>${escaparHtml(p.NombrePaquete || 'Paquete')}</span>
+                    <span class="hab-option-price">$${fmt(Math.round(Number(p.PrecioPaquete || 0) * 1.19))}</span>
+                </div>`).join('');
+
+        list.querySelectorAll('.hab-option').forEach(opt => {
+            const p = paq.find(x => String(x.IDPaquete) === opt.dataset.id);
+            if (p) {
+                opt.addEventListener('mouseenter', () => mostrarPreview(p, opt));
+                opt.addEventListener('mouseleave', () => { clearInterval(sliderTimer); if (preview) preview.style.display = 'none'; });
+            }
+            opt.addEventListener('click', () => {
+                const nombre = opt.querySelector('span:not(.hab-option-price)').textContent;
+                sincronizar(opt.dataset.id, opt.dataset.id ? nombre : '');
+                cerrar();
+            });
+        });
+
+        if (!trigger.dataset.paqDropdownInit) {
+            trigger.dataset.paqDropdownInit = '1';
+            trigger.addEventListener('click', () => {
+                const abierto = list.classList.contains('open');
+                if (abierto) { cerrar(); } else { list.classList.add('open'); trigger.classList.add('open'); }
+            });
+            document.addEventListener('click', (e) => {
+                if (!trigger.contains(e.target) && !list.contains(e.target) && e.target !== selectPaq) cerrar();
+            }, true);
+        }
+
+        // Re-sincronizar label si hay valor guardado (modo edición)
+        if (selectPaq.value) {
+            const opt = list.querySelector(`.hab-option[data-id="${selectPaq.value}"]`);
+            if (opt && labelSpan) labelSpan.textContent = opt.querySelector('span:not(.hab-option-price)').textContent;
+        }
+    };
+
     window.sincronizarLabelHabDropdown = (idHab) => {
         const label = document.getElementById('hab-selected-label');
         const list  = document.getElementById('hab-options-list');

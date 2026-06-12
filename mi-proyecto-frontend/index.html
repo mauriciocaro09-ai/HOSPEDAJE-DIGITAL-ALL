@@ -532,9 +532,16 @@
                         <div class="reserva-card paquetes-card">
                             <span class="card-title"><i class="fa-solid fa-box"></i> PAQUETE <small>(opcional)</small></span>
                             <div class="form-group" style="margin-bottom:0;">
-                                <select id="reserva-admin-paquetes" style="width:100%;" onchange="adminPaqueteOnChange(this.value)">
+                                <select id="reserva-admin-paquetes" style="display:none;" onchange="adminPaqueteOnChange(this.value)">
                                     <option value="">Sin paquete</option>
                                 </select>
+                                <div id="paq-custom-dropdown" class="hab-custom-dropdown">
+                                    <div id="paq-custom-trigger" class="hab-custom-trigger" tabindex="0">
+                                        <span id="paq-selected-label">Sin paquete</span>
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </div>
+                                    <div id="paq-options-list" class="hab-options-list"></div>
+                                </div>
                             </div>
                             <div id="admin-paquete-detalle" class="admin-paquete-detalle-inline hidden"></div>
                         </div>
@@ -1131,5 +1138,6 @@
             }
         } catch(e) {}
     </script>
+<div id="paq-preview-card" class="hab-preview-card" style="display:none"></div>
 </body>
 </html>

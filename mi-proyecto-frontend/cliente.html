@@ -1218,10 +1218,17 @@
                                     <i class="fa-solid fa-box"></i> Paquete
                                     <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;">(opcional)</span>
                                 </div>
-                                <div class="form-group">
-                                    <select id="nr-paquete" style="width:100%;">
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <select id="nr-paquete" style="display:none;">
                                         <option value="">Sin paquete</option>
                                     </select>
+                                    <div id="nr-paq-custom-dropdown" class="hab-custom-dropdown">
+                                        <div id="nr-paq-custom-trigger" class="hab-custom-trigger" tabindex="0">
+                                            <span id="nr-paq-selected-label">Sin paquete</span>
+                                            <i class="fa-solid fa-chevron-down"></i>
+                                        </div>
+                                        <div id="nr-paq-options-list" class="hab-options-list"></div>
+                                    </div>
                                 </div>
                                 <div id="nr-paquete-detalle" class="paquete-detalle-inline hidden"></div>
                             </div>
@@ -2391,6 +2398,113 @@
             }
         }
 
+        function construirDropdownCustomNRPaquetes(paquetes) {
+            const trigger   = $('nr-paq-custom-trigger');
+            const list      = $('nr-paq-options-list');
+            const labelSpan = $('nr-paq-selected-label');
+            const selectPaq = $('nr-paquete');
+            const preview   = $('nr-paq-preview-card');
+            if (!trigger || !list || !selectPaq) return;
+
+            const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            let sliderTimer = null;
+
+            const cerrar = () => {
+                list.classList.remove('open');
+                trigger.classList.remove('open');
+                if (preview) preview.style.display = 'none';
+            };
+
+            const sincronizar = (val, nombre) => {
+                selectPaq.value = val;
+                if (labelSpan) labelSpan.textContent = nombre || 'Sin paquete';
+                selectPaq.dispatchEvent(new Event('change'));
+                list.querySelectorAll('.hab-option').forEach(o => o.classList.toggle('selected', o.dataset.id === String(val)));
+            };
+
+            const mostrarPreview = (p, targetEl) => {
+                if (!preview) return;
+                const imgs = (p.Imagen || '').split(',').map(s => s.trim()).filter(Boolean);
+                const precio = '$' + fmt(Math.round(Number(p.PrecioPaquete || 0) * 1.19));
+                const desc = p.Descripcion || 'Sin descripción';
+                const noches = p.DuracionNoches || 0;
+
+                const dotsHtml = imgs.length > 1
+                    ? imgs.map((_, i) => `<div class="hab-preview-dot${i === 0 ? ' active' : ''}"></div>`).join('')
+                    : '';
+
+                preview.innerHTML = `
+                    <div class="hab-preview-header">${esc(p.NombrePaquete || '')}</div>
+                    <div class="hab-preview-slider">
+                        ${imgs.length
+                            ? imgs.map((u, i) => `<img src="${u}" class="${i === 0 ? 'active' : ''}" onerror="this.style.display='none'" alt="">`).join('')
+                            : `<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;"><i class="fa-solid fa-box-open" style="font-size:36px;"></i></div>`
+                        }
+                        ${dotsHtml ? `<div class="hab-preview-dots">${dotsHtml}</div>` : ''}
+                    </div>
+                    <div class="hab-preview-body">
+                        <div class="hab-preview-desc">${esc(desc)}</div>
+                        <div class="hab-preview-footer">
+                            <div class="hab-preview-precio">${precio} <span>/ paquete</span></div>
+                            <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">
+                                ${noches ? `<span class="hab-preview-badge">${noches} noche${noches !== 1 ? 's' : ''}</span>` : ''}
+                                ${p.IncluirHabitacion ? '<span class="hab-preview-badge" style="background:#dbeafe;color:#1e40af;">Alojamiento incl.</span>' : ''}
+                            </div>
+                        </div>
+                    </div>`;
+
+                clearInterval(sliderTimer);
+                if (imgs.length > 1) {
+                    let idx = 0;
+                    sliderTimer = setInterval(() => {
+                        idx = (idx + 1) % imgs.length;
+                        preview.querySelectorAll('.hab-preview-slider img').forEach((img, i) => img.classList.toggle('active', i === idx));
+                        preview.querySelectorAll('.hab-preview-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+                    }, 1800);
+                }
+
+                const rect = targetEl.getBoundingClientRect();
+                const cardW = 368, cardH = 430;
+                const left = Math.max(8, window.innerWidth - cardW - 8);
+                const top  = Math.max(8, Math.min(rect.top - 60, window.innerHeight - cardH - 8));
+                preview.style.left = left + 'px';
+                preview.style.top  = top + 'px';
+                preview.style.display = 'block';
+            };
+
+            list.innerHTML = '<div class="hab-option" data-id=""><span style="color:#9ca3af;">Sin paquete</span></div>' +
+                paquetes.map(p => `
+                    <div class="hab-option" data-id="${p.IDPaquete}">
+                        <div class="hab-option-dot" style="background:#f59e0b;"></div>
+                        <span>${esc(p.NombrePaquete || 'Paquete')}</span>
+                        <span class="hab-option-price">$${fmt(Math.round(Number(p.PrecioPaquete || 0) * 1.19))}</span>
+                    </div>`).join('');
+
+            list.querySelectorAll('.hab-option').forEach(opt => {
+                const p = paquetes.find(x => String(x.IDPaquete) === opt.dataset.id);
+                if (p) {
+                    opt.addEventListener('mouseenter', () => mostrarPreview(p, opt));
+                    opt.addEventListener('mouseleave', () => { clearInterval(sliderTimer); if (preview) preview.style.display = 'none'; });
+                }
+                opt.addEventListener('click', () => {
+                    const nombre = opt.querySelector('span:not(.hab-option-price)').textContent;
+                    sincronizar(opt.dataset.id, opt.dataset.id ? nombre : '');
+                    cerrar();
+                });
+            });
+
+            if (!trigger.dataset.nrPaqInit) {
+                trigger.dataset.nrPaqInit = '1';
+                trigger.addEventListener('click', () => {
+                    const abierto = list.classList.contains('open');
+                    if (abierto) { cerrar(); } else { list.classList.add('open'); trigger.classList.add('open'); }
+                });
+                document.addEventListener('click', (e) => {
+                    if (!trigger.contains(e.target) && !list.contains(e.target) && e.target !== selectPaq) cerrar();
+                }, true);
+            }
+        }
+
         async function cargarMetodosPagoNR() {
             try {
                 const data = await apiFetch('/reservas/metodos-pago');
@@ -2416,8 +2530,9 @@
                 sel.innerHTML = '<option value="">Sin paquete</option>';
                 paquetes.forEach(p => {
                     const precioIva = Math.round(p.PrecioPaquete * 1.19);
-                    sel.innerHTML += `<option value="${p.IDPaquete}" data-precio="${precioIva}">${p.NombrePaquete} — $${fmt(precioIva)}</option>`;
+                    sel.innerHTML += `<option value="${p.IDPaquete}" data-precio="${precioIva}">${p.NombrePaquete}</option>`;
                 });
+                construirDropdownCustomNRPaquetes(paquetes);
 
                 sel.addEventListener('change', async () => {
                     actualizarResumen();
@@ -2782,5 +2897,6 @@
         });
     </script>
 <div id="nr-hab-preview-card" class="hab-preview-card" style="display:none"></div>
+<div id="nr-paq-preview-card" class="hab-preview-card" style="display:none"></div>
 </body>
 </html>
