@@ -1177,7 +1177,6 @@ const confirmarCambioEstado = async () => {
     // Si el estado elegido es "Cancelada", redirigir al flujo con política de cancelación
     const selectEl = document.getElementById('cambio-estado-select');
     const textoEstadoElegido = (selectEl?.options[selectEl?.selectedIndex]?.text || '').toLowerCase();
-    console.log('[cambioEstado] estado elegido texto:', textoEstadoElegido, '| nuevoEstado ID:', nuevoEstado);
     if (textoEstadoElegido.includes('cancelad')) {
         cerrarModalCambioEstado();
         await cancelarConPoliticaAdmin(idReserva);
@@ -1201,11 +1200,8 @@ const confirmarCambioEstado = async () => {
 };
 
 const cancelarConPoliticaAdmin = async (idReserva) => {
-    console.log('[cancelarConPolitica] buscando id:', idReserva, '| total cargadas:', reservasAdminCargadas.length);
-    console.log('[cancelarConPolitica] IDs en array:', reservasAdminCargadas.map(r => obtenerIdReserva(r)));
     const reserva = reservasAdminCargadas.find(r => String(obtenerIdReserva(r)) === String(idReserva));
-    console.log('[cancelarConPolitica] reserva encontrada:', reserva ? 'SÍ' : 'NO', '| Monto_Total:', reserva?.Monto_Total);
-    if (!reserva) { alert('Error: no se encontró la reserva en los datos cargados. ID: ' + idReserva); return; }
+    if (!reserva) return;
 
     const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
     const entrada = new Date(reserva.FechaInicio); entrada.setHours(0, 0, 0, 0);
