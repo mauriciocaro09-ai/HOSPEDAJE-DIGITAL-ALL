@@ -45,6 +45,10 @@ router.put("/:id/cancelar", reservasController.cancelar);
 // Subir comprobante de transferencia
 router.put("/:id/comprobante", reservasController.subirComprobante);
 
+// Aprobar / rechazar comprobante (admin)
+router.put("/:id/aprobar", reservasController.aprobarComprobante);
+router.put("/:id/rechazar", reservasController.rechazarComprobante);
+
 // Agregar servicios a reserva existente
 router.post("/:id/servicios", reservasController.agregarServicios);
 

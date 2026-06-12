@@ -118,14 +118,40 @@ const DashboardService = {
             LIMIT 10
         `, [hoy]);
 
+        // Comprobantes subidos por clientes pendientes de revisión del admin
+        const [[{ comprobantes }]] = await db.query(`
+            SELECT COUNT(*) AS comprobantes FROM reserva r
+            JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
+            WHERE LOWER(e.NombreEstadoReserva) LIKE '%pendiente%'
+              AND r.ComprobanteTransferencia IS NOT NULL
+              AND r.ComprobanteTransferencia != ''
+        `).catch(() => [[{ comprobantes: 0 }]]);
+
+        const [listaComprobantes] = await db.query(`
+            SELECT r.IDReserva,
+                   CONCAT(c.Nombre, ' ', c.Apellido) AS NombreCliente,
+                   c.Email AS EmailCliente,
+                   r.FechaCreacion AS FechaSubida
+            FROM reserva r
+            JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
+            JOIN cliente c ON r.NroDocumentoCliente = c.NroDocumento
+            WHERE LOWER(e.NombreEstadoReserva) LIKE '%pendiente%'
+              AND r.ComprobanteTransferencia IS NOT NULL
+              AND r.ComprobanteTransferencia != ''
+            ORDER BY r.FechaCreacion DESC
+            LIMIT 10
+        `).catch(() => [[]]);
+
         return {
             pendientes:      Number(pendientes),
             checkins:        Number(checkins),
             checkouts:       Number(checkouts),
-            total:           Number(pendientes) + Number(checkins) + Number(checkouts),
+            comprobantes:    Number(comprobantes),
+            total:           Number(pendientes) + Number(checkins) + Number(checkouts) + Number(comprobantes),
             listaPendientes,
             listaCheckins,
-            listaCheckouts
+            listaCheckouts,
+            listaComprobantes
         };
     }
 

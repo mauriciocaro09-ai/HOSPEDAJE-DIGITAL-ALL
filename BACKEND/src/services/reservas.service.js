@@ -48,6 +48,47 @@ const ReservasService = {
 
   /* ── Crear ─────────────────────────────────── */
   create: async (data) => {
+    // Validar bloqueo por reserva Pendiente (habitación o paquete con habitación)
+    if (data.IDHabitacion) {
+      const [bloqueadas] = await db.query(`
+        SELECT r.IDReserva FROM reserva r
+        JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
+        WHERE r.IDHabitacion = ?
+          AND LOWER(e.NombreEstadoReserva) LIKE '%pendiente%'
+          AND r.FechaInicio < ? AND r.FechaFinalizacion > ?
+        LIMIT 1
+      `, [data.IDHabitacion, data.FechaFinalizacion, data.FechaInicio]);
+      if (bloqueadas.length > 0) {
+        const err = new Error('Esta habitacion tiene una reserva pendiente de confirmacion de pago para esas fechas. Por favor elige otra habitacion o intenta mas tarde.');
+        err.statusCode = 409;
+        throw err;
+      }
+    }
+
+    if (Array.isArray(data.paquetes) && data.paquetes.length > 0) {
+      for (const p of data.paquetes) {
+        const idPaquete = p.IDPaquete || p.idPaquete;
+        if (!idPaquete) continue;
+        const [[paq]] = await db.query('SELECT IncluirHabitacion FROM paquete WHERE IDPaquete = ? LIMIT 1', [idPaquete]);
+        if (paq && paq.IncluirHabitacion) {
+          const [bloqPaq] = await db.query(`
+            SELECT r.IDReserva FROM reserva r
+            JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
+            JOIN detallereservapaquetes dp ON dp.IDReserva = r.IDReserva
+            WHERE dp.IDPaquete = ?
+              AND LOWER(e.NombreEstadoReserva) LIKE '%pendiente%'
+              AND r.FechaInicio < ? AND r.FechaFinalizacion > ?
+            LIMIT 1
+          `, [idPaquete, data.FechaFinalizacion, data.FechaInicio]);
+          if (bloqPaq.length > 0) {
+            const err = new Error('Este paquete tiene una reserva pendiente de confirmacion de pago para esas fechas. Por favor elige otro paquete o intenta mas tarde.');
+            err.statusCode = 409;
+            throw err;
+          }
+        }
+      }
+    }
+
     const result = await Reservas.crear(data);
     const reservaId = result.insertId;
 
@@ -91,6 +132,31 @@ const ReservasService = {
       } catch (e) {
         console.error('Error insertando paquetes en detalle:', e.message);
       }
+    }
+
+    // Enviar email de aviso si el pago es por transferencia bancaria
+    try {
+      const [[mp]] = await db.query(
+        'SELECT mp.NomMetodoPago FROM metodopago mp JOIN reserva r ON r.MetodoPago = mp.IdMetodoPago WHERE r.IDReserva = ? LIMIT 1',
+        [reservaId]
+      ).catch(() => [[null]]);
+      if (mp && mp.NomMetodoPago && mp.NomMetodoPago.toLowerCase().includes('transferencia')) {
+        const [[clienteData]] = await db.query(
+          'SELECT c.Nombre, c.Apellido, c.Email FROM reserva r JOIN cliente c ON r.NroDocumentoCliente = c.NroDocumento WHERE r.IDReserva = ? LIMIT 1',
+          [reservaId]
+        ).catch(() => [[null]]);
+        if (clienteData && clienteData.Email) {
+          const fechaLimite = new Date(Date.now() + 30 * 60 * 1000);
+          EmailService.enviarAvisoComprobante({
+            clienteNombre: (clienteData.Nombre || '') + ' ' + (clienteData.Apellido || ''),
+            clienteEmail: clienteData.Email,
+            reservaId,
+            fechaLimite
+          }).catch(e => console.error('Error enviando aviso comprobante:', e.message));
+        }
+      }
+    } catch (e) {
+      console.error('Error verificando metodo de pago para aviso:', e.message);
     }
 
     return result;
@@ -159,6 +225,96 @@ const ReservasService = {
     }
 
     return { ...result, politica };
+  },
+
+  /* ── Aprobar comprobante ────────────────────── */
+  aprobar: async (id) => {
+    const reserva = await Reservas.obtenerPorId(id);
+    if (!reserva) return null;
+
+    const [[estadoConf]] = await db.query(
+      "SELECT IdEstadoReserva FROM estadosreserva WHERE LOWER(NombreEstadoReserva) LIKE '%confirmad%' LIMIT 1"
+    );
+    const idEstado = estadoConf ? estadoConf.IdEstadoReserva : 2;
+    const result = await Reservas.actualizar(id, { IdEstadoReserva: idEstado });
+    if (!result || result.affectedRows === 0) return null;
+
+    if (reserva.EmailCliente) {
+      EmailService.enviarPagoVerificado({
+        clienteNombre: reserva.NombreCliente || "Cliente",
+        clienteEmail: reserva.EmailCliente,
+        reservaId: id,
+        fechaInicio: reserva.FechaInicio,
+        fechaFin: reserva.FechaFinalizacion,
+        montoTotal: Number(reserva.Monto_Total ?? reserva.MontoTotal ?? 0)
+      }).catch(e => console.error("Error enviando email pago verificado:", e.message));
+    }
+
+    return result;
+  },
+
+  /* ── Rechazar comprobante ───────────────────── */
+  rechazar: async (id, motivo) => {
+    const reserva = await Reservas.obtenerPorId(id);
+    if (!reserva) return null;
+
+    // Limpiar comprobante y guardar motivo, mantener estado Pendiente
+    await db.query(
+      "UPDATE reserva SET ComprobanteTransferencia = NULL, MotivoCancelacion = ? WHERE IDReserva = ?",
+      [motivo || null, id]
+    );
+
+    if (reserva.EmailCliente) {
+      EmailService.enviarRechazoComprobante({
+        clienteNombre: reserva.NombreCliente || "Cliente",
+        clienteEmail: reserva.EmailCliente,
+        reservaId: id,
+        motivo: motivo || null
+      }).catch(e => console.error("Error enviando email rechazo:", e.message));
+    }
+
+    return { ok: true };
+  },
+
+  /* ── Auto-cancelar vencidas ─────────────────── */
+  autoCancelarVencidas: async () => {
+    try {
+      const limite = new Date(Date.now() - 30 * 60 * 1000); // hace 30 minutos
+      const [vencidas] = await db.query(`
+        SELECT r.IDReserva, c.Nombre, c.Apellido, c.Email
+        FROM reserva r
+        JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
+        JOIN cliente c ON r.NroDocumentoCliente = c.NroDocumento
+        WHERE LOWER(e.NombreEstadoReserva) LIKE '%pendiente%'
+          AND (r.ComprobanteTransferencia IS NULL OR r.ComprobanteTransferencia = '')
+          AND r.FechaCreacion IS NOT NULL
+          AND r.FechaCreacion <= ?
+      `, [limite]);
+
+      if (vencidas.length === 0) return;
+
+      const [[estadoCancelada]] = await db.query(
+        "SELECT IdEstadoReserva FROM estadosreserva WHERE LOWER(NombreEstadoReserva) LIKE '%cancelad%' LIMIT 1"
+      );
+      const idEstado = estadoCancelada ? estadoCancelada.IdEstadoReserva : 4;
+
+      for (const r of vencidas) {
+        await db.query(
+          "UPDATE reserva SET IdEstadoReserva = ?, MotivoCancelacion = 'Cancelacion automatica: plazo de 30 minutos vencido sin comprobante' WHERE IDReserva = ?",
+          [idEstado, r.IDReserva]
+        );
+        if (r.Email) {
+          EmailService.enviarCancelacionPorVencimiento({
+            clienteNombre: (r.Nombre || '') + ' ' + (r.Apellido || ''),
+            clienteEmail: r.Email,
+            reservaId: r.IDReserva
+          }).catch(e => console.error("Error enviando email vencimiento:", e.message));
+        }
+        console.log(`Reserva #${r.IDReserva} auto-cancelada por vencimiento de plazo.`);
+      }
+    } catch (e) {
+      console.error("Error en autoCancelarVencidas:", e.message);
+    }
   },
 
   /* ── Eliminar ───────────────────────────────── */

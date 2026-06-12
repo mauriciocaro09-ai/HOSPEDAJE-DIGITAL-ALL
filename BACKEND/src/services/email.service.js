@@ -212,6 +212,131 @@ const EmailService = {
     }
   },
 
+  enviarAvisoComprobante: async ({ clienteNombre, clienteEmail, reservaId, fechaLimite }) => {
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clienteEmail && clienteEmail.trim());
+    if (!emailValido) { console.warn("Correo invalido para aviso comprobante: " + clienteEmail); return false; }
+    try {
+      const limiteStr = new Date(fechaLimite).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+      const frontendUrl = (process.env.FRONTEND_URL || "https://hospedaje-digital-all.vercel.app").trim();
+      await enviarBrevo({
+        toEmail: clienteEmail,
+        toName: clienteNombre,
+        subject: "Accion requerida: Sube tu comprobante de pago — Reserva #" + reservaId,
+        htmlContent:
+          "<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:8px;\">" +
+          "<div style=\"background:#f59e0b;padding:20px;border-radius:8px 8px 0 0;text-align:center;\"><h1 style=\"color:white;margin:0;\">Hospedaje Digital</h1></div>" +
+          "<div style=\"padding:30px;\">" +
+          "<h2 style=\"color:#b45309;\">&#9201; Tenes 30 minutos para subir tu comprobante</h2>" +
+          "<p>Hola <strong>" + clienteNombre + "</strong>, tu reserva <strong>#" + reservaId + "</strong> fue registrada con metodo de pago <strong>Transferencia Bancaria</strong>.</p>" +
+          "<div style=\"background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:16px;margin:20px 0;\">" +
+          "<p style=\"margin:0;color:#92400e;\"><strong>Plazo limite:</strong> hoy a las <strong>" + limiteStr + "</strong></p>" +
+          "<p style=\"margin:8px 0 0;color:#92400e;\">Si no sube el comprobante antes de esa hora, la reserva sera cancelada automaticamente.</p></div>" +
+          "<div style=\"text-align:center;margin:28px 0;\"><a href=\"" + frontendUrl + "/cliente.html\" style=\"background:#f59e0b;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;\">Subir comprobante ahora</a></div>" +
+          "<p style=\"color:#666;font-size:13px;\">Ingresa a tu portal de cliente, ve a <strong>Mis Reservas</strong>, abre el detalle de la reserva #" + reservaId + " y sube la imagen de tu comprobante.</p>" +
+          "</div><div style=\"background:#f5f5f5;padding:15px;border-radius:0 0 8px 8px;text-align:center;\"><p style=\"color:#999;font-size:12px;margin:0;\">&copy; 2026 Hospedaje Digital.</p></div></div>"
+      });
+      console.log("Correo aviso comprobante enviado a " + clienteEmail);
+      return true;
+    } catch (err) {
+      console.error("Error en EmailService.enviarAvisoComprobante:", err.message);
+      return false;
+    }
+  },
+
+  enviarPagoVerificado: async ({ clienteNombre, clienteEmail, reservaId, fechaInicio, fechaFin, montoTotal }) => {
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clienteEmail && clienteEmail.trim());
+    if (!emailValido) { console.warn("Correo invalido para pago verificado: " + clienteEmail); return false; }
+    try {
+      const fechaInicioStr = new Date(fechaInicio).toLocaleDateString("es-CO", { dateStyle: "long" });
+      const fechaFinStr    = new Date(fechaFin).toLocaleDateString("es-CO", { dateStyle: "long" });
+      const montoStr = Number(montoTotal).toLocaleString("es-CO");
+      await enviarBrevo({
+        toEmail: clienteEmail,
+        toName: clienteNombre,
+        subject: "Pago verificado! Tu reserva #" + reservaId + " esta confirmada — Hospedaje Digital",
+        htmlContent:
+          "<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:8px;\">" +
+          "<div style=\"background:#16a34a;padding:20px;border-radius:8px 8px 0 0;text-align:center;\"><h1 style=\"color:white;margin:0;\">Hospedaje Digital</h1></div>" +
+          "<div style=\"padding:30px;\">" +
+          "<h2 style=\"color:#15803d;\">&#10003; Pago verificado — Reserva Confirmada</h2>" +
+          "<p>Hola <strong>" + clienteNombre + "</strong>, hemos revisado y verificado tu comprobante de transferencia bancaria. Tu reserva queda oficialmente confirmada.</p>" +
+          "<div style=\"background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:20px;margin:20px 0;\">" +
+          "<h3 style=\"color:#15803d;margin-top:0;\">Detalles de tu reserva</h3>" +
+          "<table style=\"width:100%;border-collapse:collapse;\">" +
+          "<tr><td style=\"padding:8px 0;color:#777;\">Numero de reserva:</td><td style=\"color:#333;font-weight:bold;\">#" + reservaId + "</td></tr>" +
+          "<tr><td style=\"padding:8px 0;color:#777;\">Entrada:</td><td style=\"color:#333;\">" + fechaInicioStr + "</td></tr>" +
+          "<tr><td style=\"padding:8px 0;color:#777;\">Salida:</td><td style=\"color:#333;\">" + fechaFinStr + "</td></tr>" +
+          "<tr style=\"border-top:1px solid #ddd;\"><td style=\"padding:12px 0 8px;font-weight:bold;color:#777;\">Total pagado:</td><td style=\"color:#15803d;font-weight:bold;font-size:18px;\">$" + montoStr + "</td></tr>" +
+          "</table></div>" +
+          "<p style=\"color:#555;\">Te esperamos. Si tenes alguna consulta, comunicate con nosotros.</p>" +
+          "</div><div style=\"background:#f5f5f5;padding:15px;border-radius:0 0 8px 8px;text-align:center;\"><p style=\"color:#999;font-size:12px;margin:0;\">&copy; 2026 Hospedaje Digital.</p></div></div>"
+      });
+      console.log("Correo pago verificado enviado a " + clienteEmail);
+      return true;
+    } catch (err) {
+      console.error("Error en EmailService.enviarPagoVerificado:", err.message);
+      return false;
+    }
+  },
+
+  enviarRechazoComprobante: async ({ clienteNombre, clienteEmail, reservaId, motivo }) => {
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clienteEmail && clienteEmail.trim());
+    if (!emailValido) { console.warn("Correo invalido para rechazo: " + clienteEmail); return false; }
+    try {
+      const frontendUrl = (process.env.FRONTEND_URL || "https://hospedaje-digital-all.vercel.app").trim();
+      await enviarBrevo({
+        toEmail: clienteEmail,
+        toName: clienteNombre,
+        subject: "Comprobante rechazado — Reserva #" + reservaId + " pendiente de pago",
+        htmlContent:
+          "<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:8px;\">" +
+          "<div style=\"background:#dc2626;padding:20px;border-radius:8px 8px 0 0;text-align:center;\"><h1 style=\"color:white;margin:0;\">Hospedaje Digital</h1></div>" +
+          "<div style=\"padding:30px;\">" +
+          "<h2 style=\"color:#dc2626;\">&#10007; Comprobante no aprobado</h2>" +
+          "<p>Hola <strong>" + clienteNombre + "</strong>, revisamos el comprobante de pago de tu reserva <strong>#" + reservaId + "</strong> y no pudimos aprobarlo.</p>" +
+          "<div style=\"background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px;margin:20px 0;\">" +
+          "<p style=\"margin:0;color:#b91c1c;\"><strong>Motivo del rechazo:</strong></p>" +
+          "<p style=\"margin:8px 0 0;color:#7f1d1d;\">" + (motivo || "El comprobante no pudo ser verificado.") + "</p></div>" +
+          "<p style=\"color:#555;\">Tu reserva sigue <strong>Pendiente</strong>. Podes subir un nuevo comprobante valido desde tu portal de cliente.</p>" +
+          "<div style=\"text-align:center;margin:28px 0;\"><a href=\"" + frontendUrl + "/cliente.html\" style=\"background:#dc2626;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;\">Subir nuevo comprobante</a></div>" +
+          "</div><div style=\"background:#f5f5f5;padding:15px;border-radius:0 0 8px 8px;text-align:center;\"><p style=\"color:#999;font-size:12px;margin:0;\">&copy; 2026 Hospedaje Digital.</p></div></div>"
+      });
+      console.log("Correo rechazo comprobante enviado a " + clienteEmail);
+      return true;
+    } catch (err) {
+      console.error("Error en EmailService.enviarRechazoComprobante:", err.message);
+      return false;
+    }
+  },
+
+  enviarCancelacionPorVencimiento: async ({ clienteNombre, clienteEmail, reservaId }) => {
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clienteEmail && clienteEmail.trim());
+    if (!emailValido) { console.warn("Correo invalido para vencimiento: " + clienteEmail); return false; }
+    try {
+      const frontendUrl = (process.env.FRONTEND_URL || "https://hospedaje-digital-all.vercel.app").trim();
+      await enviarBrevo({
+        toEmail: clienteEmail,
+        toName: clienteNombre,
+        subject: "Reserva #" + reservaId + " cancelada — plazo de pago vencido",
+        htmlContent:
+          "<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:8px;\">" +
+          "<div style=\"background:#6b7280;padding:20px;border-radius:8px 8px 0 0;text-align:center;\"><h1 style=\"color:white;margin:0;\">Hospedaje Digital</h1></div>" +
+          "<div style=\"padding:30px;\">" +
+          "<h2 style=\"color:#374151;\">Reserva cancelada por vencimiento</h2>" +
+          "<p>Hola <strong>" + clienteNombre + "</strong>, lamentablemente tu reserva <strong>#" + reservaId + "</strong> fue cancelada automaticamente porque no recibimos el comprobante de pago dentro de los <strong>30 minutos</strong> establecidos.</p>" +
+          "<div style=\"background:#f3f4f6;border-radius:8px;padding:16px;margin:20px 0;\">" +
+          "<p style=\"margin:0;color:#374151;\">La disponibilidad de la habitacion/paquete ha sido liberada. Si aun deseas hospedarte con nosotros, podes hacer una nueva reserva.</p></div>" +
+          "<div style=\"text-align:center;margin:28px 0;\"><a href=\"" + frontendUrl + "/cliente.html\" style=\"background:#1a2744;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;\">Hacer nueva reserva</a></div>" +
+          "</div><div style=\"background:#f5f5f5;padding:15px;border-radius:0 0 8px 8px;text-align:center;\"><p style=\"color:#999;font-size:12px;margin:0;\">&copy; 2026 Hospedaje Digital.</p></div></div>"
+      });
+      console.log("Correo vencimiento enviado a " + clienteEmail);
+      return true;
+    } catch (err) {
+      console.error("Error en EmailService.enviarCancelacionPorVencimiento:", err.message);
+      return false;
+    }
+  },
+
   enviarBienvenida: async ({ usuarioNombre, usuarioEmail }) => {
     const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usuarioEmail && usuarioEmail.trim());
     if (!emailValido) { console.warn("Correo invalido para bienvenida: " + usuarioEmail); return false; }

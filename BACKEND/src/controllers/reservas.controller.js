@@ -208,6 +208,9 @@ const crear = async (req, res) => {
     }
 
   } catch (error) {
+    if (error.statusCode === 409) {
+      return res.status(409).json({ error: error.message });
+    }
     console.error("RESERVAS ERROR:", error);
     return res.status(500).json({ error: "Error creando la reserva", detalle: error.message });
   }
@@ -280,6 +283,37 @@ const subirComprobante = async (req, res) => {
   }
 };
 
+/* ================= APROBAR COMPROBANTE ================= */
+
+const aprobarComprobante = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const resultado = await ReservasService.aprobar(id);
+    if (!resultado) return res.status(404).json({ error: "Reserva no encontrada" });
+    return res.status(200).json({ mensaje: "Comprobante aprobado. Reserva confirmada." });
+  } catch (error) {
+    console.error("RESERVAS ERROR:", error);
+    return res.status(500).json({ error: "Error al aprobar comprobante", detalle: error.message });
+  }
+};
+
+/* ================= RECHAZAR COMPROBANTE ================= */
+
+const rechazarComprobante = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const motivo = req.body?.motivo || null;
+    if (!motivo || motivo.trim().length === 0)
+      return res.status(400).json({ error: "El motivo de rechazo es requerido" });
+    const resultado = await ReservasService.rechazar(id, motivo.trim());
+    if (!resultado) return res.status(404).json({ error: "Reserva no encontrada" });
+    return res.status(200).json({ mensaje: "Comprobante rechazado. Email enviado al cliente." });
+  } catch (error) {
+    console.error("RESERVAS ERROR:", error);
+    return res.status(500).json({ error: "Error al rechazar comprobante", detalle: error.message });
+  }
+};
+
 /* ================= AGREGAR SERVICIOS (crea cargo adicional) ================= */
 
 const agregarServicios = async (req, res) => {
@@ -326,6 +360,8 @@ module.exports = {
   actualizar,
   actualizarEstado,
   cancelar,
+  aprobarComprobante,
+  rechazarComprobante,
   eliminar,
   agregarServicios,
   subirComprobante,

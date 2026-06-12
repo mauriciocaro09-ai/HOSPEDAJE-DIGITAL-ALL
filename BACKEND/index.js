@@ -91,6 +91,7 @@ const crearTablasDetalle = async () => {
         };
         await agregarColumna('MotivoCancelacion', 'TEXT NULL DEFAULT NULL');
         await agregarColumna('ComprobanteTransferencia', 'MEDIUMTEXT NULL DEFAULT NULL');
+        await agregarColumna('FechaCreacion', 'DATETIME DEFAULT NOW()');
         console.log('Tablas de detalle verificadas.');
     } catch (err) {
         console.warn('No se pudieron crear tablas de detalle:', err.message);
@@ -108,6 +109,14 @@ const startServer = async () => {
         server = app.listen(port, () => {
             console.log(`Servidor corriendo en http://localhost:${port}`);
         });
+
+        // Auto-cancelar reservas con comprobante vencido cada 5 minutos
+        const ReservasService = require('./src/services/reservas.service');
+        setInterval(() => {
+            ReservasService.autoCancelarVencidas().catch(e => console.error('Error auto-cancelacion:', e.message));
+        }, 5 * 60 * 1000);
+        // Ejecutar inmediatamente al arrancar
+        ReservasService.autoCancelarVencidas().catch(e => console.error('Error auto-cancelacion inicial:', e.message));
 
         server.on('error', (error) => {
             if (error.code === 'EADDRINUSE') {
