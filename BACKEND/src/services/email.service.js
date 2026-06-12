@@ -149,6 +149,69 @@ const EmailService = {
     }
   },
 
+
+  enviarCancelacionReserva: async ({
+    clienteNombre, clienteEmail, reservaId, habitacion,
+    fechaInicio, fechaFin, montoTotal, montoReembolso,
+    montoRetenido, porcentajeRetencion, descripcionPolitica, motivo
+  }) => {
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clienteEmail && clienteEmail.trim());
+    if (!emailValido) { console.warn("Correo invalido para cancelacion: " + clienteEmail); return false; }
+    try {
+      const fechaInicioStr = new Date(fechaInicio).toLocaleDateString("es-CO", { dateStyle: "long" });
+      const fechaFinStr    = new Date(fechaFin).toLocaleDateString("es-CO", { dateStyle: "long" });
+      const fmtCOP = (v) => "$" + Number(v || 0).toLocaleString("es-CO");
+      const colorReembolso = porcentajeRetencion === 0 ? "#16a34a" : porcentajeRetencion === 100 ? "#dc2626" : "#ea580c";
+
+      let filaMotivoHtml = "";
+      if (motivo) {
+        filaMotivoHtml = "<tr><td style=\"padding:8px 0;color:#777;\">Motivo:</td>" +
+          "<td style=\"color:#333;\">" + motivo + "</td></tr>";
+      }
+
+      await enviarBrevo({
+        toEmail: clienteEmail,
+        toName: clienteNombre,
+        subject: "Cancelacion de Reserva #" + reservaId + " - Hospedaje Digital",
+        htmlContent:
+          "<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:8px;\">" +
+          "<div style=\"background:#dc2626;padding:20px;border-radius:8px 8px 0 0;text-align:center;\">" +
+          "<h1 style=\"color:white;margin:0;\">Hospedaje Digital</h1></div>" +
+          "<div style=\"padding:30px;\">" +
+          "<h2 style=\"color:#dc2626;\">Reserva Cancelada</h2>" +
+          "<p>Hola <strong>" + clienteNombre + "</strong>, tu reserva ha sido cancelada.</p>" +
+          "<div style=\"background:#f5f5f5;border-radius:8px;padding:20px;margin:20px 0;\">" +
+          "<h3 style=\"color:#333;margin-top:0;\">Detalles de la reserva</h3>" +
+          "<table style=\"width:100%;border-collapse:collapse;\">" +
+          "<tr><td style=\"padding:8px 0;color:#777;\">Numero de reserva:</td><td style=\"color:#333;font-weight:bold;\">#" + reservaId + "</td></tr>" +
+          "<tr><td style=\"padding:8px 0;color:#777;\">Habitacion:</td><td style=\"color:#333;\">" + habitacion + "</td></tr>" +
+          "<tr><td style=\"padding:8px 0;color:#777;\">Entrada:</td><td style=\"color:#333;\">" + fechaInicioStr + "</td></tr>" +
+          "<tr><td style=\"padding:8px 0;color:#777;\">Salida:</td><td style=\"color:#333;\">" + fechaFinStr + "</td></tr>" +
+          filaMotivoHtml +
+          "</table></div>" +
+          "<div style=\"background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:20px;margin:20px 0;\">" +
+          "<h3 style=\"color:#c2410c;margin-top:0;\">Politica de cancelacion aplicada</h3>" +
+          "<p style=\"color:#666;margin:0 0 12px;\">" + descripcionPolitica + "</p>" +
+          "<table style=\"width:100%;border-collapse:collapse;\">" +
+          "<tr><td style=\"padding:6px 0;color:#777;\">Monto total:</td><td style=\"color:#333;\">" + fmtCOP(montoTotal) + "</td></tr>" +
+          (porcentajeRetencion > 0 ? "<tr><td style=\"padding:6px 0;color:#777;\">Retencion (" + porcentajeRetencion + "%):</td><td style=\"color:#dc2626;\">- " + fmtCOP(montoRetenido) + "</td></tr>" : "") +
+          "<tr style=\"border-top:2px solid #fed7aa;\">" +
+          "<td style=\"padding:10px 0 6px;font-weight:bold;color:#555;\">Monto a reembolsar:</td>" +
+          "<td style=\"font-weight:bold;font-size:18px;color:" + colorReembolso + ";\">" + fmtCOP(montoReembolso) + "</td></tr>" +
+          "</table>" +
+          (montoReembolso > 0 ? "<p style=\"color:#666;font-size:13px;margin:12px 0 0;\">El reembolso se acreditara en un plazo de <strong>5 a 10 dias habiles</strong> por transferencia bancaria segun los datos registrados.</p>" : "") +
+          "</div></div>" +
+          "<div style=\"background:#f5f5f5;padding:15px;border-radius:0 0 8px 8px;text-align:center;\">" +
+          "<p style=\"color:#999;font-size:12px;margin:0;\">&copy; 2026 Hospedaje Digital.</p></div></div>"
+      });
+      console.log("Correo de cancelacion enviado a " + clienteEmail);
+      return true;
+    } catch (err) {
+      console.error("Error en EmailService.enviarCancelacionReserva:", err.message);
+      return false;
+    }
+  },
+
   enviarBienvenida: async ({ usuarioNombre, usuarioEmail }) => {
     const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usuarioEmail && usuarioEmail.trim());
     if (!emailValido) { console.warn("Correo invalido para bienvenida: " + usuarioEmail); return false; }

@@ -1141,6 +1141,18 @@
 
                 <div class="modal-error hidden" id="nr-error"></div>
 
+                <!-- POLÍTICA DE CANCELACIÓN -->
+                <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:#0369a1;">
+                    <p style="margin:0 0 8px;font-weight:700;font-size:14px;"><i class="fa-solid fa-circle-info"></i> Política de Cancelación</p>
+                    <table style="border-collapse:collapse;width:100%;">
+                        <tr><td style="padding:3px 12px 3px 0;font-weight:600;white-space:nowrap;">Más de 5 días antes</td><td style="color:#15803d;">Cancelación gratuita — reembolso completo</td></tr>
+                        <tr><td style="padding:3px 12px 3px 0;font-weight:600;white-space:nowrap;">1 a 5 días antes</td><td style="color:#ea580c;">Retención del 50% del monto total</td></tr>
+                        <tr><td style="padding:3px 12px 3px 0;font-weight:600;white-space:nowrap;">Menos de 24 horas</td><td style="color:#dc2626;">Sin reembolso (100% de retención)</td></tr>
+                        <tr><td style="padding:3px 12px 3px 0;font-weight:600;white-space:nowrap;">Reservas con paquete</td><td>Cancelación gratuita hasta 8 días antes</td></tr>
+                    </table>
+                    <p style="margin:8px 0 0;color:#0284c7;font-size:12px;">Los reembolsos se procesan en 5–10 días hábiles por transferencia bancaria. Emergencias médicas o desastres naturales: contactanos para evaluación sin penalidad.</p>
+                </div>
+
                 <form id="form-nueva-reserva" novalidate>
                     <div class="reserva-layout">
 
@@ -1501,14 +1513,50 @@
         }
 
         // ── CANCELAR RESERVA ──────────────────────
+        function calcularReembolsoCliente(fechaInicio, montoTotal, tienePaquetes) {
+            const hoy = new Date(); hoy.setHours(0,0,0,0);
+            const checkIn = new Date(fechaInicio); checkIn.setHours(0,0,0,0);
+            const dias = Math.floor((checkIn - hoy) / (1000 * 60 * 60 * 24));
+            const umbral = tienePaquetes ? 8 : 5;
+            const monto = Number(montoTotal) || 0;
+            let pct = 0, desc = '';
+            if (dias > umbral) { pct = 0; desc = 'Cancelación gratuita — reembolso completo'; }
+            else if (dias >= 1) { pct = 50; desc = `${dias} día(s) antes del check-in — retención del 50%`; }
+            else { pct = 100; desc = 'Menos de 24 horas — sin reembolso'; }
+            const retenido = Math.round(monto * pct / 100);
+            const reembolso = monto - retenido;
+            return { dias, pct, retenido, reembolso, desc };
+        }
+
         document.addEventListener('click', async (e) => {
             const btn = e.target.closest('.btn-cancelar-res');
             if (!btn) return;
             const id = btn.dataset.id;
+            const fechaInicio = btn.dataset.fecha || '';
+            const montoTotal = Number(btn.dataset.monto) || 0;
+            const tienePaquetes = btn.dataset.paquetes === '1';
+
+            const fmtCOP = (v) => '$' + Number(v).toLocaleString('es-CO');
+            const pol = fechaInicio ? calcularReembolsoCliente(fechaInicio, montoTotal, tienePaquetes) : null;
+
+            const reembolsoHtml = pol ? `
+                <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:14px;margin:16px 0;text-align:left;">
+                    <p style="margin:0 0 8px;font-size:13px;color:#c2410c;font-weight:600;">Política de cancelación aplicable:</p>
+                    <p style="margin:0 0 10px;font-size:13px;color:#666;">${pol.desc}</p>
+                    <table style="width:100%;font-size:13px;border-collapse:collapse;">
+                        <tr><td style="color:#777;padding:3px 0;">Monto total:</td><td style="text-align:right;color:#333;">${fmtCOP(montoTotal)}</td></tr>
+                        ${pol.pct > 0 ? `<tr><td style="color:#777;padding:3px 0;">Retención (${pol.pct}%):</td><td style="text-align:right;color:#dc2626;">- ${fmtCOP(pol.retenido)}</td></tr>` : ''}
+                        <tr style="border-top:1px solid #fed7aa;">
+                            <td style="padding:6px 0 3px;font-weight:bold;color:#555;">A reembolsar:</td>
+                            <td style="text-align:right;font-weight:bold;color:${pol.pct === 0 ? '#16a34a' : pol.pct === 100 ? '#dc2626' : '#ea580c'};">${fmtCOP(pol.reembolso)}</td>
+                        </tr>
+                    </table>
+                    ${pol.reembolso > 0 ? '<p style="margin:8px 0 0;font-size:11px;color:#999;">El reembolso se acredita en 5–10 días hábiles por transferencia bancaria.</p>' : ''}
+                </div>` : '';
 
             const confirmacion = await Swal.fire({
                 title: '¿Cancelar reserva?',
-                text: `La reserva #${id} se cancelará y no podrás revertir esta acción.`,
+                html: `<p>La reserva <strong>#${id}</strong> se cancelará. Esta acción no se puede deshacer.</p>${reembolsoHtml}`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc2626',
@@ -1527,6 +1575,17 @@
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
                 });
                 if (!resp.ok) throw new Error();
+                const data = await resp.json().catch(() => ({}));
+                const p = data.politica;
+                const reembolsoMensaje = p ? (p.montoReembolso > 0
+                    ? `Se te reembolsarán <strong>${fmtCOP(p.montoReembolso)}</strong> en 5–10 días hábiles.`
+                    : 'No aplica reembolso según la política de cancelación.') : '';
+                await Swal.fire({
+                    title: 'Reserva cancelada',
+                    html: `<p>Tu reserva #${id} fue cancelada exitosamente.</p>${reembolsoMensaje ? `<p style="margin-top:10px;">${reembolsoMensaje}</p>` : ''}<p style="font-size:12px;color:#999;margin-top:8px;">Recibirás un correo con los detalles.</p>`,
+                    icon: 'success',
+                    confirmButtonColor: '#1a2744'
+                });
                 cargarMisReservas();
                 cargarDashboard();
             } catch {
@@ -1806,7 +1865,7 @@
                                 <td>$${fmt(r.Monto_Total || r.Sub_Total || 0)}</td>
                                 <td style="display:flex;gap:6px;flex-wrap:wrap;">
                                     <button class="btn-ver-res" data-id="${r.IdReserva}"><i class="fa-solid fa-eye"></i> Ver</button>
-                                    ${cancelable ? `<button class="btn-cancelar-res" data-id="${r.IdReserva}"><i class="fa-solid fa-xmark"></i> Cancelar</button>` : ''}
+                                    ${cancelable ? `<button class="btn-cancelar-res" data-id="${r.IdReserva}" data-fecha="${r.FechaInicio || r.fechaInicio || ''}" data-monto="${r.Monto_Total || r.MontoTotal || 0}" data-paquetes="${(r.paquetes && r.paquetes.length > 0) ? '1' : '0'}"><i class="fa-solid fa-xmark"></i> Cancelar</button>` : ''}
                                 </td>
                             </tr>`;
                         }).join('')}

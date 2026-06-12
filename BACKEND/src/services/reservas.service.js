@@ -1,5 +1,48 @@
 const Reservas = require("../models/reservas.model");
 const db = require("../config/db");
+const EmailService = require("../services/email.service");
+
+/* ══════════════════════════════════════════════════════
+   POLÍTICA DE CANCELACIÓN
+   ──────────────────────────────────────────────────────
+   Reservas normales:
+     > 5 días  → 0% retención (gratis)
+     1-5 días  → 50% retención
+     < 24 h    → 100% (sin reembolso)
+   Reservas con paquetes:
+     > 8 días  → 0% retención (gratis)
+     1-8 días  → 50% retención
+     < 24 h    → 100% (sin reembolso)
+══════════════════════════════════════════════════════ */
+function calcularPoliticaCancelacion(fechaInicio, montoTotal, tienesPaquetes) {
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const checkIn = new Date(fechaInicio);
+  checkIn.setHours(0, 0, 0, 0);
+  const diasAnticipacion = Math.floor((checkIn - hoy) / (1000 * 60 * 60 * 24));
+
+  const diasLibres = tienesPaquetes ? 8 : 5;
+  const monto = Number(montoTotal) || 0;
+
+  let porcentajeRetencion = 0;
+  let descripcion = "";
+
+  if (diasAnticipacion > diasLibres) {
+    porcentajeRetencion = 0;
+    descripcion = "Cancelacion gratuita — reembolso completo";
+  } else if (diasAnticipacion >= 1) {
+    porcentajeRetencion = 50;
+    descripcion = `${diasAnticipacion} dia(s) antes del check-in — retencion del 50%`;
+  } else {
+    porcentajeRetencion = 100;
+    descripcion = "Menos de 24 horas o no presentacion — sin reembolso";
+  }
+
+  const montoRetenido = Math.round(monto * porcentajeRetencion / 100);
+  const montoReembolso = monto - montoRetenido;
+
+  return { diasAnticipacion, porcentajeRetencion, montoRetenido, montoReembolso, descripcion };
+}
 
 const ReservasService = {
 
@@ -71,19 +114,51 @@ const ReservasService = {
 
   /* ── Cancelar ───────────────────────────────── */
   cancelar: async (id, motivo = null) => {
+    // 1. Obtener datos de la reserva antes de cancelar
+    const reserva = await Reservas.obtenerPorId(id);
+    if (!reserva) return null;
+
+    // 2. Calcular política de cancelación
+    const montoTotal = Number(reserva.Monto_Total ?? reserva.MontoTotal ?? 0);
+    const tienesPaquetes = Array.isArray(reserva.paquetes) && reserva.paquetes.length > 0;
+    const politica = calcularPoliticaCancelacion(reserva.FechaInicio, montoTotal, tienesPaquetes);
+
+    // 3. Cambiar estado a cancelada
     const [[estadoCancelada]] = await db.query(
       "SELECT IdEstadoReserva FROM estadosreserva WHERE LOWER(NombreEstadoReserva) LIKE '%cancelad%' LIMIT 1"
     );
     const idEstado = estadoCancelada ? estadoCancelada.IdEstadoReserva : 4;
 
     const result = await Reservas.actualizar(id, { IdEstadoReserva: idEstado });
-    if (result && result.affectedRows > 0 && motivo) {
+    if (!result || result.affectedRows === 0) return null;
+
+    // 4. Guardar motivo si existe
+    if (motivo) {
       await db.query(
         "UPDATE reserva SET MotivoCancelacion = ? WHERE IdReserva = ?",
         [motivo, id]
       ).catch(() => {});
     }
-    return result && result.affectedRows > 0 ? result : null;
+
+    // 5. Enviar email de cancelación con desglose
+    if (reserva.EmailCliente) {
+      EmailService.enviarCancelacionReserva({
+        clienteNombre: reserva.NombreCliente || "Cliente",
+        clienteEmail: reserva.EmailCliente,
+        reservaId: id,
+        habitacion: reserva.NombreHabitacion || "—",
+        fechaInicio: reserva.FechaInicio,
+        fechaFin: reserva.FechaFinalizacion,
+        montoTotal,
+        montoReembolso: politica.montoReembolso,
+        montoRetenido: politica.montoRetenido,
+        porcentajeRetencion: politica.porcentajeRetencion,
+        descripcionPolitica: politica.descripcion,
+        motivo: motivo || null
+      }).catch(e => console.error("Error enviando email cancelacion:", e.message));
+    }
+
+    return { ...result, politica };
   },
 
   /* ── Eliminar ───────────────────────────────── */

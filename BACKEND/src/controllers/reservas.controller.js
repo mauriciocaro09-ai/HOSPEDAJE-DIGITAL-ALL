@@ -251,9 +251,12 @@ const cancelar = async (req, res) => {
   try {
     const { id } = req.params;
     const motivo = req.body?.motivo || null;
-    const ok = await ReservasService.cancelar(id, motivo);
-    if (!ok) return res.status(404).json({ error: "Reserva no encontrada" });
-    return res.status(200).json({ mensaje: "Reserva cancelada" });
+    const resultado = await ReservasService.cancelar(id, motivo);
+    if (!resultado) return res.status(404).json({ error: "Reserva no encontrada" });
+    return res.status(200).json({
+      mensaje: "Reserva cancelada",
+      politica: resultado.politica || null
+    });
   } catch (error) {
     console.error("RESERVAS ERROR:", error);
     return res.status(500).json({ error: "Error al cancelar", detalle: error.message });
