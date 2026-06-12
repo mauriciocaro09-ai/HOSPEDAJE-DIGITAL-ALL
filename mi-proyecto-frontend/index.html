@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <meta name="description" content="Hospedaje Digital - Encuentra la habitación perfecta para tu estadía">
+    <meta name="description" content="Hospedaje Digital - Encuentra la habitaciÃ³n perfecta para tu estadÃ­a">
     <title>Hospedaje Digital - Inicio</title>
     <!-- Estilos CSS -->
     <link rel="stylesheet" href="css/reset.css?v=20260524b">
@@ -21,16 +21,16 @@
 </head>
 <body>
     <!-- ============================================
-         SIDEBAR - Menú Lateral 77
+         SIDEBAR - MenÃº Lateral 77
     ============================================ -->
     <aside id="sidebar" class="sidebar open">
         <div class="sidebar-brand">
-            <button id="sidebar-toggle" class="sidebar-hamburger" aria-label="Toggle menú">
+            <button id="sidebar-toggle" class="sidebar-hamburger" aria-label="Toggle menÃº">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
-            <span class="sidebar-brand-text">📊 MENU</span>
+            <span class="sidebar-brand-text">ðŸ“Š MENU</span>
         </div>
         <nav class="sidebar-nav">
             <ul>
@@ -91,18 +91,18 @@
             </div>
             <button class="sidebar-logout-btn" onclick="cerrarSesion()">
                 <i class="fa-solid fa-right-from-bracket"></i>
-                <span class="text">Cerrar Sesión</span>
+                <span class="text">Cerrar SesiÃ³n</span>
             </button>
             <p class="sidebar-version">Hospedaje Digital v1.0</p>
         </div>
     </aside>
-    <!-- Overlay oscuro cuando el sidebar está abierto -->
+    <!-- Overlay oscuro cuando el sidebar estÃ¡ abierto -->
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <!-- Tooltip del sidebar colapsado (JS-powered, fuera del sidebar para evitar overflow:hidden) -->
     <div id="sidebar-nav-tip"></div>
     <!-- Wrapper para el contenido principal -->
     <div id="main-wrapper" class="main-wrapper sidebar-open">
-        <!-- Header y Navegación -->
+        <!-- Header y NavegaciÃ³n -->
         <header>
             <nav>
                 <h1><i class="fa-solid fa-hotel" aria-hidden="true"></i> Hospedaje Digital</h1>
@@ -116,7 +116,7 @@
                         </button>
                         <div id="notif-panel" class="notif-panel notif-panel-hidden">
                             <div class="notif-panel-header">
-                                <span><i class="fa-solid fa-bell"></i> Alertas del día</span>
+                                <span><i class="fa-solid fa-bell"></i> Alertas del dÃ­a</span>
                             </div>
                             <div id="notif-lista"></div>
                         </div>
@@ -133,9 +133,9 @@
             <!-- Hero Section -->
             <section class="hero">
                 <h2>Bienvenido a Hospedaje Digital</h2>
-                <p>Encuentra la habitación perfecta para tu estadía</p>
+                <p>Encuentra la habitaciÃ³n perfecta para tu estadÃ­a</p>
             </section>
-            <!-- Sección CRUD de Habitaciones -->
+            <!-- SecciÃ³n CRUD de Habitaciones -->
             <section id="seccion-administrar-habitaciones" class="crud-habitaciones-section hidden">
                 <div class="crud-habitaciones-toolbar">
                     <button type="button" class="btn-accion-crud btn-accion-principal" id="btn-nueva-habitacion-admin">+ NUEVA HABITACION</button>
@@ -145,7 +145,7 @@
                     <section class="crud-habitaciones-panel crud-habitaciones-panel-lista">
                         <div class="crud-habitaciones-lista-top">
                             <div class="crud-habitaciones-filtros">
-                                <input type="search" id="busqueda-habitaciones-admin" placeholder="Buscar habitación">
+                                <input type="search" id="busqueda-habitaciones-admin" placeholder="Buscar habitaciÃ³n">
                                 <select id="filtro-estado-habitaciones-admin" aria-label="Filtrar habitaciones por estado">
                                     <option value="all">Todos</option>
                                     <option value="available">Disponibles</option>
@@ -160,7 +160,7 @@
                                         <th>Imagen</th>
                                         <th>Nombre</th>
                                         <th>Costo</th>
-                                        <th>Descripción</th>
+                                        <th>DescripciÃ³n</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -178,18 +178,18 @@
             <div id="modal-habitacion-admin" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="habitacion-admin-form-title">
                 <div class="crud-modal-content">
                     <button type="button" class="crud-modal-close" id="btn-cerrar-modal-habitacion" aria-label="Cerrar formulario">&times;</button>
-                    <h4 id="habitacion-admin-form-title">Crear habitación</h4>
-                    <p class="crud-habitaciones-note">Los campos están alineados con la estructura real de la base de datos.</p>
+                    <h4 id="habitacion-admin-form-title">Crear habitaciÃ³n</h4>
+                    <p class="crud-habitaciones-note">Los campos estÃ¡n alineados con la estructura real de la base de datos.</p>
                     <div id="mensaje-habitacion-admin-modal" class="crud-habitaciones-mensaje" aria-live="polite"></div>
                     <form id="form-habitacion-admin" class="crud-habitaciones-form">
                         <input type="hidden" id="habitacion-admin-id">
                         <label>
-                            <span>Nombre de la habitación <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <span>Nombre de la habitaciÃ³n <span class="campo-obligatorio" aria-hidden="true">*</span></span>
                             <input type="text" id="habitacion-admin-nombre" required maxlength="100" placeholder="Ej. Suite Premium">
                         </label>
                         <label>
-                            <span>Descripción <span class="campo-obligatorio" aria-hidden="true">*</span></span>
-                            <textarea id="habitacion-admin-descripcion" required maxlength="1000" placeholder="Describe la habitación en pocas palabras"></textarea>
+                            <span>DescripciÃ³n <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <textarea id="habitacion-admin-descripcion" required maxlength="1000" placeholder="Describe la habitaciÃ³n en pocas palabras"></textarea>
                         </label>
                         <label>
                             <span>Costo <span class="campo-obligatorio" aria-hidden="true">*</span></span>
@@ -203,29 +203,29 @@
                             </select>
                         </label>
                         <label>
-                            Imágenes por URL
-                            <textarea id="habitacion-admin-imagen" placeholder="Pega una o varias URL separadas por salto de línea o coma"></textarea>
-                            <small class="crud-habitaciones-help">Pega una o varias URLs para armar la galería del detalle.</small>
+                            ImÃ¡genes por URL
+                            <textarea id="habitacion-admin-imagen" placeholder="Pega una o varias URL separadas por salto de lÃ­nea o coma"></textarea>
+                            <small class="crud-habitaciones-help">Pega una o varias URLs para armar la galerÃ­a del detalle.</small>
                         </label>
                         <div id="habitacion-admin-preview-wrap" class="crud-habitaciones-preview hidden">
                             <p>Vista previa:</p>
-                            <div class="carousel" id="habitacion-carousel" role="region" aria-roledescription="carousel" aria-label="Vista previa de imágenes de la habitación">
-                                <button type="button" class="carousel-btn prev" id="habitacion-carousel-prev" aria-label="Imagen anterior">‹</button>
+                            <div class="carousel" id="habitacion-carousel" role="region" aria-roledescription="carousel" aria-label="Vista previa de imÃ¡genes de la habitaciÃ³n">
+                                <button type="button" class="carousel-btn prev" id="habitacion-carousel-prev" aria-label="Imagen anterior">â€¹</button>
                                 <div class="carousel-viewport">
                                     <ul class="carousel-track" id="habitacion-carousel-track" role="list"></ul>
                                 </div>
-                                <button type="button" class="carousel-btn next" id="habitacion-carousel-next" aria-label="Siguiente imagen">›</button>
+                                <button type="button" class="carousel-btn next" id="habitacion-carousel-next" aria-label="Siguiente imagen">â€º</button>
                             </div>
                             <div class="carousel-counter" id="habitacion-carousel-counter" aria-hidden="true"></div>
                         </div>
                         <div class="crud-habitaciones-form-actions">
-                            <button type="submit" class="btn-accion-crud btn-accion-principal" id="btn-habitacion-admin-guardar">Guardar habitación</button>
+                            <button type="submit" class="btn-accion-crud btn-accion-principal" id="btn-habitacion-admin-guardar">Guardar habitaciÃ³n</button>
                             <button type="button" class="btn-accion-crud btn-accion-secundaria" id="btn-habitacion-admin-limpiar">Limpiar formulario</button>
                         </div>
                     </form>
                 </div>
             </div>
-            <!-- Sección de Administración de Servicios -->
+            <!-- SecciÃ³n de AdministraciÃ³n de Servicios -->
             <section id="seccion-administrar-servicios" class="crud-servicios-section hidden">
                 <div class="crud-servicios-toolbar">
                     <button type="button" class="btn-accion-crud btn-accion-principal" id="btn-nuevo-servicio-admin">+ NUEVO SERVICIO</button>
@@ -249,10 +249,10 @@
                                     <tr>
                                         <th>Imagen</th>
                                         <th>Nombre</th>
-                                        <th>Duración (min)</th>
+                                        <th>DuraciÃ³n (min)</th>
                                         <th>Personas</th>
                                         <th>Costo</th>
-                                        <th>Descripción</th>
+                                        <th>DescripciÃ³n</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -267,7 +267,7 @@
                     </section>
                 </div>
             </section>
-            <!-- Sección de Administración de Paquetes -->
+            <!-- SecciÃ³n de AdministraciÃ³n de Paquetes -->
             <section id="seccion-administrar-paquetes" class="crud-paquetes-section hidden">
                 <div class="crud-paquetes-toolbar">
                     <button type="button" class="btn-accion-crud btn-accion-principal" id="btn-nuevo-paquete" aria-label="Crear un nuevo paquete">+ NUEVO PAQUETE</button>
@@ -291,9 +291,9 @@
                                     <tr>
                                         <th>Imagen</th>
                                         <th>Nombre</th>
-                                        <th>Descripción</th>
+                                        <th>DescripciÃ³n</th>
                                         <th>Precio</th>
-                                        <th>Duración</th>
+                                        <th>DuraciÃ³n</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -305,11 +305,11 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div id="paginacion-paquetes" class="crud-paquetes-paginacion hidden" aria-label="Paginación de paquetes"></div>
+                        <div id="paginacion-paquetes" class="crud-paquetes-paginacion hidden" aria-label="PaginaciÃ³n de paquetes"></div>
                     </section>
                 </div>
             </section>
-            <!-- Sección de Administración de Clientes -->
+            <!-- SecciÃ³n de AdministraciÃ³n de Clientes -->
             <section id="seccion-administrar-clientes" class="crud-clientes-section hidden">
                 <div class="crud-clientes-toolbar">
                     <button type="button" class="btn-accion-crud btn-accion-principal" id="btn-nuevo-cliente-admin">+ NUEVO CLIENTE</button>
@@ -319,7 +319,7 @@
                     <section class="crud-clientes-panel crud-clientes-panel-lista">
                         <div class="crud-clientes-lista-top">
                             <div class="crud-clientes-filtros">
-                                <input type="search" id="busqueda-clientes-admin" placeholder="Buscar por documento, nombre, email o teléfono">
+                                <input type="search" id="busqueda-clientes-admin" placeholder="Buscar por documento, nombre, email o telÃ©fono">
                                 <select id="filtro-estado-clientes-admin" aria-label="Filtrar clientes por estado">
                                     <option value="all">Todos</option>
                                     <option value="active">Activos</option>
@@ -335,8 +335,8 @@
                                         <th>Nombre</th>
                                         <th>Apellido</th>
                                         <th>Email</th>
-                                        <th>Teléfono</th>
-                                        <th>Dirección</th>
+                                        <th>TelÃ©fono</th>
+                                        <th>DirecciÃ³n</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -423,7 +423,7 @@
                     </section>
                 </div>
             </section>
-            <!-- Sección de Administración de Reservas -->
+            <!-- SecciÃ³n de AdministraciÃ³n de Reservas -->
             <section id="seccion-administrar-reservas" class="crud-clientes-section hidden reservas-dashboard-section">
                 <div class="reservas-dashboard-header">
                     <div>
@@ -482,9 +482,9 @@
                                     <label><span>Tipo documento <span class="campo-obligatorio" aria-hidden="true">*</span></span>
                                         <select id="reserva-admin-tipo-documento" required>
                                             <option value="">Selecciona un tipo</option>
-                                            <option value="CC">Cédula de Ciudadanía</option>
+                                            <option value="CC">CÃ©dula de CiudadanÃ­a</option>
                                             <option value="TI">Tarjeta de Identidad</option>
-                                            <option value="CE">Cédula de Extranjería</option>
+                                            <option value="CE">CÃ©dula de ExtranjerÃ­a</option>
                                         </select>
                                     </label>
                                     <label><span>Documento <span class="campo-obligatorio">*</span></span>
@@ -496,21 +496,21 @@
                                     <label><span>Email</span>
                                         <input type="email" id="reserva-admin-email" maxlength="100">
                                     </label>
-                                    <label><span>País</span>
+                                    <label><span>PaÃ­s</span>
                                         <input type="text" id="reserva-admin-pais" maxlength="100">
                                     </label>
                                 </div>
                             </details>
                         </div>
                         <div class="reserva-card">
-                            <span class="card-title"><i class="fa-solid fa-bed"></i> HABITACIÓN Y FECHAS</span>
+                            <span class="card-title"><i class="fa-solid fa-bed"></i> HABITACIÃ“N Y FECHAS</span>
                             <div class="reserva-form-group">
                                 <div style="position:relative;">
-                                    <span style="display:block;margin-bottom:4px;font-size:13px;color:#374151;">Habitación <span class="campo-obligatorio">*</span> <small id="hab-paquete-hint" style="display:none;color:#f59e0b;font-weight:600;font-size:11px;">— incluida en el paquete</small></span>
-                                    <select id="reserva-admin-habitacion" required style="display:none"><option value="" disabled selected hidden>-- Selecciona habitación --</option></select>
+                                    <span style="display:block;margin-bottom:4px;font-size:13px;color:#374151;">HabitaciÃ³n <span class="campo-obligatorio">*</span> <small id="hab-paquete-hint" style="display:none;color:#f59e0b;font-weight:600;font-size:11px;">â€” incluida en el paquete</small></span>
+                                    <select id="reserva-admin-habitacion" required style="display:none"><option value="" disabled selected hidden>-- Selecciona habitaciÃ³n --</option></select>
                                     <div id="hab-custom-dropdown" class="hab-custom-dropdown">
                                         <div id="hab-custom-trigger" class="hab-custom-trigger" tabindex="0">
-                                            <span id="hab-selected-label">-- Selecciona habitación --</span>
+                                            <span id="hab-selected-label">-- Selecciona habitaciÃ³n --</span>
                                             <i class="fa-solid fa-chevron-down" id="hab-chevron"></i>
                                         </div>
                                         <div id="hab-options-list" class="hab-options-list"></div>
@@ -546,16 +546,16 @@
                             <div id="admin-paquete-detalle" class="admin-paquete-detalle-inline hidden"></div>
                         </div>
                         <div class="reserva-card servicios-card">
-                            <span class="card-title"><i class="fa-solid fa-concierge-bell"></i> SERVICIOS ADICIONALES <small>solo activos — clic para agregar</small></span>
+                            <span class="card-title"><i class="fa-solid fa-concierge-bell"></i> SERVICIOS ADICIONALES <small>solo activos â€” clic para agregar</small></span>
                             <div class="servicios-visual-list" id="servicios-visual-list">
-                                <p class="empty-state-text">Aquí irán los tags de servicios adicionales.</p>
+                                <p class="empty-state-text">AquÃ­ irÃ¡n los tags de servicios adicionales.</p>
                             </div>
                         </div>
                         <div class="reserva-card">
                             <span class="card-title"><i class="fa-solid fa-credit-card"></i> PAGO Y ESTADO</span>
                             <div class="reserva-form-group">
                                 <label>
-                                    <span>Método de pago <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                                    <span>MÃ©todo de pago <span class="campo-obligatorio" aria-hidden="true">*</span></span>
                                     <select id="reserva-admin-metodo-pago"></select>
                                 </label>
                                 <label>
@@ -574,7 +574,7 @@
                         </div>
                         <div class="reserva-sidebar-section">
                             <h4>DESGLOSE DE PRECIO</h4>
-                            <div class="reserva-summary-row"><span>Habitación</span><strong id="reserva-summary-hab">$0</strong></div>
+                            <div class="reserva-summary-row"><span>HabitaciÃ³n</span><strong id="reserva-summary-hab">$0</strong></div>
                             <div class="reserva-summary-row"><span>Paquetes</span><strong id="reserva-summary-paq">$0</strong></div>
                             <div class="reserva-summary-row"><span>Servicios</span><strong id="reserva-summary-serv">$0</strong></div>
                             <div class="reserva-summary-row input-row">
@@ -621,7 +621,7 @@
                 </div>
             </div>
 
-            <!-- Modal: Cambio rápido de estado -->
+            <!-- Modal: Cambio rÃ¡pido de estado -->
             <div id="modal-cambio-estado-reserva" class="crud-modal hidden" role="dialog" aria-modal="true" aria-labelledby="cambio-estado-titulo">
                 <div class="crud-modal-content" style="max-width:360px;">
                     <button type="button" class="crud-modal-close" id="btn-cerrar-cambio-estado" aria-label="Cerrar">&times;</button>
@@ -645,7 +645,7 @@
                 <div class="crud-modal-content">
                     <button type="button" class="crud-modal-close" id="btn-cerrar-modal-cliente" aria-label="Cerrar formulario">&times;</button>
                     <h4 id="cliente-admin-form-title">Crear cliente</h4>
-                    <p class="crud-clientes-note">Los campos están alineados con la estructura real de la base de datos.</p>
+                    <p class="crud-clientes-note">Los campos estÃ¡n alineados con la estructura real de la base de datos.</p>
                     <div id="mensaje-cliente-admin-modal" class="crud-clientes-mensaje" aria-live="polite"></div>
                     <form id="form-cliente-admin" class="crud-clientes-form">
                         <input type="hidden" id="cliente-admin-id">
@@ -659,10 +659,10 @@
                         </label>
                         <label>
                             <span>Apellido</span>
-                            <input type="text" id="cliente-admin-apellido" maxlength="50" placeholder="Ej. López" data-filtro="letras">
+                            <input type="text" id="cliente-admin-apellido" maxlength="50" placeholder="Ej. LÃ³pez" data-filtro="letras">
                         </label>
                         <label>
-                            <span>Dirección</span>
+                            <span>DirecciÃ³n</span>
                             <input type="text" id="cliente-admin-direccion" maxlength="50" placeholder="Ej. Calle 10 # 12-34">
                         </label>
                         <label>
@@ -670,7 +670,7 @@
                             <input type="email" id="cliente-admin-email" required maxlength="50" placeholder="Ej. cliente@email.com">
                         </label>
                         <label>
-                            <span>Teléfono</span>
+                            <span>TelÃ©fono</span>
                             <input type="text" id="cliente-admin-telefono" maxlength="50" placeholder="Ej. 3001234567" inputmode="numeric" data-filtro="numeros">
                         </label>
                         <label>
@@ -691,19 +691,19 @@
                 <div class="crud-modal-content">
                     <button type="button" class="crud-modal-close" id="btn-cerrar-modal-usuario" aria-label="Cerrar formulario">&times;</button>
                     <h4 id="usuario-admin-form-title">Crear usuario</h4>
-                    <p class="crud-clientes-note">Los campos están alineados con la estructura real de la base de datos.</p>
+                    <p class="crud-clientes-note">Los campos estÃ¡n alineados con la estructura real de la base de datos.</p>
                     <div id="mensaje-usuario-admin-modal" class="crud-clientes-mensaje" aria-live="polite"></div>
                     <form id="form-usuario-admin" class="crud-clientes-form">
                         <input type="hidden" id="usuario-admin-id">
                         <label><span>Nombre <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="text" id="usuario-admin-nombre" required maxlength="50" data-filtro="letras"></label>
                         <label><span>Apellido</span><input type="text" id="usuario-admin-apellido" maxlength="50" data-filtro="letras"></label>
                         <label><span>Email <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="email" id="usuario-admin-email" required maxlength="100" autocomplete="email"></label>
-                        <label><span>Contraseña <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="password" id="usuario-admin-contrasena" maxlength="255" autocomplete="new-password"></label>
+                        <label><span>ContraseÃ±a <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="password" id="usuario-admin-contrasena" maxlength="255" autocomplete="new-password"></label>
                         <label><span>Tipo documento</span><input type="text" id="usuario-admin-documento" maxlength="20"></label>
-                        <label><span>Número documento</span><input type="text" id="usuario-admin-numero-documento" maxlength="30" inputmode="numeric" data-filtro="numeros"></label>
-                        <label><span>Teléfono</span><input type="text" id="usuario-admin-telefono" maxlength="20" inputmode="numeric" data-filtro="numeros"></label>
-                        <label><span>País</span><input type="text" id="usuario-admin-pais" maxlength="50"></label>
-                        <label><span>Dirección</span><input type="text" id="usuario-admin-direccion" maxlength="255"></label>
+                        <label><span>NÃºmero documento</span><input type="text" id="usuario-admin-numero-documento" maxlength="30" inputmode="numeric" data-filtro="numeros"></label>
+                        <label><span>TelÃ©fono</span><input type="text" id="usuario-admin-telefono" maxlength="20" inputmode="numeric" data-filtro="numeros"></label>
+                        <label><span>PaÃ­s</span><input type="text" id="usuario-admin-pais" maxlength="50"></label>
+                        <label><span>DirecciÃ³n</span><input type="text" id="usuario-admin-direccion" maxlength="255"></label>
                         <label><span>Rol</span><select id="usuario-admin-idrol"></select></label>
                         <label><span>Estado</span><select id="usuario-admin-estado"><option value="1">Activo</option><option value="0">Inactivo</option></select></label>
                         <div class="crud-clientes-form-actions">
@@ -717,7 +717,7 @@
                 <div class="crud-modal-content">
                     <button type="button" class="crud-modal-close" id="btn-cerrar-modal-rol" aria-label="Cerrar formulario">&times;</button>
                     <h4 id="rol-admin-form-title">Crear rol</h4>
-                    <p class="crud-clientes-note">Los campos están alineados con la estructura real de la base de datos.</p>
+                    <p class="crud-clientes-note">Los campos estÃ¡n alineados con la estructura real de la base de datos.</p>
                     <div id="mensaje-rol-admin-modal" class="crud-clientes-mensaje" aria-live="polite"></div>
                     <form id="form-rol-admin" class="crud-clientes-form">
                         <input type="hidden" id="rol-admin-id">
@@ -735,12 +735,12 @@
                 <div class="crud-modal-content">
                     <button type="button" class="crud-modal-close" id="btn-cerrar-modal-permiso" aria-label="Cerrar formulario">&times;</button>
                     <h4 id="permiso-admin-form-title">Crear permiso</h4>
-                    <p class="crud-clientes-note">Los campos están alineados con la estructura real de la base de datos.</p>
+                    <p class="crud-clientes-note">Los campos estÃ¡n alineados con la estructura real de la base de datos.</p>
                     <div id="mensaje-permiso-admin-modal" class="crud-clientes-mensaje" aria-live="polite"></div>
                     <form id="form-permiso-admin" class="crud-clientes-form">
                         <input type="hidden" id="permiso-admin-id">
                         <label><span>Nombre del permiso <span class="campo-obligatorio" aria-hidden="true">*</span></span><input type="text" id="permiso-admin-nombre" required maxlength="255"></label>
-                        <label><span>Descripción</span><textarea id="permiso-admin-descripcion" maxlength="255"></textarea></label>
+                        <label><span>DescripciÃ³n</span><textarea id="permiso-admin-descripcion" maxlength="255"></textarea></label>
                         <label><span>Estado</span><select id="permiso-admin-estado"><option value="1">Activo</option><option value="0">Inactivo</option></select></label>
                         <div class="crud-clientes-form-actions">
                             <button type="submit" class="btn-accion-crud btn-accion-principal" id="btn-permiso-admin-guardar">Guardar permiso</button>
@@ -753,7 +753,7 @@
                 <div class="crud-modal-content">
                     <button type="button" class="crud-modal-close" id="btn-cerrar-modal-servicio" aria-label="Cerrar formulario">&times;</button>
                     <h4 id="servicio-admin-form-title">Crear servicio</h4>
-                    <p class="crud-servicios-note">Los campos están alineados con la estructura real de la base de datos.</p>
+                    <p class="crud-servicios-note">Los campos estÃ¡n alineados con la estructura real de la base de datos.</p>
                     <div id="mensaje-servicio-admin-modal" class="crud-servicios-mensaje" aria-live="polite"></div>
                     <form id="form-servicio-admin" class="crud-servicios-form">
                         <input type="hidden" id="servicio-admin-id">
@@ -762,15 +762,15 @@
                             <input type="text" id="servicio-admin-nombre" required maxlength="100" placeholder="Ej. Masaje relajante">
                         </label>
                         <label>
-                            <span>Descripción <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <span>DescripciÃ³n <span class="campo-obligatorio" aria-hidden="true">*</span></span>
                             <textarea id="servicio-admin-descripcion" required maxlength="500" placeholder="Describe el servicio en pocas palabras"></textarea>
                         </label>
                         <label>
-                            <span>Duración (minutos) <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <span>DuraciÃ³n (minutos) <span class="campo-obligatorio" aria-hidden="true">*</span></span>
                             <input type="number" id="servicio-admin-duracion" required min="0" placeholder="Ej. 60">
                         </label>
                         <label>
-                            <span>Cantidad máxima de personas <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <span>Cantidad mÃ¡xima de personas <span class="campo-obligatorio" aria-hidden="true">*</span></span>
                             <input type="number" id="servicio-admin-cantidad-maxima" required min="1" placeholder="Ej. 4">
                         </label>
                         <label>
@@ -778,18 +778,18 @@
                             <input type="number" id="servicio-admin-costo" required min="0" step="0.01" placeholder="Ej. 150000">
                         </label>
                         <label>
-                            Imágenes por URL
-                            <textarea id="servicio-admin-imagen" placeholder="Pega una o varias URL separadas por salto de línea o coma"></textarea>
-                            <small class="crud-habitaciones-help">Pega una o varias URLs para armar la galería del detalle.</small>
+                            ImÃ¡genes por URL
+                            <textarea id="servicio-admin-imagen" placeholder="Pega una o varias URL separadas por salto de lÃ­nea o coma"></textarea>
+                            <small class="crud-habitaciones-help">Pega una o varias URLs para armar la galerÃ­a del detalle.</small>
                         </label>
                         <div id="servicio-admin-preview-wrap" class="crud-habitaciones-preview hidden">
                             <p>Vista previa:</p>
-                            <div class="carousel" id="servicio-carousel" role="region" aria-roledescription="carousel" aria-label="Vista previa de imágenes del servicio">
-                                <button type="button" class="carousel-btn prev" id="servicio-carousel-prev" aria-label="Imagen anterior">‹</button>
+                            <div class="carousel" id="servicio-carousel" role="region" aria-roledescription="carousel" aria-label="Vista previa de imÃ¡genes del servicio">
+                                <button type="button" class="carousel-btn prev" id="servicio-carousel-prev" aria-label="Imagen anterior">â€¹</button>
                                 <div class="carousel-viewport">
                                     <ul class="carousel-track" id="servicio-carousel-track" role="list"></ul>
                                 </div>
-                                <button type="button" class="carousel-btn next" id="servicio-carousel-next" aria-label="Siguiente imagen">›</button>
+                                <button type="button" class="carousel-btn next" id="servicio-carousel-next" aria-label="Siguiente imagen">â€º</button>
                             </div>
                             <div class="carousel-counter" id="servicio-carousel-counter" aria-hidden="true"></div>
                         </div>
@@ -815,20 +815,20 @@
                             <i class="fa-solid fa-user"></i>
                         </div>
                         <h4 id="perfil-titulo">Mi Perfil</h4>
-                        <p>Administra tu información personal y credenciales</p>
+                        <p>Administra tu informaciÃ³n personal y credenciales</p>
                     </div>
                     <div id="perfil-mensaje" class="perfil-mensaje hidden" aria-live="polite"></div>
-                    <!-- SECCIÓN DE LECTURA (Por defecto visible) -->
+                    <!-- SECCIÃ“N DE LECTURA (Por defecto visible) -->
                     <div id="perfil-lectura" class="perfil-lectura">
                         <section class="perfil-section">
-                            <h5>Información de documento</h5>
+                            <h5>InformaciÃ³n de documento</h5>
                             <div class="perfil-grid-campos">
                                 <label class="perfil-field">
                                     <span class="perfil-label">Tipo de documento</span>
                                     <span class="perfil-value" id="perfil-tipo-documento">-</span>
                                 </label>
                                 <label class="perfil-field">
-                                    <span class="perfil-label">Número de documento</span>
+                                    <span class="perfil-label">NÃºmero de documento</span>
                                     <span class="perfil-value" id="perfil-numero-documento">-</span>
                                 </label>
                             </div>
@@ -845,15 +845,15 @@
                                     <span class="perfil-value" id="perfil-apellido">-</span>
                                 </label>
                                 <label class="perfil-field">
-                                    <span class="perfil-label">Teléfono</span>
+                                    <span class="perfil-label">TelÃ©fono</span>
                                     <span class="perfil-value" id="perfil-telefono">-</span>
                                 </label>
                                 <label class="perfil-field">
-                                    <span class="perfil-label">País</span>
+                                    <span class="perfil-label">PaÃ­s</span>
                                     <span class="perfil-value" id="perfil-pais">-</span>
                                 </label>
                                 <label class="perfil-field perfil-field-full">
-                                    <span class="perfil-label">Dirección</span>
+                                    <span class="perfil-label">DirecciÃ³n</span>
                                     <span class="perfil-value" id="perfil-direccion">-</span>
                                 </label>
                             </div>
@@ -881,17 +881,17 @@
                             <div id="perfil-permisos" class="perfil-permisos"></div>
                         </section>
                     </div>
-                    <!-- SECCIÓN DE EDICIÓN (Oculta inicialmente) -->
+                    <!-- SECCIÃ“N DE EDICIÃ“N (Oculta inicialmente) -->
                     <form id="perfil-form" class="perfil-form hidden">
                         <section class="perfil-section">
-                            <h5>Información de documento</h5>
+                            <h5>InformaciÃ³n de documento</h5>
                             <div class="perfil-grid-campos">
                                 <label class="perfil-field">
                                     <span class="perfil-label">Tipo de documento</span>
                                     <input type="text" id="perfil-edit-tipo-documento" maxlength="50" placeholder="CC" readonly>
                                 </label>
                                 <label class="perfil-field">
-                                    <span class="perfil-label">Número de documento</span>
+                                    <span class="perfil-label">NÃºmero de documento</span>
                                     <input type="text" id="perfil-edit-numero-documento" maxlength="50" placeholder="1234567890" readonly>
                                 </label>
                             </div>
@@ -908,16 +908,16 @@
                                     <input type="text" id="perfil-edit-apellido" maxlength="255" placeholder="Apellido" readonly>
                                 </label>
                                 <label class="perfil-field">
-                                    <span class="perfil-label">Teléfono</span>
+                                    <span class="perfil-label">TelÃ©fono</span>
                                     <input type="text" id="perfil-edit-telefono" maxlength="50" placeholder="3001234567" readonly>
                                 </label>
                                 <label class="perfil-field">
-                                    <span class="perfil-label">País</span>
+                                    <span class="perfil-label">PaÃ­s</span>
                                     <input type="text" id="perfil-edit-pais" maxlength="100" placeholder="Colombia" readonly>
                                 </label>
                                 <label class="perfil-field perfil-field-full">
-                                    <span class="perfil-label">Dirección</span>
-                                    <input type="text" id="perfil-edit-direccion" maxlength="255" placeholder="Dirección" readonly>
+                                    <span class="perfil-label">DirecciÃ³n</span>
+                                    <input type="text" id="perfil-edit-direccion" maxlength="255" placeholder="DirecciÃ³n" readonly>
                                 </label>
                             </div>
                         </section>
@@ -948,7 +948,7 @@
                         <button type="button" class="perfil-btn perfil-btn-primary" id="btn-editar-perfil">Editar Perfil</button>
                         <button type="submit" form="perfil-form" class="perfil-btn perfil-btn-primary hidden" id="btn-guardar-perfil">Guardar Cambios</button>
                         <button type="button" class="perfil-btn perfil-btn-secondary hidden" id="btn-cancelar-edicion-perfil">Cancelar</button>
-                        <button type="button" class="perfil-btn perfil-btn-secondary" id="btn-cerrar-sesion">Cerrar Sesión</button>
+                        <button type="button" class="perfil-btn perfil-btn-secondary" id="btn-cerrar-sesion">Cerrar SesiÃ³n</button>
                     </div>
                 </div>
             </div>
@@ -968,10 +968,10 @@
                     <form id="formulario-paquete" class="crud-paquetes-form">
                         <label>
                             <span>Nombre <span class="campo-obligatorio" aria-hidden="true">*</span></span>
-                            <input type="text" id="paquete-nombre" name="NombrePaquete" required maxlength="150" placeholder="Ej: Paquete Romántico">
+                            <input type="text" id="paquete-nombre" name="NombrePaquete" required maxlength="150" placeholder="Ej: Paquete RomÃ¡ntico">
                         </label>
                         <label>
-                            <span>Descripción</span>
+                            <span>DescripciÃ³n</span>
                             <textarea id="paquete-descripcion" name="Descripcion" maxlength="500" placeholder="Describe los detalles del paquete..." rows="3"></textarea>
                         </label>
                         <div class="form-row-2">
@@ -980,7 +980,7 @@
                                 <input type="number" id="paquete-precio" name="PrecioPaquete" required min="0" step="1000" placeholder="0">
                             </label>
                             <label>
-                                <span>Duración (noches) <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                                <span>DuraciÃ³n (noches) <span class="campo-obligatorio" aria-hidden="true">*</span></span>
                                 <input type="number" id="paquete-duracion" name="DuracionNoches" required min="1" value="1">
                             </label>
                         </div>
@@ -1000,7 +1000,7 @@
                                 <span>Servicios Incluidos</span>
                             </label>
                             <div id="lista-servicios-paquete" class="crud-paquetes-servicios-grid">
-                                <!-- Se llenará dinámicamente -->
+                                <!-- Se llenarÃ¡ dinÃ¡micamente -->
                             </div>
                         </div>
                         <div class="crud-paquetes-form-actions">
@@ -1034,7 +1034,7 @@
                         <div class="detalles-servicios">
                             <h4>Servicios Incluidos</h4>
                             <div id="detalles-servicios" class="servicios-lista">
-                                <!-- Se llenará dinámicamente -->
+                                <!-- Se llenarÃ¡ dinÃ¡micamente -->
                             </div>
                         </div>
                     </div>
@@ -1049,31 +1049,31 @@
         </main>
     </div>
     <!-- Scripts JavaScript -->
-    <!-- ⭐ IMPORTANTE: Cargar en este orden -->
+    <!-- â­ IMPORTANTE: Cargar en este orden -->
     <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script defer src="js/config.js?v=20260524b"></script>    <!-- Primero: Configuración -->
+    <script defer src="js/config.js?v=20260524b"></script>    <!-- Primero: ConfiguraciÃ³n -->
         <script defer src="js/dashboard-inject.js?v=20260524b"></script> <!-- Inyectar Dashboard HTML -->
     <script defer src="js/constants.js?v=20260524b"></script> <!-- Segundo: Constantes -->
-    <script defer src="js/validation.js?v=20260526c"></script> <!-- Tercero: Validación -->
+    <script defer src="js/validation.js?v=20260526c"></script> <!-- Tercero: ValidaciÃ³n -->
     <script defer src="js/notifications.js?v=20260524b"></script> <!-- Cuarto: Notificaciones -->
     <script defer src="js/api.js?v=20260524b"></script>      <!-- Quinto: Funciones de API -->
-    <script defer src="js/perfil.js?v=20260524b"></script>   <!-- Nuevo: Módulo de Perfil -->
-    <script defer src="js/app.js?v=20260526b"></script>      <!-- Sexto: Lógica de la aplicación -->
+    <script defer src="js/perfil.js?v=20260524b"></script>   <!-- Nuevo: MÃ³dulo de Perfil -->
+    <script defer src="js/app.js?v=20260526b"></script>      <!-- Sexto: LÃ³gica de la aplicaciÃ³n -->
     <script defer src="js/usuarios.js?v=20260526a"></script>
     <script defer src="js/roles.js?v=20260524b"></script>
-    <script defer src="js/eventos.js?v=20260524b"></script>  <!-- Séptimo: Eventos y formularios -->
-    <script defer src="js/paquetes.js?v=20260526a"></script> <!-- Paquetes: Módulo de Paquetes -->
+    <script defer src="js/eventos.js?v=20260524b"></script>  <!-- SÃ©ptimo: Eventos y formularios -->
+    <script defer src="js/paquetes.js?v=20260526a"></script> <!-- Paquetes: MÃ³dulo de Paquetes -->
     <script defer src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
         <script defer src="js/dashboard.js?v=20260524b"></script> <!-- Dashboard: Panel de Control -->
-    <script defer src="js/reservas.js?v=20260528b"></script> <!-- Reservas: Módulo de Reservas -->
+    <script defer src="js/reservas.js?v=20260612a"></script> <!-- Reservas: MÃ³dulo de Reservas -->
     <script defer src="js/campana.js?v=20260525c"></script> <!-- Campana de alertas -->
     <!-- Script del Sidebar -->
     <script>
         // ============================================
         // FUNCIONALIDAD DEL SIDEBAR
         // ============================================
-        // Cargar habitaciones cuando el DOM esté listo
+        // Cargar habitaciones cuando el DOM estÃ© listo
         document.addEventListener('DOMContentLoaded', function() {
             if (document.getElementById('habitaciones')) {
                 cargarHabitaciones();
