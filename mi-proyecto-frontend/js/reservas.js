@@ -1694,23 +1694,27 @@ if (document.readyState === 'loading') {
             const imgs = (hab.ImagenHabitacion || '').split(',').map(s => s.trim()).filter(Boolean);
             const precio = fmt(Math.round(Number(hab.Costo || 0) * 1.19));
             const desc = hab.Descripcion || 'Sin descripción';
+            const nombre = escaparHtml(hab.NombreHabitacion || hab.Nombre || '');
 
             const dotsHtml = imgs.length > 1
-                ? imgs.map((_, i) => `<div class="hab-preview-dot${i === 0 ? ' active' : ''}" data-i="${i}"></div>`).join('')
+                ? imgs.map((_, i) => `<div class="hab-preview-dot${i === 0 ? ' active' : ''}"></div>`).join('')
                 : '';
 
             preview.innerHTML = `
-                <div class="hab-preview-slider" id="hps-slider">
+                <div class="hab-preview-header">${nombre}</div>
+                <div class="hab-preview-slider">
                     ${imgs.length
                         ? imgs.map((u, i) => `<img src="${u}" class="${i === 0 ? 'active' : ''}" onerror="this.style.display='none'" alt="">`).join('')
-                        : `<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:13px;"><i class="fa-solid fa-image" style="font-size:28px;"></i></div>`
+                        : `<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;"><i class="fa-solid fa-image" style="font-size:36px;"></i></div>`
                     }
                     ${dotsHtml ? `<div class="hab-preview-dots">${dotsHtml}</div>` : ''}
                 </div>
                 <div class="hab-preview-body">
-                    <div class="hab-preview-nombre">${escaparHtml(hab.NombreHabitacion || hab.Nombre || '')}</div>
                     <div class="hab-preview-desc">${escaparHtml(desc)}</div>
-                    <div class="hab-preview-precio">$${precio} <span>/ noche (IVA incl.)</span></div>
+                    <div class="hab-preview-footer">
+                        <div class="hab-preview-precio">${precio} <span>/ noche</span></div>
+                        <span class="hab-preview-badge">Disponible</span>
+                    </div>
                 </div>`;
 
             // auto-slide si hay varias imágenes
@@ -1724,12 +1728,13 @@ if (document.readyState === 'loading') {
                 }, 1800);
             }
 
-            // posicionar a la derecha del elemento hover
+            // posicionar a la derecha del elemento hover (o a la izquierda si no hay espacio)
             const rect = targetEl.getBoundingClientRect();
-            const cardW = 280;
+            const cardW = 360;
+            const cardH = 420;
             const spaceRight = window.innerWidth - rect.right;
             const left = spaceRight >= cardW + 12 ? rect.right + 8 : rect.left - cardW - 8;
-            const top  = Math.min(rect.top, window.innerHeight - 320);
+            const top  = Math.min(rect.top, window.innerHeight - cardH);
             preview.style.left = left + 'px';
             preview.style.top  = Math.max(8, top) + 'px';
             preview.style.display = 'block';
@@ -1740,7 +1745,7 @@ if (document.readyState === 'loading') {
             <div class="hab-option" data-id="${h.IDHabitacion}">
                 <div class="hab-option-dot"></div>
                 <span>${escaparHtml(h.NombreHabitacion || h.Nombre || 'Habitación')}</span>
-                <span class="hab-option-price">$${fmt(Math.round(Number(h.Costo || 0) * 1.19))}</span>
+                <span class="hab-option-price">${fmt(Math.round(Number(h.Costo || 0) * 1.19))}</span>
             </div>`).join('');
 
         // Eventos hover en opciones

@@ -2938,25 +2938,33 @@ footer {
 .hab-preview-card {
     position: fixed;
     z-index: 9999;
-    width: 280px;
+    width: 360px;
     background: #fff;
     border-radius: 14px;
-    box-shadow: 0 16px 48px rgba(0,0,0,.22);
+    box-shadow: 0 24px 64px rgba(0,0,0,.28);
     border: 1px solid #e2e8f0;
     overflow: hidden;
     pointer-events: none;
 }
-.hab-preview-slider { position: relative; height: 160px; background: #f1f5f9; overflow: hidden; }
+.hab-preview-header {
+    padding: 14px 16px 12px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a2744;
+    border-bottom: 1px solid #f1f5f9;
+}
+.hab-preview-slider { position: relative; height: 210px; background: #f1f5f9; overflow: hidden; }
 .hab-preview-slider img { width: 100%; height: 100%; object-fit: cover; display: none; }
 .hab-preview-slider img.active { display: block; }
-.hab-preview-dots { position: absolute; bottom: 6px; left: 0; right: 0; display: flex; justify-content: center; gap: 4px; }
-.hab-preview-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.5); cursor: pointer; }
+.hab-preview-dots { position: absolute; bottom: 8px; left: 0; right: 0; display: flex; justify-content: center; gap: 5px; }
+.hab-preview-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.5); }
 .hab-preview-dot.active { background: #fff; }
-.hab-preview-body { padding: 12px 14px 14px; }
-.hab-preview-nombre { font-size: 14px; font-weight: 700; color: #1a2744; margin-bottom: 4px; }
-.hab-preview-desc { font-size: 12px; color: #6b7280; line-height: 1.5; margin-bottom: 8px; max-height: 54px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
-.hab-preview-precio { font-size: 15px; font-weight: 700; color: #1a2744; }
-.hab-preview-precio span { font-size: 11px; font-weight: 400; color: #9ca3af; }
+.hab-preview-body { padding: 14px 16px 16px; }
+.hab-preview-desc { font-size: 13px; color: #6b7280; line-height: 1.55; margin-bottom: 12px; max-height: 60px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.hab-preview-footer { display: flex; align-items: center; justify-content: space-between; }
+.hab-preview-precio { font-size: 20px; font-weight: 800; color: #1a2744; }
+.hab-preview-precio span { font-size: 12px; font-weight: 400; color: #9ca3af; }
+.hab-preview-badge { background: #d1fae5; color: #065f46; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; letter-spacing: .3px; }
 
 .reserva-card {
     background: var(--color-white);
