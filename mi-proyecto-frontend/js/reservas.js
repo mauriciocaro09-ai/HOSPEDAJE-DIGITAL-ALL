@@ -263,7 +263,7 @@ const actualizarOpcionesHabitacion = (fechaInicio, fechaFin) => {
         ? _habitacionesCache.filter(h => !hayCruceDeFechasConReservas(h.IDHabitacion, fechaInicio, fechaFin, ignorarId))
         : _habitacionesCache;
 
-    selectHab.innerHTML = ['<option value="">Selecciona habitación</option>']
+    selectHab.innerHTML = ['<option value="" disabled selected hidden>-- Selecciona habitación --</option>']
         .concat(habs.map(h =>
             `<option value="${escaparHtml(String(h.IDHabitacion))}">${escaparHtml(h.NombreHabitacion || h.Nombre || 'Habitación')}</option>`
         ))
@@ -715,7 +715,7 @@ const poblarSelectsReserva = async () => {
             let habs = await requestJson('/habitaciones/disponibles');
             if (!Array.isArray(habs)) habs = [];
             _habitacionesCache = habs;
-            const opciones = ['<option value="">Selecciona habitación</option>']
+            const opciones = ['<option value="" disabled selected hidden>-- Selecciona habitación --</option>']
                 .concat(habs.map(h => `<option value="${escaparHtml(h.IDHabitacion)}">${escaparHtml(h.NombreHabitacion || h.Nombre || 'Habitación')}</option>`));
             selectHab.innerHTML = opciones.join('');
             // redibujar datepickers cuando cambie la habitación seleccionada
