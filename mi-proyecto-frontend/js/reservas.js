@@ -1728,15 +1728,14 @@ if (document.readyState === 'loading') {
                 }, 1800);
             }
 
-            // posicionar a la derecha del elemento hover (o a la izquierda si no hay espacio)
+            // Anclar al borde derecho del viewport, alineado verticalmente con el item
             const rect = targetEl.getBoundingClientRect();
-            const cardW = 360;
-            const cardH = 420;
-            const spaceRight = window.innerWidth - rect.right;
-            const left = spaceRight >= cardW + 12 ? rect.right + 8 : rect.left - cardW - 8;
-            const top  = Math.min(rect.top, window.innerHeight - cardH);
+            const cardW = 368;
+            const cardH = 430;
+            const left = Math.max(8, window.innerWidth - cardW - 8);
+            const top  = Math.max(8, Math.min(rect.top - 60, window.innerHeight - cardH - 8));
             preview.style.left = left + 'px';
-            preview.style.top  = Math.max(8, top) + 'px';
+            preview.style.top  = top + 'px';
             preview.style.display = 'block';
         };
 
