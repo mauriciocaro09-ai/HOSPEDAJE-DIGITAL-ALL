@@ -505,10 +505,18 @@
                         <div class="reserva-card">
                             <span class="card-title"><i class="fa-solid fa-bed"></i> HABITACIÓN Y FECHAS</span>
                             <div class="reserva-form-group">
-                                <label>
+                                <label style="position:relative;">
                                     <span>Habitación <span class="campo-obligatorio">*</span> <small id="hab-paquete-hint" style="display:none;color:#f59e0b;font-weight:600;font-size:11px;">— incluida en el paquete</small></span>
-                                    <select id="reserva-admin-habitacion" required><option value="" disabled selected hidden>-- Selecciona habitación --</option></select>
+                                    <select id="reserva-admin-habitacion" required style="display:none"><option value="" disabled selected hidden>-- Selecciona habitación --</option></select>
+                                    <div id="hab-custom-dropdown" class="hab-custom-dropdown">
+                                        <div id="hab-custom-trigger" class="hab-custom-trigger" tabindex="0">
+                                            <span id="hab-selected-label">-- Selecciona habitación --</span>
+                                            <i class="fa-solid fa-chevron-down" id="hab-chevron"></i>
+                                        </div>
+                                        <div id="hab-options-list" class="hab-options-list"></div>
+                                    </div>
                                 </label>
+                                <div id="hab-preview-card" class="hab-preview-card" style="display:none"></div>
                                 <div class="fechas-grid">
                                     <label>
                                         <span>Fecha inicio <span class="campo-obligatorio">*</span></span>

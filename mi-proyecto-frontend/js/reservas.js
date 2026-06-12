@@ -439,6 +439,9 @@ const abrirModalNuevaReserva = async () => {
 
     const formulario = document.getElementById('form-reserva-admin');
     if (formulario) formulario.reset();
+    const habLabel = document.getElementById('hab-selected-label');
+    if (habLabel) habLabel.textContent = '-- Selecciona habitación --';
+    document.querySelectorAll('.hab-option').forEach(o => o.classList.remove('selected'));
     limpiarErroresInlineReserva();
     mostrarMensajeReservaAdmin('');
 
@@ -718,12 +721,12 @@ const poblarSelectsReserva = async () => {
             const opciones = ['<option value="" disabled selected hidden>-- Selecciona habitación --</option>']
                 .concat(habs.map(h => `<option value="${escaparHtml(h.IDHabitacion)}">${escaparHtml(h.NombreHabitacion || h.Nombre || 'Habitación')}</option>`));
             selectHab.innerHTML = opciones.join('');
-            // redibujar datepickers cuando cambie la habitación seleccionada
             selectHab.addEventListener('change', () => {
                 try { if (fpInicio) fpInicio.redraw(); } catch{};
                 try { if (fpFin) fpFin.redraw(); } catch{};
                 actualizarSidebarResumen();
             });
+            construirDropdownCustomHabitaciones(habs);
         } catch (err) {
             console.error('No se pudieron cargar habitaciones:', err);
             selectHab.innerHTML = '<option value="">No disponible</option>';
@@ -776,7 +779,10 @@ const editarReservaAdmin = async (idReserva) => {
             document.getElementById('reserva-admin-estado').value = reserva.IdEstadoReserva || '';
                 // seleccionar habitación si está presente
                 const selectHab = document.getElementById('reserva-admin-habitacion');
-                if (selectHab) selectHab.value = reserva.IDHabitacion || '';
+                if (selectHab) {
+                    selectHab.value = reserva.IDHabitacion || '';
+                    if (reserva.IDHabitacion) window.sincronizarLabelHabDropdown && window.sincronizarLabelHabDropdown(reserva.IDHabitacion);
+                }
                 // seleccionar paquetes si vienen en la reserva
                 const selectPaq = document.getElementById('reserva-admin-paquetes');
                 if (selectPaq && Array.isArray(reserva.paquetes) && reserva.paquetes.length) {
@@ -1655,6 +1661,127 @@ if (document.readyState === 'loading') {
         }
 
         actualizarSidebarResumen();
+    };
+
+    // ── Dropdown custom con preview al hover ──────────────────────────────
+    const construirDropdownCustomHabitaciones = (habs) => {
+        const trigger  = document.getElementById('hab-custom-trigger');
+        const list     = document.getElementById('hab-options-list');
+        const label    = document.getElementById('hab-selected-label');
+        const selectHab = document.getElementById('reserva-admin-habitacion');
+        const preview  = document.getElementById('hab-preview-card');
+        if (!trigger || !list || !selectHab) return;
+
+        let sliderTimer = null;
+
+        const cerrar = () => {
+            list.classList.remove('open');
+            trigger.classList.remove('open');
+            if (preview) preview.style.display = 'none';
+        };
+
+        const sincronizarConSelect = (idHab, nombre) => {
+            selectHab.value = idHab;
+            label.textContent = nombre;
+            selectHab.dispatchEvent(new Event('change'));
+            list.querySelectorAll('.hab-option').forEach(o => {
+                o.classList.toggle('selected', o.dataset.id === String(idHab));
+            });
+        };
+
+        const mostrarPreview = (hab, targetEl) => {
+            if (!preview) return;
+            const imgs = (hab.ImagenHabitacion || '').split(',').map(s => s.trim()).filter(Boolean);
+            const precio = fmt(Math.round(Number(hab.Costo || 0) * 1.19));
+            const desc = hab.Descripcion || 'Sin descripción';
+
+            const dotsHtml = imgs.length > 1
+                ? imgs.map((_, i) => `<div class="hab-preview-dot${i === 0 ? ' active' : ''}" data-i="${i}"></div>`).join('')
+                : '';
+
+            preview.innerHTML = `
+                <div class="hab-preview-slider" id="hps-slider">
+                    ${imgs.length
+                        ? imgs.map((u, i) => `<img src="${u}" class="${i === 0 ? 'active' : ''}" onerror="this.style.display='none'" alt="">`).join('')
+                        : `<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:13px;"><i class="fa-solid fa-image" style="font-size:28px;"></i></div>`
+                    }
+                    ${dotsHtml ? `<div class="hab-preview-dots">${dotsHtml}</div>` : ''}
+                </div>
+                <div class="hab-preview-body">
+                    <div class="hab-preview-nombre">${escaparHtml(hab.NombreHabitacion || hab.Nombre || '')}</div>
+                    <div class="hab-preview-desc">${escaparHtml(desc)}</div>
+                    <div class="hab-preview-precio">$${precio} <span>/ noche (IVA incl.)</span></div>
+                </div>`;
+
+            // auto-slide si hay varias imágenes
+            clearInterval(sliderTimer);
+            if (imgs.length > 1) {
+                let idx = 0;
+                sliderTimer = setInterval(() => {
+                    idx = (idx + 1) % imgs.length;
+                    preview.querySelectorAll('.hab-preview-slider img').forEach((img, i) => img.classList.toggle('active', i === idx));
+                    preview.querySelectorAll('.hab-preview-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+                }, 1800);
+            }
+
+            // posicionar a la derecha del elemento hover
+            const rect = targetEl.getBoundingClientRect();
+            const cardW = 280;
+            const spaceRight = window.innerWidth - rect.right;
+            const left = spaceRight >= cardW + 12 ? rect.right + 8 : rect.left - cardW - 8;
+            const top  = Math.min(rect.top, window.innerHeight - 320);
+            preview.style.left = left + 'px';
+            preview.style.top  = Math.max(8, top) + 'px';
+            preview.style.display = 'block';
+        };
+
+        // Construir opciones
+        list.innerHTML = habs.map(h => `
+            <div class="hab-option" data-id="${h.IDHabitacion}">
+                <div class="hab-option-dot"></div>
+                <span>${escaparHtml(h.NombreHabitacion || h.Nombre || 'Habitación')}</span>
+                <span class="hab-option-price">$${fmt(Math.round(Number(h.Costo || 0) * 1.19))}</span>
+            </div>`).join('');
+
+        // Eventos hover en opciones
+        list.querySelectorAll('.hab-option').forEach(opt => {
+            const hab = habs.find(h => String(h.IDHabitacion) === opt.dataset.id);
+            opt.addEventListener('mouseenter', () => { if (hab) mostrarPreview(hab, opt); });
+            opt.addEventListener('mouseleave', () => {
+                clearInterval(sliderTimer);
+                if (preview) preview.style.display = 'none';
+            });
+            opt.addEventListener('click', () => {
+                sincronizarConSelect(opt.dataset.id, opt.querySelector('span:not(.hab-option-price)').textContent);
+                cerrar();
+            });
+        });
+
+        // Abrir/cerrar al clic en trigger
+        trigger.addEventListener('click', () => {
+            const abierto = list.classList.contains('open');
+            if (abierto) { cerrar(); } else {
+                list.classList.add('open');
+                trigger.classList.add('open');
+            }
+        });
+
+        // Cerrar al clic fuera
+        document.addEventListener('click', (e) => {
+            if (!trigger.contains(e.target) && !list.contains(e.target)) cerrar();
+        }, true);
+    };
+
+    // Re-sincronizar label del dropdown custom cuando se cargue una reserva para editar
+    window.sincronizarLabelHabDropdown = (idHab) => {
+        const label = document.getElementById('hab-selected-label');
+        const list  = document.getElementById('hab-options-list');
+        if (!label || !list) return;
+        const opt = list.querySelector(`.hab-option[data-id="${idHab}"]`);
+        if (opt) {
+            label.textContent = opt.querySelector('span:not(.hab-option-price)').textContent;
+            list.querySelectorAll('.hab-option').forEach(o => o.classList.toggle('selected', o.dataset.id === String(idHab)));
+        }
     };
 
 })();
