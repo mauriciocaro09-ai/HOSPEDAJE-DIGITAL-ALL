@@ -1770,7 +1770,7 @@ if (document.readyState === 'loading') {
             });
 
             document.addEventListener('click', (e) => {
-                if (!trigger.contains(e.target) && !list.contains(e.target)) cerrar();
+                if (!trigger.contains(e.target) && !list.contains(e.target) && e.target !== selectHab) cerrar();
             }, true);
         }
     };
