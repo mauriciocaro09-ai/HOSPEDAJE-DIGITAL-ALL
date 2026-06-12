@@ -1757,19 +1757,22 @@ if (document.readyState === 'loading') {
             });
         });
 
-        // Abrir/cerrar al clic en trigger
-        trigger.addEventListener('click', () => {
-            const abierto = list.classList.contains('open');
-            if (abierto) { cerrar(); } else {
-                list.classList.add('open');
-                trigger.classList.add('open');
-            }
-        });
+        // Solo adjuntar listeners de trigger y documento UNA vez
+        if (!trigger.dataset.habDropdownInit) {
+            trigger.dataset.habDropdownInit = '1';
 
-        // Cerrar al clic fuera
-        document.addEventListener('click', (e) => {
-            if (!trigger.contains(e.target) && !list.contains(e.target)) cerrar();
-        }, true);
+            trigger.addEventListener('click', () => {
+                const abierto = list.classList.contains('open');
+                if (abierto) { cerrar(); } else {
+                    list.classList.add('open');
+                    trigger.classList.add('open');
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!trigger.contains(e.target) && !list.contains(e.target)) cerrar();
+            }, true);
+        }
     };
 
     // Re-sincronizar label del dropdown custom cuando se cargue una reserva para editar
