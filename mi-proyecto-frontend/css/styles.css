@@ -5,6 +5,34 @@
 /* SweetAlert2 siempre encima de modales custom */
 .swal2-container { z-index: 999999 !important; }
 
+/* ── Admin service cards (Nueva Reserva) ───── */
+.admin-srv-card { display:flex; align-items:center; gap:12px; padding:10px 12px; border:1.5px solid #e5e7eb; border-radius:10px; cursor:pointer; transition:border-color .2s,background .2s; position:relative; -webkit-user-select:none; user-select:none; }
+.admin-srv-card:hover { border-color:#1a2744; background:#f8faff; }
+.admin-srv-card.seleccionado { border-color:#1a2744; background:#eef2ff; }
+.admin-srv-card.seleccionado::after { content:'\f00c'; font-family:'Font Awesome 6 Free'; font-weight:900; position:absolute; top:6px; right:6px; background:#1a2744; color:#fff; font-size:9px; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+.admin-srv-img { width:52px; height:52px; object-fit:cover; border-radius:8px; flex-shrink:0; }
+.admin-srv-img-ph { width:52px; height:52px; background:#f3f4f6; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#9ca3af; font-size:20px; flex-shrink:0; }
+.admin-srv-info { flex:1; min-width:0; }
+.admin-srv-name { font-size:13px; font-weight:700; color:#1a2744; }
+.admin-srv-desc { font-size:11px; color:#6b7280; overflow:hidden; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; margin-top:2px; }
+.admin-srv-chips { display:flex; gap:4px; margin-top:4px; flex-wrap:wrap; }
+.admin-srv-dur { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:600; color:#1a2744; background:#e0f2fe; border-radius:20px; padding:2px 7px; }
+.admin-srv-precio { font-size:13px; font-weight:700; color:#1a2744; white-space:nowrap; }
+.admin-srv-ojo { background:none; border:none; cursor:pointer; color:#6b7280; font-size:15px; padding:4px; border-radius:6px; transition:color .2s; flex-shrink:0; }
+.admin-srv-ojo:hover { color:#1a2744; }
+
+/* ── Slider servicios admin modal ───────────── */
+.srv-slider-admin { position:relative; border-radius:10px 10px 0 0; overflow:hidden; height:200px; background:#f3f4f6; }
+.srv-slides-admin { position:relative; width:100%; height:200px; }
+.srv-slide-img-admin { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .3s; }
+.srv-slide-img-admin.active { opacity:1; }
+.srv-slide-btn-admin { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,.45); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; z-index:2; }
+.srv-slide-btn-admin.prev { left:8px; }
+.srv-slide-btn-admin.next { right:8px; }
+.srv-dots-admin { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); display:flex; gap:5px; z-index:2; }
+.srv-dot-admin { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.5); cursor:pointer; transition:background .2s; }
+.srv-dot-admin.active { background:#fff; }
+
 /* ============================================
    LAYOUT GENERAL
    ============================================ */

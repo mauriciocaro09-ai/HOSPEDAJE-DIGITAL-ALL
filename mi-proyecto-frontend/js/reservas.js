@@ -1458,6 +1458,8 @@ const cargarPaquetesVisuales = async () => {
     }
 };
 
+let _serviciosAdminCache = [];
+
 const cargarServiciosVisuales = async () => {
     const lista = document.getElementById('servicios-visual-list');
     if (!lista) return;
@@ -1465,6 +1467,7 @@ const cargarServiciosVisuales = async () => {
     try {
         let servicios = await requestJson('/servicios?soloActivos=true');
         if (!Array.isArray(servicios)) servicios = [];
+        _serviciosAdminCache = servicios;
 
         if (!servicios.length) {
             lista.innerHTML = '<p class="empty-state-text">No hay servicios activos.</p>';
@@ -1473,11 +1476,27 @@ const cargarServiciosVisuales = async () => {
 
         lista.innerHTML = servicios.map(s => {
             const costoIva = Math.round(Number(s.Costo || 0) * 1.19);
+            const imgUrl = s.Imagen ? s.Imagen.split(',')[0].trim() : '';
             return `
-            <span class="servicio-tag" data-id="${escaparHtml(String(s.IDServicio))}" data-precio="${costoIva}" title="${escaparHtml(s.NombreServicio || '')}">
-                ${escaparHtml(s.NombreServicio || 'Servicio')}
-                <small>$ ${fmt(costoIva)}</small>
-            </span>`;
+            <div class="admin-srv-card servicio-tag" data-id="${escaparHtml(String(s.IDServicio))}" data-precio="${costoIva}">
+                ${imgUrl
+                    ? `<img src="${imgUrl}" alt="${escaparHtml(s.NombreServicio || '')}" class="admin-srv-img" onerror="this.outerHTML='<span class=\\'admin-srv-img-ph\\'><i class=\\'fa-solid fa-concierge-bell\\'></i></span>'">`
+                    : `<span class="admin-srv-img-ph"><i class="fa-solid fa-concierge-bell"></i></span>`
+                }
+                <div class="admin-srv-info">
+                    <div class="admin-srv-name">${escaparHtml(s.NombreServicio || '')}</div>
+                    ${s.Descripcion ? `<div class="admin-srv-desc">${escaparHtml(s.Descripcion)}</div>` : ''}
+                    <div class="admin-srv-chips">
+                        ${s.Duracion ? `<span class="admin-srv-dur"><i class="fa-regular fa-clock"></i> ${escaparHtml(String(s.Duracion))} min</span>` : ''}
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                    <span class="admin-srv-precio">$${fmt(costoIva)}</span>
+                    <button class="admin-srv-ojo" type="button" title="Ver detalle" onclick="event.stopPropagation();abrirDetalleServicioAdmin(${s.IDServicio})">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>`;
         }).join('');
 
         lista.querySelectorAll('.servicio-tag').forEach(tag => {
@@ -1491,6 +1510,68 @@ const cargarServiciosVisuales = async () => {
         lista.innerHTML = '<p class="empty-state-text">Error al cargar servicios.</p>';
     }
 };
+
+const abrirDetalleServicioAdmin = (idServicio) => {
+    const s = _serviciosAdminCache.find(x => String(x.IDServicio) === String(idServicio));
+    if (!s) return;
+    const imgs = s.Imagen ? s.Imagen.split(',').map(u => u.trim()).filter(Boolean) : [];
+    const costoIva = Math.round(Number(s.Costo || 0) * 1.19);
+    const modal = document.getElementById('srv-detalle-modal-admin');
+    const contenido = document.getElementById('srv-detalle-contenido-admin');
+    if (!modal || !contenido) return;
+
+    const sliderHtml = imgs.length > 0 ? `
+        <div class="srv-slider-admin">
+            <div class="srv-slides-admin">
+                ${imgs.map((u, i) => `<img src="${u}" class="srv-slide-img-admin${i === 0 ? ' active' : ''}" onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=400'">`).join('')}
+            </div>
+            ${imgs.length > 1 ? `
+            <button class="srv-slide-btn-admin prev" onclick="slideSrvAdmin(-1)" type="button"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="srv-slide-btn-admin next" onclick="slideSrvAdmin(1)" type="button"><i class="fa-solid fa-chevron-right"></i></button>
+            <div class="srv-dots-admin">${imgs.map((_, i) => `<span class="srv-dot-admin${i === 0 ? ' active' : ''}" onclick="goSrvAdmin(${i})"></span>`).join('')}</div>
+            ` : ''}
+        </div>` : '';
+
+    contenido.innerHTML = `
+        ${sliderHtml}
+        <div style="padding:${imgs.length ? '0' : '0'} 0 4px;">
+            <h3 style="font-size:17px;font-weight:700;color:#1a2744;margin:16px 0 6px;">${escaparHtml(s.NombreServicio || '')}</h3>
+            ${s.Descripcion ? `<p style="font-size:13px;color:#4b5563;line-height:1.6;margin-bottom:12px;">${escaparHtml(s.Descripcion)}</p>` : ''}
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                ${s.Duracion ? `<span style="background:#e0f2fe;color:#1a2744;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>${escaparHtml(String(s.Duracion))} min</span>` : ''}
+                ${s.CantidadMaximaPersonas ? `<span style="background:#f0fdf4;color:#166534;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;"><i class="fa-solid fa-users" style="margin-right:4px;"></i>Máx. ${s.CantidadMaximaPersonas} personas</span>` : ''}
+                ${s.Horario ? `<span style="background:#fef3c7;color:#92400e;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;"><i class="fa-regular fa-calendar" style="margin-right:4px;"></i>${escaparHtml(s.Horario)}</span>` : ''}
+            </div>
+            <div style="font-size:16px;font-weight:700;color:#1a2744;">$${fmt(costoIva)} <span style="font-size:12px;font-weight:400;color:#6b7280;">IVA incl.</span></div>
+        </div>`;
+
+    window._srvSlideIdxAdmin = 0;
+    modal.classList.remove('hidden');
+};
+
+window.slideSrvAdmin = (dir) => {
+    const imgs = document.querySelectorAll('.srv-slide-img-admin');
+    const dots = document.querySelectorAll('.srv-dot-admin');
+    if (!imgs.length) return;
+    imgs[window._srvSlideIdxAdmin].classList.remove('active');
+    dots[window._srvSlideIdxAdmin]?.classList.remove('active');
+    window._srvSlideIdxAdmin = (window._srvSlideIdxAdmin + dir + imgs.length) % imgs.length;
+    imgs[window._srvSlideIdxAdmin].classList.add('active');
+    dots[window._srvSlideIdxAdmin]?.classList.add('active');
+};
+
+window.goSrvAdmin = (i) => {
+    const imgs = document.querySelectorAll('.srv-slide-img-admin');
+    const dots = document.querySelectorAll('.srv-dot-admin');
+    if (!imgs.length) return;
+    imgs[window._srvSlideIdxAdmin]?.classList.remove('active');
+    dots[window._srvSlideIdxAdmin]?.classList.remove('active');
+    window._srvSlideIdxAdmin = i;
+    imgs[i]?.classList.add('active');
+    dots[i]?.classList.add('active');
+};
+
+window.abrirDetalleServicioAdmin = abrirDetalleServicioAdmin;
 
 // ============================================
 // EVENT LISTENERS

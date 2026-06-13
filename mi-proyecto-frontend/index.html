@@ -1139,5 +1139,13 @@
         } catch(e) {}
     </script>
 <div id="paq-preview-card" class="hab-preview-card" style="display:none"></div>
+
+<!-- Modal detalle servicio admin -->
+<div id="srv-detalle-modal-admin" class="crud-modal hidden" onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="crud-modal-content" style="max-width:480px;padding:0;overflow:hidden;" onclick="event.stopPropagation()">
+        <button class="crud-modal-close" onclick="document.getElementById('srv-detalle-modal-admin').classList.add('hidden')" style="z-index:10;">&times;</button>
+        <div id="srv-detalle-contenido-admin" style="padding:20px;"></div>
+    </div>
+</div>
 </body>
 </html>
