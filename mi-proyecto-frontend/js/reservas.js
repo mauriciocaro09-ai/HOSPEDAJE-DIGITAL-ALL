@@ -1460,6 +1460,12 @@ const cargarPaquetesVisuales = async () => {
 
 let _serviciosAdminCache = [];
 
+// Extrae URLs de imagen separadas por coma, espacio o salto de línea
+const _extraerImgsSrv = (valor) => {
+    if (!valor) return [];
+    return String(valor).split(/[,\n]|(?=https?:\/\/)/).map(s => s.trim()).filter(s => s.startsWith('http'));
+};
+
 const cargarServiciosVisuales = async () => {
     const lista = document.getElementById('servicios-visual-list');
     if (!lista) return;
@@ -1476,7 +1482,7 @@ const cargarServiciosVisuales = async () => {
 
         lista.innerHTML = servicios.map(s => {
             const costoIva = Math.round(Number(s.Costo || 0) * 1.19);
-            const imgUrl = s.Imagen ? s.Imagen.split(',')[0].trim() : '';
+            const imgUrl = _extraerImgsSrv(s.Imagen)[0] || '';
             return `
             <div class="admin-srv-card servicio-tag" data-id="${escaparHtml(String(s.IDServicio))}" data-precio="${costoIva}">
                 ${imgUrl
@@ -1514,7 +1520,7 @@ const cargarServiciosVisuales = async () => {
 const abrirDetalleServicioAdmin = (idServicio) => {
     const s = _serviciosAdminCache.find(x => String(x.IDServicio) === String(idServicio));
     if (!s) return;
-    const imgs = s.Imagen ? s.Imagen.split(',').map(u => u.trim()).filter(Boolean) : [];
+    const imgs = _extraerImgsSrv(s.Imagen);
     const costoIva = Math.round(Number(s.Costo || 0) * 1.19);
     const modal = document.getElementById('srv-detalle-modal-admin');
     const contenido = document.getElementById('srv-detalle-contenido-admin');
