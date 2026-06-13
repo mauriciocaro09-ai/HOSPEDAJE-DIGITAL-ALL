@@ -146,7 +146,7 @@ const ReservasService = {
           [reservaId]
         ).catch(() => [[null]]);
         if (clienteData && clienteData.Email) {
-          const fechaLimite = new Date(Date.now() + 2 * 60 * 1000);
+          const fechaLimite = new Date(Date.now() + 3 * 60 * 1000);
           EmailService.enviarAvisoComprobante({
             clienteNombre: (clienteData.Nombre || '') + ' ' + (clienteData.Apellido || ''),
             clienteEmail: clienteData.Email,
@@ -279,7 +279,7 @@ const ReservasService = {
   /* ── Auto-cancelar vencidas ─────────────────── */
   autoCancelarVencidas: async () => {
     try {
-      const limite = new Date(Date.now() - 2 * 60 * 1000); // hace 2 minutos
+      const limite = new Date(Date.now() - 3 * 60 * 1000); // hace 3 minutos
       const [vencidas] = await db.query(`
         SELECT r.IDReserva, c.Nombre, c.Apellido, c.Email
         FROM reserva r
@@ -300,7 +300,7 @@ const ReservasService = {
 
       for (const r of vencidas) {
         await db.query(
-          "UPDATE reserva SET IdEstadoReserva = ?, MotivoCancelacion = 'Cancelacion automatica: plazo de 2 minutos vencido sin comprobante' WHERE IDReserva = ?",
+          "UPDATE reserva SET IdEstadoReserva = ?, MotivoCancelacion = 'Cancelacion automatica: plazo de 3 minutos vencido sin comprobante' WHERE IDReserva = ?",
           [idEstado, r.IDReserva]
         );
         if (r.Email) {

@@ -226,7 +226,7 @@ const EmailService = {
           "<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:8px;\">" +
           "<div style=\"background:#f59e0b;padding:20px;border-radius:8px 8px 0 0;text-align:center;\"><h1 style=\"color:white;margin:0;\">Hospedaje Digital</h1></div>" +
           "<div style=\"padding:30px;\">" +
-          "<h2 style=\"color:#b45309;\">&#9201; Tenes 2 minutos para subir tu comprobante</h2>" +
+          "<h2 style=\"color:#b45309;\">&#9201; Tenes 3 minutos para subir tu comprobante</h2>" +
           "<p>Hola <strong>" + clienteNombre + "</strong>, tu reserva <strong>#" + reservaId + "</strong> fue registrada con metodo de pago <strong>Transferencia Bancaria</strong>.</p>" +
           "<div style=\"background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:16px;margin:20px 0;\">" +
           "<p style=\"margin:0;color:#92400e;\"><strong>Plazo limite:</strong> hoy a las <strong>" + limiteStr + "</strong></p>" +
@@ -323,7 +323,7 @@ const EmailService = {
           "<div style=\"background:#6b7280;padding:20px;border-radius:8px 8px 0 0;text-align:center;\"><h1 style=\"color:white;margin:0;\">Hospedaje Digital</h1></div>" +
           "<div style=\"padding:30px;\">" +
           "<h2 style=\"color:#374151;\">Reserva cancelada por vencimiento</h2>" +
-          "<p>Hola <strong>" + clienteNombre + "</strong>, lamentablemente tu reserva <strong>#" + reservaId + "</strong> fue cancelada automaticamente porque no recibimos el comprobante de pago dentro de los <strong>2 minutos</strong> establecidos.</p>" +
+          "<p>Hola <strong>" + clienteNombre + "</strong>, lamentablemente tu reserva <strong>#" + reservaId + "</strong> fue cancelada automaticamente porque no recibimos el comprobante de pago dentro de los <strong>3 minutos</strong> establecidos.</p>" +
           "<div style=\"background:#f3f4f6;border-radius:8px;padding:16px;margin:20px 0;\">" +
           "<p style=\"margin:0;color:#374151;\">La disponibilidad de la habitacion/paquete ha sido liberada. Si aun deseas hospedarte con nosotros, podes hacer una nueva reserva.</p></div>" +
           "<div style=\"text-align:center;margin:28px 0;\"><a href=\"" + frontendUrl + "/cliente.html\" style=\"background:#1a2744;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;\">Hacer nueva reserva</a></div>" +
