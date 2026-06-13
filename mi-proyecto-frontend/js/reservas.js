@@ -1114,7 +1114,7 @@ const verDetalleReserva = async (idReserva) => {
                     ? `<img src="${r.ComprobanteTransferencia}" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid #e2e8f0;margin-top:4px;cursor:zoom-in;" onclick="this.style.maxHeight=this.style.maxHeight==='none'?'220px':'none'">`
                     : `<a href="${r.ComprobanteTransferencia}" download="comprobante_reserva_${r.IdReserva || ''}.pdf" class="detalle-valor" style="color:#1a2744;font-weight:600;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:5px;"></i>Descargar PDF</a>`
                 }
-                ${estado === 'pendiente' ? `
+                ${estado.clase === 'pendiente' ? `
                 <div style="display:flex;gap:10px;margin-top:14px;">
                     <button id="btn-aprobar-comprobante" type="button"
                         style="flex:1;background:#16a34a;color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">
