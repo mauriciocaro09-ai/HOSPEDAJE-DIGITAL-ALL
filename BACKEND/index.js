@@ -110,11 +110,11 @@ const startServer = async () => {
             console.log(`Servidor corriendo en http://localhost:${port}`);
         });
 
-        // Auto-cancelar reservas con comprobante vencido cada 5 minutos
+        // Auto-cancelar reservas con comprobante vencido cada 30 segundos
         const ReservasService = require('./src/services/reservas.service');
         setInterval(() => {
             ReservasService.autoCancelarVencidas().catch(e => console.error('Error auto-cancelacion:', e.message));
-        }, 5 * 60 * 1000);
+        }, 30 * 1000);
         // Ejecutar inmediatamente al arrancar
         ReservasService.autoCancelarVencidas().catch(e => console.error('Error auto-cancelacion inicial:', e.message));
 
