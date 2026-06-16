@@ -1712,20 +1712,7 @@ function inicializarReservasAdmin() {
 
     const btnLimpiar = document.getElementById('btn-reserva-admin-limpiar');
     if (btnLimpiar) {
-        btnLimpiar.addEventListener('click', () => {
-            document.getElementById('form-reserva-admin')?.reset();
-            document.getElementById('reserva-admin-id').value = '';
-            const titulo = document.getElementById('reserva-admin-form-title');
-            if (titulo) titulo.textContent = 'Crear reserva';
-            const btnGuardar = document.getElementById('wizard-submit');
-            if (btnGuardar) btnGuardar.textContent = 'Guardar reserva';
-            mostrarPasoWizard(1); // Reiniciar al primer paso
-            const tipoDocumento = document.getElementById('reserva-admin-tipo-documento');
-            if (tipoDocumento) tipoDocumento.value = '';
-            limpiarErroresInlineReserva();
-            mostrarMensajeReservaAdmin('');
-            poblarSelectsReserva();
-        });
+        btnLimpiar.addEventListener('click', () => abrirModalNuevaReserva());
     }
 
     // ── Autocomplete buscador de clientes ──────────────────────────
