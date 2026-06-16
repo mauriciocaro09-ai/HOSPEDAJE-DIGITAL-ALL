@@ -1541,7 +1541,7 @@ const cargarServiciosVisuales = async () => {
                         <button type="button" class="admin-srv-qty-btn" onclick="event.stopPropagation();cambiarCantidadSrvAdmin(this,1)">+</button>
                     </div>
                     <div style="display:flex;align-items:center;gap:5px;">
-                        <span class="admin-srv-precio">$${fmt(costoIva)}</span>
+                        <span class="admin-srv-precio">${fmt(costoIva)}</span>
                         <button class="admin-srv-ojo" type="button" title="Ver detalle" onclick="event.stopPropagation();abrirDetalleServicioAdmin(${s.IDServicio})">
                             <i class="fa-solid fa-eye"></i>
                         </button>
@@ -1612,7 +1612,7 @@ const abrirDetalleServicioAdmin = (idServicio) => {
                 ${s.CantidadMaximaPersonas ? `<span style="background:#f0fdf4;color:#166534;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;"><i class="fa-solid fa-users" style="margin-right:4px;"></i>Máx. ${s.CantidadMaximaPersonas} personas</span>` : ''}
                 ${s.Horario ? `<span style="background:#fef3c7;color:#92400e;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;"><i class="fa-regular fa-calendar" style="margin-right:4px;"></i>${escaparHtml(s.Horario)}</span>` : ''}
             </div>
-            <div style="font-size:16px;font-weight:700;color:#1a2744;">$${fmt(costoIva)} <span style="font-size:12px;font-weight:400;color:#6b7280;">IVA incl.</span></div>
+            <div style="font-size:16px;font-weight:700;color:#1a2744;">${fmt(costoIva)} <span style="font-size:12px;font-weight:400;color:#6b7280;">IVA incl.</span></div>
         </div>`;
 
     window._srvSlideIdxAdmin = 0;
@@ -1869,11 +1869,8 @@ if (document.readyState === 'loading') {
         if (val > maxP) val = maxP;
         card.dataset.cantidad = val;
         if (display) display.textContent = val;
-        // si está seleccionado, sincronizar estado (siempre, incluso si la entrada no existía)
-        const id = card.dataset.id;
-        if (card.classList.contains('seleccionado')) {
-            _seleccionadosAdmin[id] = { precio: Number(card.dataset.precio || 0), cantidad: val };
-        }
+        // Presionar + auto-selecciona el servicio; presionar - lo deja en su estado actual
+        if (delta > 0) card.classList.add('seleccionado');
         actualizarSidebarResumen();
     };
 
