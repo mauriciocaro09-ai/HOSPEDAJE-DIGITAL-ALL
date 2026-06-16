@@ -28,15 +28,40 @@ const CargosController = {
 
   pagar: async (req, res) => {
     try {
-      const { IDMetodoPago } = req.body;
+      const { IDMetodoPago, ComprobanteTransferencia } = req.body;
       if (!IDMetodoPago) return res.status(400).json({ error: 'Método de pago requerido' });
-      await CargosService.pagar(req.params.id, IDMetodoPago);
-      res.json({ mensaje: 'Cargo pagado correctamente' });
+      const result = await CargosService.pagar(req.params.id, IDMetodoPago, ComprobanteTransferencia || null);
+      const mensaje = result.esTransferencia
+        ? 'Comprobante recibido. Pendiente de aprobación por el administrador.'
+        : 'Cargo pagado correctamente';
+      res.json({ mensaje });
     } catch (error) {
       if (error.code === 'NOT_FOUND') return res.status(404).json({ error: error.message });
       if (error.code === 'ESTADO_INVALIDO') return res.status(400).json({ error: error.message });
       console.error(error);
       res.status(500).json({ error: 'Error procesando pago' });
+    }
+  },
+
+  aprobar: async (req, res) => {
+    try {
+      await CargosService.aprobar(req.params.id);
+      res.json({ mensaje: 'Cargo aprobado y marcado como pagado' });
+    } catch (error) {
+      if (error.code === 'NOT_FOUND') return res.status(404).json({ error: error.message });
+      console.error(error);
+      res.status(500).json({ error: 'Error aprobando cargo' });
+    }
+  },
+
+  rechazar: async (req, res) => {
+    try {
+      await CargosService.rechazar(req.params.id);
+      res.json({ mensaje: 'Comprobante rechazado. El cargo vuelve a pendiente de pago.' });
+    } catch (error) {
+      if (error.code === 'NOT_FOUND') return res.status(404).json({ error: error.message });
+      console.error(error);
+      res.status(500).json({ error: 'Error rechazando cargo' });
     }
   },
 

@@ -1032,7 +1032,8 @@ const renderCargosAdicionalesSection = async (idReserva, estadoNombreOriginal) =
         } else {
             html = cargos.map(c => {
                 let acciones = '';
-                if (c.Estado === 'pendiente') {
+                const tieneComprobanteCargo = !!c.ComprobanteTransferencia;
+                if (c.Estado === 'pendiente' && !tieneComprobanteCargo) {
                     acciones = `
                         <div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                             <select id="metodo-cargo-${c.IDCargo}" style="font-size:11px;padding:3px 6px;border:1px solid #d1d5db;border-radius:4px;">
@@ -1041,6 +1042,20 @@ const renderCargosAdicionalesSection = async (idReserva, estadoNombreOriginal) =
                             </select>
                             <button onclick="pagarCargoAdicional(${idReserva}, ${c.IDCargo}, '${escaparHtml(estadoNombreOriginal)}')" style="font-size:11px;padding:3px 10px;background:#10b981;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;">Pagar</button>
                             <button onclick="cancelarCargoAdicional(${idReserva}, ${c.IDCargo}, '${escaparHtml(estadoNombreOriginal)}')" style="font-size:11px;padding:3px 10px;background:#ef4444;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;">Cancelar</button>
+                        </div>`;
+                } else if (c.Estado === 'pendiente' && tieneComprobanteCargo) {
+                    const esImg = c.ComprobanteTransferencia.startsWith('data:image');
+                    acciones = `
+                        <div style="margin-top:8px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px;">
+                            <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#0369a1;"><i class="fa-solid fa-file-check"></i> Comprobante de transferencia recibido</p>
+                            ${esImg
+                                ? `<img src="${c.ComprobanteTransferencia}" style="max-width:100%;max-height:160px;border-radius:6px;border:1px solid #e2e8f0;cursor:pointer;display:block;margin-bottom:8px;" onclick="window.open(this.src,'_blank')" title="Ver comprobante">`
+                                : `<a href="${c.ComprobanteTransferencia}" download="comprobante_cargo_${c.IDCargo}.pdf" style="font-size:12px;color:#1a2744;font-weight:600;display:block;margin-bottom:8px;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:4px;"></i>Descargar PDF</a>`
+                            }
+                            <div style="display:flex;gap:6px;">
+                                <button onclick="aprobarCargoAdicional(${idReserva}, ${c.IDCargo}, '${escaparHtml(estadoNombreOriginal)}')" style="font-size:11px;padding:4px 12px;background:#10b981;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;"><i class="fa-solid fa-check"></i> Aprobar</button>
+                                <button onclick="rechazarCargoAdicional(${idReserva}, ${c.IDCargo}, '${escaparHtml(estadoNombreOriginal)}')" style="font-size:11px;padding:4px 12px;background:#ef4444;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;"><i class="fa-solid fa-xmark"></i> Rechazar</button>
+                            </div>
                         </div>`;
                 }
                 return `
@@ -1958,6 +1973,46 @@ if (document.readyState === 'loading') {
             await renderCargosAdicionalesSection(idReserva, estadoNombre);
         } catch(e) {
             Swal.fire('Error', 'No se pudo registrar el pago', 'error');
+        }
+    };
+
+    window.aprobarCargoAdicional = async (idReserva, idCargo, estadoNombre) => {
+        const result = await Swal.fire({
+            title: '¿Aprobar comprobante?',
+            text: 'El cargo pasará a estado Pagado.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, aprobar',
+            cancelButtonText: 'No',
+            confirmButtonColor: '#10b981'
+        });
+        if (!result.isConfirmed) return;
+        try {
+            await requestJson(`/cargos/${idCargo}/aprobar`, { method: 'PUT', body: {} });
+            await renderCargosAdicionalesSection(idReserva, estadoNombre);
+            Swal.fire({ icon: 'success', title: 'Cargo aprobado', timer: 1500, showConfirmButton: false });
+        } catch(e) {
+            Swal.fire('Error', 'No se pudo aprobar el cargo', 'error');
+        }
+    };
+
+    window.rechazarCargoAdicional = async (idReserva, idCargo, estadoNombre) => {
+        const result = await Swal.fire({
+            title: 'Rechazar comprobante',
+            text: 'El comprobante será eliminado y el cargo volverá a pendiente de pago.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, rechazar',
+            cancelButtonText: 'No',
+            confirmButtonColor: '#ef4444'
+        });
+        if (!result.isConfirmed) return;
+        try {
+            await requestJson(`/cargos/${idCargo}/rechazar`, { method: 'PUT', body: {} });
+            await renderCargosAdicionalesSection(idReserva, estadoNombre);
+            Swal.fire({ icon: 'info', title: 'Comprobante rechazado', timer: 1500, showConfirmButton: false });
+        } catch(e) {
+            Swal.fire('Error', 'No se pudo rechazar el cargo', 'error');
         }
     };
 

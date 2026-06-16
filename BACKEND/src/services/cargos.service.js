@@ -55,7 +55,7 @@ const CargosService = {
     return rows;
   },
 
-  pagar: async (idCargo, idMetodoPago) => {
+  pagar: async (idCargo, idMetodoPago, comprobante = null) => {
     const [[cargo]] = await db.query(
       'SELECT * FROM cargo_adicional WHERE IDCargo = ? LIMIT 1',
       [idCargo]
@@ -63,9 +63,47 @@ const CargosService = {
     if (!cargo) throw { code: 'NOT_FOUND', message: 'Cargo no encontrado' };
     if (cargo.Estado !== 'pendiente') throw { code: 'ESTADO_INVALIDO', message: 'El cargo no está pendiente de pago' };
 
+    const [[mp]] = await db.query('SELECT NomMetodoPago FROM metodopago WHERE IdMetodoPago = ? LIMIT 1', [idMetodoPago]);
+    const esTransferencia = mp && (mp.NomMetodoPago || '').toLowerCase().includes('transferencia');
+
+    if (esTransferencia && comprobante) {
+      // Guardar comprobante y dejar en pendiente para aprobación del admin
+      await db.query(
+        `UPDATE cargo_adicional SET IDMetodoPago = ?, ComprobanteTransferencia = ? WHERE IDCargo = ?`,
+        [idMetodoPago, comprobante, idCargo]
+      );
+    } else {
+      // Pago directo (efectivo u otro)
+      await db.query(
+        `UPDATE cargo_adicional SET Estado = 'pagado', IDMetodoPago = ?, FechaPago = NOW() WHERE IDCargo = ?`,
+        [idMetodoPago, idCargo]
+      );
+    }
+    return { esTransferencia: !!esTransferencia };
+  },
+
+  aprobar: async (idCargo) => {
+    const [[cargo]] = await db.query(
+      'SELECT * FROM cargo_adicional WHERE IDCargo = ? LIMIT 1',
+      [idCargo]
+    );
+    if (!cargo) throw { code: 'NOT_FOUND', message: 'Cargo no encontrado' };
     await db.query(
-      `UPDATE cargo_adicional SET Estado = 'pagado', IDMetodoPago = ?, FechaPago = NOW() WHERE IDCargo = ?`,
-      [idMetodoPago, idCargo]
+      `UPDATE cargo_adicional SET Estado = 'pagado', FechaPago = NOW() WHERE IDCargo = ?`,
+      [idCargo]
+    );
+    return true;
+  },
+
+  rechazar: async (idCargo) => {
+    const [[cargo]] = await db.query(
+      'SELECT * FROM cargo_adicional WHERE IDCargo = ? LIMIT 1',
+      [idCargo]
+    );
+    if (!cargo) throw { code: 'NOT_FOUND', message: 'Cargo no encontrado' };
+    await db.query(
+      `UPDATE cargo_adicional SET ComprobanteTransferencia = NULL, IDMetodoPago = NULL WHERE IDCargo = ?`,
+      [idCargo]
     );
     return true;
   },

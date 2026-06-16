@@ -92,6 +92,14 @@ const crearTablasDetalle = async () => {
         await agregarColumna('MotivoCancelacion', 'TEXT NULL DEFAULT NULL');
         await agregarColumna('ComprobanteTransferencia', 'MEDIUMTEXT NULL DEFAULT NULL');
         await agregarColumna('FechaCreacion', 'DATETIME DEFAULT NOW()');
+
+        // Agregar columna ComprobanteTransferencia a cargo_adicional si no existe
+        const [colsCargo] = await db.query(`SHOW COLUMNS FROM cargo_adicional LIKE 'ComprobanteTransferencia'`);
+        if (colsCargo.length === 0) {
+            await db.query(`ALTER TABLE cargo_adicional ADD COLUMN ComprobanteTransferencia MEDIUMTEXT NULL DEFAULT NULL`);
+            console.log('Columna ComprobanteTransferencia agregada a cargo_adicional.');
+        }
+
         console.log('Tablas de detalle verificadas.');
     } catch (err) {
         console.warn('No se pudieron crear tablas de detalle:', err.message);
