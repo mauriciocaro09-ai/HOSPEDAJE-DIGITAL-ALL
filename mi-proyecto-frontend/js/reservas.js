@@ -1595,7 +1595,7 @@ const cargarServiciosVisuales = async () => {
                     </div>
                     <div style="display:flex;align-items:center;gap:5px;">
                         <span class="admin-srv-precio">${fmt(costoIva)}</span>
-                        <button class="admin-srv-ojo" type="button" title="Ver detalle" onclick="event.stopPropagation();abrirDetalleServicioAdmin(${s.IDServicio})">
+                        <button class="admin-srv-ojo" type="button" title="Ver detalle" onclick="event.stopPropagation();abrirDetalleSrvNuevaReserva(${s.IDServicio})">
                             <i class="fa-solid fa-eye"></i>
                         </button>
                     </div>
@@ -1634,7 +1634,7 @@ const cargarServiciosVisuales = async () => {
     }
 };
 
-const abrirDetalleServicioAdmin = (idServicio) => {
+const abrirDetalleSrvNuevaReserva = (idServicio) => {
     const s = _serviciosAdminCache.find(x => String(x.IDServicio) === String(idServicio));
     if (!s) return;
     const imgs = _extraerImgsSrv(s.Imagen);
@@ -1694,7 +1694,7 @@ window.goSrvAdmin = (i) => {
     dots[i]?.classList.add('active');
 };
 
-window.abrirDetalleServicioAdmin = abrirDetalleServicioAdmin;
+window.abrirDetalleSrvNuevaReserva = abrirDetalleSrvNuevaReserva;
 
 // ============================================
 // EVENT LISTENERS
