@@ -1045,21 +1045,34 @@ const renderCargosAdicionalesSection = async (idReserva, estadoNombreOriginal) =
                 const servicios = await requestJson('/servicios?soloActivos=true');
                 serviciosOptions += (Array.isArray(servicios) ? servicios : []).map(s => {
                     const costoIva = Math.round(Number(s.Costo || 0) * 1.19);
-                    return `<option value="${escaparHtml(String(s.IDServicio))}">${escaparHtml(s.NombreServicio)} — ${fmt(costoIva)} (IVA incl.)</option>`;
+                    const maxP = s.CantidadMaximaPersonas ? ` · máx. ${s.CantidadMaximaPersonas} pers.` : '';
+                    return `<option value="${escaparHtml(String(s.IDServicio))}"
+                        data-maxp="${escaparHtml(String(s.CantidadMaximaPersonas || ''))}"
+                        data-dur="${escaparHtml(String(s.Duracion || ''))}"
+                        data-hor="${escaparHtml(s.Horario || '')}">${escaparHtml(s.NombreServicio)} — ${fmt(costoIva)} IVA incl.${maxP}</option>`;
                 }).join('');
             } catch(e) {}
 
             html += `
                 <div style="margin-top:12px;padding-top:12px;border-top:2px dashed #e5e7eb;">
-                    <p style="font-size:12px;font-weight:600;color:#374151;margin:0 0 8px;">Agregar cargo extra</p>
-                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                        <select id="nuevo-cargo-servicio" style="flex:1;min-width:150px;font-size:12px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;">
-                            ${serviciosOptions}
-                        </select>
-                        <input id="nuevo-cargo-cantidad" type="number" min="1" value="1"
-                            style="width:60px;font-size:12px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;text-align:center;" />
+                    <p style="font-size:12px;font-weight:600;color:#374151;margin:0 0 8px;"><i class="fa-solid fa-plus-circle" style="color:#3b82f6;margin-right:5px;"></i>Agregar servicio extra</p>
+                    <select id="nuevo-cargo-servicio" onchange="mostrarInfoCargo(this)"
+                        style="width:100%;font-size:12px;padding:6px 8px;border:1px solid #d1d5db;border-radius:6px;margin-bottom:6px;">
+                        ${serviciosOptions}
+                    </select>
+                    <div id="info-cargo-extra" style="display:none;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;padding:6px 10px;margin-bottom:8px;"></div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <div style="display:flex;align-items:center;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;background:#fff;">
+                            <button type="button" onclick="ajustarCantidadCargo(-1)"
+                                style="padding:4px 11px;background:none;border:none;font-size:16px;cursor:pointer;color:#374151;font-weight:700;line-height:1;">−</button>
+                            <span id="nuevo-cargo-display" style="min-width:28px;text-align:center;font-size:13px;font-weight:700;color:#1a2744;padding:0 2px;">1</span>
+                            <button type="button" onclick="ajustarCantidadCargo(1)"
+                                style="padding:4px 11px;background:none;border:none;font-size:16px;cursor:pointer;color:#374151;font-weight:700;line-height:1;">+</button>
+                        </div>
+                        <input id="nuevo-cargo-cantidad" type="hidden" value="1">
                         <button onclick="agregarCargoAdicional(${idReserva}, '${escaparHtml(estadoNombreOriginal)}')"
-                            style="font-size:12px;padding:5px 14px;background:#3b82f6;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">+ Agregar</button>
+                            style="flex:1;font-size:12px;padding:6px 14px;background:#3b82f6;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;">
+                            <i class="fa-solid fa-plus" style="margin-right:5px;"></i>Agregar</button>
                     </div>
                 </div>`;
         }
@@ -1802,6 +1815,34 @@ if (document.readyState === 'loading') {
 }
 
     // Acciones de cargos adicionales (llamadas desde onclick inline del modal)
+    window.mostrarInfoCargo = (sel) => {
+        const infoDiv = document.getElementById('info-cargo-extra');
+        if (!infoDiv) return;
+        const opt = sel.options[sel.selectedIndex];
+        if (!opt || !opt.value) { infoDiv.style.display = 'none'; return; }
+        const maxP = opt.dataset.maxp;
+        const dur  = opt.dataset.dur;
+        const hor  = opt.dataset.hor;
+        if (!maxP && !dur && !hor) { infoDiv.style.display = 'none'; return; }
+        let chips = '';
+        if (dur)  chips += `<span style="display:inline-flex;align-items:center;gap:4px;background:#e0f2fe;color:#1a2744;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600;"><i class="fa-regular fa-clock"></i>${dur} min</span>`;
+        if (maxP) chips += `<span style="display:inline-flex;align-items:center;gap:4px;background:#d1fae5;color:#065f46;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600;"><i class="fa-solid fa-users"></i>Máx. ${maxP} personas</span>`;
+        if (hor)  chips += `<span style="display:inline-flex;align-items:center;gap:4px;background:#fef3c7;color:#92400e;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600;"><i class="fa-regular fa-calendar"></i>${hor}</span>`;
+        infoDiv.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:6px;">${chips}</div>`;
+        infoDiv.style.display = '';
+    };
+
+    window.ajustarCantidadCargo = (delta) => {
+        const display = document.getElementById('nuevo-cargo-display');
+        const input   = document.getElementById('nuevo-cargo-cantidad');
+        if (!display || !input) return;
+        let val = parseInt(input.value || '1') + delta;
+        if (val < 1) val = 1;
+        if (val > 20) val = 20;
+        input.value = val;
+        display.textContent = val;
+    };
+
     window.agregarCargoAdicional = async (idReserva, estadoNombre) => {
         const selectSrv = document.getElementById('nuevo-cargo-servicio');
         const inputCantidad = document.getElementById('nuevo-cargo-cantidad');
