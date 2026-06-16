@@ -147,19 +147,21 @@ const obtenerPorFechas = async (req, res) => {
 
 const crear = async (req, res) => {
   try {
-    // Resolver id_usuario desde el NroDocumento del cliente (para que aparezca en portal cliente)
+    // Resolver id_usuario, email y nombre del cliente desde NroDocumento
     const docCliente = req.body.NroDocumentoCliente;
     if (docCliente) {
       try {
         const [uRows] = await db.query(
-          'SELECT IDUsuario FROM usuarios WHERE NumeroDocumento = ? LIMIT 1',
+          'SELECT IDUsuario, Email, NombreUsuario, Apellido FROM usuarios WHERE NumeroDocumento = ? LIMIT 1',
           [docCliente]
         );
-        if (uRows && uRows[0] && uRows[0].IDUsuario) {
-          req.body.id_usuario = uRows[0].IDUsuario;
+        if (uRows && uRows[0]) {
+          if (uRows[0].IDUsuario)  req.body.id_usuario   = uRows[0].IDUsuario;
+          if (!req.body.EmailCliente   && uRows[0].Email)        req.body.EmailCliente   = uRows[0].Email;
+          if (!req.body.ContactoCliente && uRows[0].NombreUsuario) req.body.ContactoCliente = `${uRows[0].NombreUsuario} ${uRows[0].Apellido || ''}`.trim();
         }
       } catch (e) {
-        console.error('No se pudo resolver id_usuario del cliente:', e.message);
+        console.error('No se pudo resolver datos del cliente:', e.message);
       }
     }
 
