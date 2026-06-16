@@ -147,6 +147,22 @@ const obtenerPorFechas = async (req, res) => {
 
 const crear = async (req, res) => {
   try {
+    // Resolver id_usuario desde el NroDocumento del cliente (para que aparezca en portal cliente)
+    const docCliente = req.body.NroDocumentoCliente;
+    if (docCliente) {
+      try {
+        const [uRows] = await db.query(
+          'SELECT IDUsuario FROM usuarios WHERE NumeroDocumento = ? LIMIT 1',
+          [docCliente]
+        );
+        if (uRows && uRows[0] && uRows[0].IDUsuario) {
+          req.body.id_usuario = uRows[0].IDUsuario;
+        }
+      } catch (e) {
+        console.error('No se pudo resolver id_usuario del cliente:', e.message);
+      }
+    }
+
     const result = await ReservasService.create(req.body);
     const reservaId = result.insertId;
 
