@@ -721,7 +721,13 @@
         .servicio-item-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
         .servicio-item-duracion { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; color: var(--primary); background: #e0f2fe; border-radius: 20px; padding: 2px 8px; }
         .servicio-item-horario { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; color: #065f46; background: #d1fae5; border-radius: 20px; padding: 2px 8px; }
-        .servicio-item-precio { font-size: 13px; font-weight: 700; color: var(--primary); white-space: nowrap; align-self: flex-start; padding-top: 2px; }
+        .servicio-item-precio { font-size: 13px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+        .servicio-item-maxp { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 600; color: #065f46; background: #d1fae5; border-radius: 20px; padding: 2px 7px; }
+        .servicio-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+        .nr-srv-qty { display: flex; align-items: center; border: 1.5px solid #e5e7eb; border-radius: 7px; overflow: hidden; background: #fff; }
+        .nr-srv-qty-btn { background: none; border: none; padding: 3px 10px; font-size: 14px; font-weight: 700; cursor: pointer; color: #374151; line-height: 1; transition: background .15s; }
+        .nr-srv-qty-btn:hover { background: #f3f4f6; }
+        .nr-srv-qty-display { min-width: 22px; text-align: center; font-size: 12px; font-weight: 700; color: var(--primary); }
 
         /* ── RESERVA VISTA COMPLETA ──────────────── */
         .reserva-layout {
@@ -2604,30 +2610,60 @@
                 }
                 lista.innerHTML = servicios.map(s => {
                     const costoIva = Math.round(s.Costo * 1.19);
+                    const maxP = s.CantidadMaximaPersonas ? Number(s.CantidadMaximaPersonas) : '';
+                    const imgSrc = s.Imagen
+                        ? (s.Imagen.split(/[,\n]|(?=https?:\/\/)/).map(u => u.trim()).filter(u => u.startsWith('http'))[0] || '')
+                        : '';
                     return `
                     <label class="servicio-item">
                         <input type="checkbox" class="nr-servicio-check"
-                            data-id="${s.IDServicio}" data-costo="${costoIva}" data-nombre="${s.NombreServicio}">
-                        ${s.Imagen
-                            ? `<img src="${s.Imagen.split(',')[0].trim()}" alt="${s.NombreServicio}" class="servicio-item-img" onerror="this.outerHTML='<span class=\\'servicio-item-img-placeholder\\'><i class=\\'fa-solid fa-concierge-bell\\'></i></span>'">`
+                            data-id="${s.IDServicio}"
+                            data-costo="${costoIva}"
+                            data-nombre="${s.NombreServicio}"
+                            data-maxpersonas="${maxP}"
+                            data-cantidad="1">
+                        ${imgSrc
+                            ? `<img src="${imgSrc}" alt="${s.NombreServicio}" class="servicio-item-img" onerror="this.outerHTML='<span class=\\'servicio-item-img-placeholder\\'><i class=\\'fa-solid fa-concierge-bell\\'></i></span>'">`
                             : `<span class="servicio-item-img-placeholder"><i class="fa-solid fa-concierge-bell"></i></span>`
                         }
                         <div class="servicio-item-info">
                             <div class="servicio-item-name">${s.NombreServicio}</div>
                             ${s.Descripcion ? `<div class="servicio-item-desc">${s.Descripcion}</div>` : ''}
-                            ${(s.Duracion || s.Horario) ? `
                             <div class="servicio-item-chips">
                                 ${s.Duracion ? `<span class="servicio-item-duracion"><i class="fa-regular fa-clock"></i> ${s.Duracion} min</span>` : ''}
+                                ${maxP ? `<span class="servicio-item-maxp"><i class="fa-solid fa-users"></i> Máx. ${maxP}</span>` : ''}
                                 ${s.Horario ? `<span class="servicio-item-horario"><i class="fa-regular fa-calendar"></i> ${s.Horario}</span>` : ''}
-                            </div>` : ''}
+                            </div>
                         </div>
-                        <div class="servicio-item-precio">$${fmt(costoIva)}</div>
+                        <div class="servicio-item-right">
+                            <div class="servicio-item-precio">$${fmt(costoIva)}</div>
+                            <div class="nr-srv-qty">
+                                <button type="button" class="nr-srv-qty-btn" onclick="ajustarCantNR(event,${s.IDServicio},-1)">−</button>
+                                <span class="nr-srv-qty-display" id="nr-srv-qty-${s.IDServicio}">1</span>
+                                <button type="button" class="nr-srv-qty-btn" onclick="ajustarCantNR(event,${s.IDServicio},1)">+</button>
+                            </div>
+                        </div>
                     </label>
                 `}).join('');
                 lista.querySelectorAll('.nr-servicio-check').forEach(cb => cb.addEventListener('change', actualizarResumen));
             } catch(e) {
                 lista.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No se pudieron cargar los servicios</div>';
             }
+        }
+
+        function ajustarCantNR(event, idServicio, delta) {
+            event.preventDefault();
+            event.stopPropagation();
+            const cb = document.querySelector(`.nr-servicio-check[data-id="${idServicio}"]`);
+            if (!cb) return;
+            const maxP = parseInt(cb.dataset.maxpersonas) || 20;
+            let val = parseInt(cb.dataset.cantidad || '1') + delta;
+            if (val < 1) val = 1;
+            if (val > maxP) val = maxP;
+            cb.dataset.cantidad = val;
+            const display = document.getElementById(`nr-srv-qty-${idServicio}`);
+            if (display) display.textContent = val;
+            actualizarResumen();
         }
 
         function actualizarResumen() {
@@ -2638,7 +2674,7 @@
             const fin    = $('nr-fecha-fin')?.value    || '';
 
             const costoServicios = Array.from(document.querySelectorAll('.nr-servicio-check:checked'))
-                .reduce((sum, cb) => sum + parseFloat(cb.dataset.costo || 0), 0);
+                .reduce((sum, cb) => sum + parseFloat(cb.dataset.costo || 0) * parseInt(cb.dataset.cantidad || 1), 0);
 
             const selPaq = $('nr-paquete');
             const paqOpt = selPaq ? selPaq.options[selPaq.selectedIndex] : null;
@@ -2766,7 +2802,7 @@
                 const usuario = perfil.usuario || {};
 
                 const serviciosSeleccionados = Array.from(document.querySelectorAll('.nr-servicio-check:checked'))
-                    .map(cb => ({ IDServicio: parseInt(cb.dataset.id), cantidad: 1 }));
+                    .map(cb => ({ IDServicio: parseInt(cb.dataset.id), cantidad: parseInt(cb.dataset.cantidad || 1) }));
 
                 const idPaquete = parseInt($('nr-paquete')?.value || 0) || null;
                 const paquetesSeleccionados = idPaquete ? [{ IDPaquete: idPaquete, cantidad: 1 }] : [];
