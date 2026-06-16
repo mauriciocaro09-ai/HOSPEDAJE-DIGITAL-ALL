@@ -443,7 +443,7 @@ const abrirModalNuevaReserva = async () => {
     const habLabel = document.getElementById('hab-selected-label');
     if (habLabel) habLabel.textContent = '-- Selecciona habitación --';
     const habTriggerReset = document.getElementById('hab-custom-trigger');
-    if (habTriggerReset) delete habTriggerReset.dataset.precio;
+    if (habTriggerReset) { delete habTriggerReset.dataset.precio; delete habTriggerReset.dataset.idSeleccionado; }
     document.querySelectorAll('.hab-option').forEach(o => o.classList.remove('selected'));
     limpiarErroresInlineReserva();
     mostrarMensajeReservaAdmin('');
@@ -568,7 +568,8 @@ const validarPasoWizard = (step) => {
 
         const tipoDocumento = document.getElementById('reserva-admin-tipo-documento')?.value?.trim();
         const cliente = document.getElementById('reserva-admin-cliente')?.value?.trim();
-        const habitacion = document.getElementById('reserva-admin-habitacion')?.value?.trim();
+        const habitacion = document.getElementById('reserva-admin-habitacion')?.value?.trim() ||
+            document.getElementById('hab-custom-trigger')?.dataset?.idSeleccionado || '';
         const inicio = document.getElementById('reserva-admin-fecha-inicio')?.value;
         const fin = document.getElementById('reserva-admin-fecha-fin')?.value;
 
@@ -857,7 +858,8 @@ const guardarReservaAdmin = async (event) => {
             EmailCliente: email || null,
             PaisCliente: pais || null,
             FechaReserva: fechaReserva || null,
-            IDHabitacion: Number(document.getElementById('reserva-admin-habitacion')?.value) || null,
+            IDHabitacion: Number(document.getElementById('reserva-admin-habitacion')?.value) ||
+                Number(document.getElementById('hab-custom-trigger')?.dataset?.idSeleccionado) || null,
             FechaInicio: fechaInicio,
             FechaFinalizacion: fechaFin,
             Sub_Total: parseFloat(subtotal),
@@ -2078,7 +2080,10 @@ if (document.readyState === 'loading') {
             label.textContent = nombre;
             // Guardar precio en el trigger para que el sidebar lo lea incluso si la opción fue filtrada del select oculto
             const habData = habs.find(h => String(h.IDHabitacion) === String(idHab));
-            if (trigger) trigger.dataset.precio = habData ? String(Math.round(Number(habData.Costo || 0) * 1.19)) : '0';
+            if (trigger) {
+                trigger.dataset.precio = habData ? String(Math.round(Number(habData.Costo || 0) * 1.19)) : '0';
+                trigger.dataset.idSeleccionado = String(idHab);
+            }
             selectHab.dispatchEvent(new Event('change'));
             list.querySelectorAll('.hab-option').forEach(o => {
                 o.classList.toggle('selected', o.dataset.id === String(idHab));
