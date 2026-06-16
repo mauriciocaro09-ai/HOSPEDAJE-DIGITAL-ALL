@@ -2016,7 +2016,7 @@
                 // Cargar cargos adicionales
                 let cargosHtml = '';
                 try {
-                    const cargos = await apiFetch(`/cargos/reserva/${r.IdReserva}`);
+                    const cargos = await apiFetch(`/cargos/reserva/${id}`);
                     const badgeCargo = e => {
                         const m = { pendiente: ['#f59e0b','#fffbeb'], pagado: ['#10b981','#ecfdf5'], cancelado: ['#6b7280','#f9fafb'] };
                         const [c, bg] = m[e] || ['#6b7280','#f9fafb'];
@@ -2031,8 +2031,8 @@
                                 </div>
                                 ${badgeCargo(c.Estado)}
                                 ${c.Estado === 'pendiente' ? `
-                                    <button onclick="abrirPagarCargo(${c.IDCargo}, ${r.IdReserva})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:600;">Pagar</button>
-                                    <button onclick="cancelarCargo(${c.IDCargo}, ${r.IdReserva})" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">✕</button>
+                                    <button onclick="abrirPagarCargo(${c.IDCargo}, ${id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:600;">Pagar</button>
+                                    <button onclick="cancelarCargo(${c.IDCargo}, ${id})" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">✕</button>
                                 ` : ''}
                             </div>`).join('');
                     } else {
@@ -2045,7 +2045,7 @@
                 contenido.innerHTML = `
                     <div class="det-seccion">
                         <h4>Información general</h4>
-                        <div class="det-fila"><span>Reserva</span><strong>#${r.IdReserva}</strong></div>
+                        <div class="det-fila"><span>Reserva</span><strong>#${id}</strong></div>
                         <div class="det-fila"><span>Estado</span>${badge}</div>
                         <div class="det-fila"><span>Habitación</span><strong>${r.NombreHabitacion || '—'}</strong></div>
                         <div class="det-fila"><span>Entrada</span><strong>${fmtF(r.FechaInicio)}</strong></div>
@@ -2055,22 +2055,22 @@
                         <div class="det-fila" style="align-items:flex-start;flex-direction:column;gap:8px;">
                             <span style="font-size:12px;color:var(--muted);">Comprobante de pago</span>
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <label for="comprobante-input-${r.IdReserva}" title="Subir comprobante de transferencia"
+                                <label for="comprobante-input-${id}" title="Subir comprobante de transferencia"
                                     style="cursor:pointer;width:40px;height:40px;background:#1a2744;color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:background .2s;"
                                     onmouseover="this.style.background='#2d4a8a'" onmouseout="this.style.background='#1a2744'">
                                     <i class="fa-solid fa-file-arrow-up"></i>
                                 </label>
-                                <input type="file" id="comprobante-input-${r.IdReserva}" accept="image/*,application/pdf" style="display:none"
-                                    onchange="subirComprobante(${r.IdReserva}, this)">
-                                <span id="comprobante-status-${r.IdReserva}" style="font-size:12px;color:var(--muted);">
+                                <input type="file" id="comprobante-input-${id}" accept="image/*,application/pdf" style="display:none"
+                                    onchange="subirComprobante(${id}, this)">
+                                <span id="comprobante-status-${id}" style="font-size:12px;color:var(--muted);">
                                     ${r.ComprobanteTransferencia ? '<i class="fa-solid fa-circle-check" style="color:#10b981;margin-right:4px;"></i>Comprobante cargado' : 'Sin comprobante aún'}
                                 </span>
                             </div>
                             ${r.ComprobanteTransferencia ? `
-                            <div id="comprobante-preview-${r.IdReserva}" style="margin-top:4px;">
+                            <div id="comprobante-preview-${id}" style="margin-top:4px;">
                                 ${r.ComprobanteTransferencia.startsWith('data:image')
                                     ? `<img src="${r.ComprobanteTransferencia}" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;" onclick="window.open(this.src,'_blank')" title="Ver comprobante en pantalla completa">`
-                                    : `<a href="${r.ComprobanteTransferencia}" download="comprobante_reserva_${r.IdReserva}.pdf" style="font-size:12px;color:#1a2744;font-weight:600;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:5px;"></i>Ver PDF</a>`
+                                    : `<a href="${r.ComprobanteTransferencia}" download="comprobante_reserva_${id}.pdf" style="font-size:12px;color:#1a2744;font-weight:600;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:5px;"></i>Ver PDF</a>`
                                 }
                             </div>` : ''}
                         </div>` : ''}
@@ -2090,7 +2090,7 @@
                     <div class="det-seccion" style="margin-top:16px;">
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                             <h4 style="margin:0;color:var(--accent)"><i class="fa-solid fa-circle-plus" style="margin-right:5px;"></i>Cargos adicionales</h4>
-                            ${puedeAgregarServicios ? `<button onclick="abrirAgregarServicios(${r.IdReserva})" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fa-solid fa-plus"></i> Agregar</button>` : ''}
+                            ${puedeAgregarServicios ? `<button onclick="abrirAgregarServicios(${id})" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fa-solid fa-plus"></i> Agregar</button>` : ''}
                         </div>
                         ${cargosHtml}
                     </div>
