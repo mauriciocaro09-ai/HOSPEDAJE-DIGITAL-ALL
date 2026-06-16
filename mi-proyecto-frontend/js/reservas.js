@@ -1155,6 +1155,24 @@ const verDetalleReserva = async (idReserva) => {
                 </div>` : ''}
                 ` : ''}
             </div>
+            ${(r.servicios && r.servicios.length) ? `
+            <div class="detalle-reserva-seccion">
+                <p class="detalle-label" style="color:#1a2744;">Servicios adicionales de reserva</p>
+                ${r.servicios.map(s => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:13px;">
+                    <span style="color:#374151;">${escaparHtml(s.NombreServicio || '')} <span style="color:#6b7280;">×${s.Cantidad || 1}</span></span>
+                    <span style="font-weight:600;color:#1a2744;">${fmt(Math.round(Number(s.SubtotalItem || 0) * 1.19))}</span>
+                </div>`).join('')}
+            </div>` : ''}
+            ${(r.paquetes && r.paquetes.length) ? `
+            <div class="detalle-reserva-seccion">
+                <p class="detalle-label" style="color:#1a2744;">Paquete de reserva</p>
+                ${r.paquetes.map(p => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:13px;">
+                    <span style="color:#374151;">${escaparHtml(p.NombrePaquete || '')} <span style="color:#6b7280;">×${p.Cantidad || 1}</span></span>
+                    <span style="font-weight:600;color:#1a2744;">${fmt(Math.round(Number(p.SubtotalItem || 0) * 1.19))}</span>
+                </div>`).join('')}
+            </div>` : ''}
             <div class="detalle-reserva-seccion">
                 <p class="detalle-label" style="color:#f59e0b;">Cargos adicionales</p>
                 <div id="cargos-adicionales-container"><p style="text-align:center;font-size:12px;color:#9ca3af;margin:0;">Cargando...</p></div>
