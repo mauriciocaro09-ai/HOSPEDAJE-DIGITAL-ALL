@@ -1448,6 +1448,14 @@
                 ...options,
                 headers: { ...authHeaders(), ...(options.headers || {}) }
             });
+            if (res.status === 401) {
+                // Sesión expirada — limpiar y redirigir a login
+                sessionStorage.clear();
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+                throw new Error('Sesión expirada');
+            }
             if (!res.ok) throw new Error(`Error ${res.status}`);
             return res.json();
         }
@@ -1712,7 +1720,8 @@
 
                 renderTablaResumen(misReservas.slice(0, 5));
             } catch (e) {
-                $('dashboard-reservas-wrap').innerHTML = '<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>No se pudieron cargar las reservas</p></div>';
+                if (e.message === 'Sesión expirada') return;
+                $('dashboard-reservas-wrap').innerHTML = `<div class="empty-state"><i class="fa-solid fa-wifi" style="color:#f59e0b;"></i><p>No se pudieron cargar las reservas</p><button onclick="cargarDashboard()" style="background:#1a2744;color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;margin-top:10px;"><i class="fa-solid fa-rotate-right"></i> Reintentar</button></div>`;
             }
         }
 
@@ -1857,7 +1866,16 @@
                 actualizarChips();
                 renderReservas();
             } catch (e) {
-                $('reservas-wrap').innerHTML = '<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>No se pudieron cargar las reservas</p></div>';
+                if (e.message === 'Sesión expirada') return;
+                $('reservas-wrap').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-wifi" style="color:#f59e0b;"></i>
+                        <p style="margin:10px 0 4px;">No se pudieron cargar las reservas</p>
+                        <p style="font-size:12px;color:#9ca3af;margin:0 0 14px;">El servidor puede estar iniciando (hasta 50s). Intentá de nuevo.</p>
+                        <button onclick="cargarMisReservas()" style="background:#1a2744;color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;">
+                            <i class="fa-solid fa-rotate-right"></i> Reintentar
+                        </button>
+                    </div>`;
             }
         }
 
