@@ -1545,14 +1545,27 @@ const cargarServiciosVisuales = async () => {
             card.addEventListener('click', () => {
                 const id = card.dataset.id;
                 const precio = Number(card.dataset.precio || 0);
+                const cantidad = parseInt(card.dataset.cantidad || '1');
                 if (card.classList.toggle('seleccionado')) {
-                    _seleccionadosAdmin[id] = { precio, cantidad: parseInt(card.dataset.cantidad || '1') };
+                    _seleccionadosAdmin[id] = { precio, cantidad };
                 } else {
                     delete _seleccionadosAdmin[id];
                 }
                 actualizarSidebarResumen();
             });
         });
+
+        // Restaurar estado visual si hay servicios ya seleccionados (por doble render)
+        lista.querySelectorAll('.admin-srv-card').forEach(card => {
+            const entry = _seleccionadosAdmin[card.dataset.id];
+            if (entry) {
+                card.classList.add('seleccionado');
+                card.dataset.cantidad = entry.cantidad;
+                const display = card.querySelector('.admin-srv-qty-display');
+                if (display) display.textContent = entry.cantidad;
+            }
+        });
+        if (Object.keys(_seleccionadosAdmin).length) actualizarSidebarResumen();
     } catch (err) {
         console.error('Error cargando servicios visuales:', err);
         lista.innerHTML = '<p class="empty-state-text">Error al cargar servicios.</p>';
@@ -1733,13 +1746,6 @@ function inicializarReservasAdmin() {
         document.addEventListener('click', (e) => { if (!dropdown.contains(e.target) && e.target !== searchInput) dropdown.style.display = 'none'; });
     }
 
-    // Asegurar que datepickers estén inicializados cuando se abra el modal
-    const btnAbrir = document.getElementById('btn-nuevo-reserva-admin');
-    if (btnAbrir) btnAbrir.addEventListener('click', () => {
-        poblarSelectsReserva();
-        inicializarDatepickers();
-    });
-
     // actualizar monto total cuando subtotal/descuento cambian
     const actualizarMontoTotal = () => {
         const subtotal = Number(document.getElementById('reserva-admin-subtotal')?.value || 0);
@@ -1854,10 +1860,10 @@ if (document.readyState === 'loading') {
         if (val > maxP) val = maxP;
         card.dataset.cantidad = val;
         if (display) display.textContent = val;
-        // si está seleccionado, actualizar también el estado
+        // si está seleccionado, sincronizar estado (siempre, incluso si la entrada no existía)
         const id = card.dataset.id;
-        if (card.classList.contains('seleccionado') && _seleccionadosAdmin[id]) {
-            _seleccionadosAdmin[id].cantidad = val;
+        if (card.classList.contains('seleccionado')) {
+            _seleccionadosAdmin[id] = { precio: Number(card.dataset.precio || 0), cantidad: val };
         }
         actualizarSidebarResumen();
     };
