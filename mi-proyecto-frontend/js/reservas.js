@@ -1865,12 +1865,19 @@ if (document.readyState === 'loading') {
         const display = card.querySelector('.admin-srv-qty-display');
         const maxP = parseInt(card.dataset.maxpersonas) || 20;
         let val = parseInt(card.dataset.cantidad || '1') + delta;
-        if (val < 1) val = 1;
         if (val > maxP) val = maxP;
+
+        if (val < 1) {
+            // − en cantidad 1 → quitar servicio del total
+            val = 1;
+            card.classList.remove('seleccionado');
+        } else {
+            // + → auto-seleccionar; − por encima de 1 → mantener seleccionado
+            if (delta > 0) card.classList.add('seleccionado');
+        }
+
         card.dataset.cantidad = val;
         if (display) display.textContent = val;
-        // Presionar + auto-selecciona el servicio; presionar - lo deja en su estado actual
-        if (delta > 0) card.classList.add('seleccionado');
         actualizarSidebarResumen();
     };
 
