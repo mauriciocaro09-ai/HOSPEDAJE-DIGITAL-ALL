@@ -1985,6 +1985,10 @@
 
             try {
                 const r = await apiFetch(`/reservas/${id}`);
+                // Normalizar comprobante: puede llegar como Buffer si mysql2 no lo convirtió
+                if (r.ComprobanteTransferencia && typeof r.ComprobanteTransferencia !== 'string') {
+                    r.ComprobanteTransferencia = null;
+                }
                 const fmtF = f => f ? new Date(f).toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric' }) : '—';
                 const badge = badgeEstado(r.NombreEstadoReserva || '');
 

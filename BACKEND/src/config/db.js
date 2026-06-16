@@ -10,7 +10,8 @@ const db = mysql.createPool({
   waitForConnections: true,
   queueLimit: 0,
   typeCast(field, next) {
-    if (field.type === 'BLOB' || field.type === 'VAR_STRING' || field.type === 'STRING') {
+    if (field.type === 'BLOB' || field.type === 'MEDIUM_BLOB' || field.type === 'LONG_BLOB' || field.type === 'TINY_BLOB' ||
+        field.type === 'VAR_STRING' || field.type === 'STRING') {
       const val = field.string('utf8');
       return val === null ? null : val;
     }
