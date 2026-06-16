@@ -430,6 +430,7 @@ const filtrarReservasAdmin = () => {
 const abrirModalNuevaReserva = async () => {
     cerrarModalesCRUD();
     reservaEnEdicion = null;
+    _seleccionadosAdmin = {};
 
     const titulo = document.getElementById('reserva-admin-form-title');
     if (titulo) titulo.textContent = 'Crear nueva reserva';
@@ -872,10 +873,9 @@ const guardarReservaAdmin = async (event) => {
         }
 
         // servicios seleccionados con su cantidad
-        const serviciosSeleccionados = [...document.querySelectorAll('.admin-srv-card.servicio-tag.seleccionado')].map(tag => ({
-            IDServicio: Number(tag.dataset.id),
-            cantidad: parseInt(tag.dataset.cantidad || '1')
-        })).filter(s => s.IDServicio);
+        const serviciosSeleccionados = Object.entries(_seleccionadosAdmin)
+            .map(([id, { cantidad }]) => ({ IDServicio: Number(id), cantidad }))
+            .filter(s => s.IDServicio);
         if (serviciosSeleccionados.length) {
             payload.servicios = serviciosSeleccionados;
         }
@@ -1416,11 +1416,10 @@ const actualizarSidebarResumen = () => {
         totalPaq = Number(opt?.dataset?.precio || 0);
     }
 
-    // sumar servicios seleccionados (precio × cantidad)
+    // sumar servicios seleccionados desde estado explícito
     let totalServ = 0;
-    document.querySelectorAll('.servicio-tag.seleccionado').forEach(tag => {
-        const cantidad = parseInt(tag.dataset.cantidad || '1');
-        totalServ += Number(tag.dataset.precio || 0) * cantidad;
+    Object.values(_seleccionadosAdmin).forEach(({ precio, cantidad }) => {
+        totalServ += precio * cantidad;
     });
 
     const total    = totalHab + totalPaq + totalServ - descuento;
@@ -1482,6 +1481,7 @@ const cargarPaquetesVisuales = async () => {
 };
 
 let _serviciosAdminCache = [];
+let _seleccionadosAdmin = {}; // { IDServicio: { precio, cantidad } }
 
 // Extrae URLs de imagen separadas por coma, espacio o salto de línea
 const _extraerImgsSrv = (valor) => {
@@ -1541,9 +1541,15 @@ const cargarServiciosVisuales = async () => {
             </div>`;
         }).join('');
 
-        lista.querySelectorAll('.servicio-tag').forEach(tag => {
-            tag.addEventListener('click', () => {
-                tag.classList.toggle('seleccionado');
+        lista.querySelectorAll('.admin-srv-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const id = card.dataset.id;
+                const precio = Number(card.dataset.precio || 0);
+                if (card.classList.toggle('seleccionado')) {
+                    _seleccionadosAdmin[id] = { precio, cantidad: parseInt(card.dataset.cantidad || '1') };
+                } else {
+                    delete _seleccionadosAdmin[id];
+                }
                 actualizarSidebarResumen();
             });
         });
@@ -1848,6 +1854,11 @@ if (document.readyState === 'loading') {
         if (val > maxP) val = maxP;
         card.dataset.cantidad = val;
         if (display) display.textContent = val;
+        // si está seleccionado, actualizar también el estado
+        const id = card.dataset.id;
+        if (card.classList.contains('seleccionado') && _seleccionadosAdmin[id]) {
+            _seleccionadosAdmin[id].cantidad = val;
+        }
         actualizarSidebarResumen();
     };
 
