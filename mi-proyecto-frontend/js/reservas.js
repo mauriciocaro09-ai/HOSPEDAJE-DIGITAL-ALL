@@ -442,6 +442,8 @@ const abrirModalNuevaReserva = async () => {
     if (formulario) formulario.reset();
     const habLabel = document.getElementById('hab-selected-label');
     if (habLabel) habLabel.textContent = '-- Selecciona habitación --';
+    const habTriggerReset = document.getElementById('hab-custom-trigger');
+    if (habTriggerReset) delete habTriggerReset.dataset.precio;
     document.querySelectorAll('.hab-option').forEach(o => o.classList.remove('selected'));
     limpiarErroresInlineReserva();
     mostrarMensajeReservaAdmin('');
@@ -1429,8 +1431,17 @@ const actualizarSidebarResumen = () => {
     if (sumNights) sumNights.textContent = noches > 0 ? `${noches} noche${noches > 1 ? 's' : ''}` : '--';
 
     const habId = habSelect?.value;
-    const hab = _habitacionesCache.find(h => String(h.IDHabitacion) === String(habId));
-    const costoHabIva = hab ? Math.round(Number(hab.Costo || 0) * 1.19) : 0;
+    let costoHabIva = 0;
+    // Leer precio del trigger del dropdown custom (más confiable: funciona aunque la opción esté filtrada del select oculto)
+    const habTrigger = document.getElementById('hab-custom-trigger');
+    if (habTrigger && habTrigger.dataset.precio !== undefined && habTrigger.dataset.precio !== '') {
+        costoHabIva = Number(habTrigger.dataset.precio) || 0;
+    }
+    // Fallback: buscar en cache si el trigger no tiene precio
+    if (!costoHabIva && habId) {
+        const hab = _habitacionesCache.find(h => String(h.IDHabitacion) === String(habId));
+        costoHabIva = hab ? Math.round(Number(hab.Costo || 0) * 1.19) : 0;
+    }
     const totalHab = costoHabIva * noches;
 
     let totalPaq = 0;
@@ -2065,6 +2076,9 @@ if (document.readyState === 'loading') {
         const sincronizarConSelect = (idHab, nombre) => {
             selectHab.value = idHab;
             label.textContent = nombre;
+            // Guardar precio en el trigger para que el sidebar lo lea incluso si la opción fue filtrada del select oculto
+            const habData = habs.find(h => String(h.IDHabitacion) === String(idHab));
+            if (trigger) trigger.dataset.precio = habData ? String(Math.round(Number(habData.Costo || 0) * 1.19)) : '0';
             selectHab.dispatchEvent(new Event('change'));
             list.querySelectorAll('.hab-option').forEach(o => {
                 o.classList.toggle('selected', o.dataset.id === String(idHab));
