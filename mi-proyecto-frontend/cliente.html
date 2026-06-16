@@ -729,6 +729,40 @@
         .nr-srv-qty-btn:hover { background: #f3f4f6; }
         .nr-srv-qty-display { min-width: 22px; text-align: center; font-size: 12px; font-weight: 700; color: var(--primary); }
 
+        /* ── Cards servicios Nueva Reserva (mismo estilo admin) ── */
+        .admin-srv-card { display:flex; align-items:center; gap:12px; padding:10px 12px; border:1.5px solid #e5e7eb; border-radius:10px; cursor:pointer; transition:border-color .2s,background .2s; position:relative; user-select:none; }
+        .admin-srv-card:hover { border-color:#1a2744; background:#f8faff; }
+        .admin-srv-card.seleccionado { border-color:#1a2744; background:#eef2ff; }
+        .admin-srv-card.seleccionado::after { content:'\f00c'; font-family:'Font Awesome 6 Free'; font-weight:900; position:absolute; top:6px; right:6px; background:#1a2744; color:#fff; font-size:9px; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+        .admin-srv-img { width:52px; height:52px; object-fit:cover; border-radius:8px; flex-shrink:0; }
+        .admin-srv-img-ph { width:52px; height:52px; background:#f3f4f6; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#9ca3af; font-size:20px; flex-shrink:0; }
+        .admin-srv-info { flex:1; min-width:0; }
+        .admin-srv-name { font-size:13px; font-weight:700; color:#1a2744; }
+        .admin-srv-desc { font-size:11px; color:#6b7280; overflow:hidden; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; margin-top:2px; }
+        .admin-srv-chips { display:flex; gap:4px; margin-top:4px; flex-wrap:wrap; }
+        .admin-srv-dur { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:600; color:#1a2744; background:#e0f2fe; border-radius:20px; padding:2px 7px; }
+        .admin-srv-maxp { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:600; color:#065f46; background:#d1fae5; border-radius:20px; padding:2px 7px; }
+        .admin-srv-horario { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:600; color:#92400e; background:#fef3c7; border-radius:20px; padding:2px 7px; }
+        .admin-srv-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+        .admin-srv-qty { display:flex; align-items:center; border:1.5px solid #e5e7eb; border-radius:7px; overflow:hidden; background:#fff; }
+        .admin-srv-qty-btn { background:none; border:none; padding:3px 10px; font-size:15px; font-weight:700; cursor:pointer; color:#374151; line-height:1; transition:background .15s; }
+        .admin-srv-qty-btn:hover { background:#f3f4f6; }
+        .admin-srv-qty-display { min-width:24px; text-align:center; font-size:12px; font-weight:700; color:#1a2744; }
+        .admin-srv-precio { font-size:13px; font-weight:700; color:#1a2744; white-space:nowrap; }
+        .admin-srv-ojo { background:none; border:none; cursor:pointer; color:#6b7280; font-size:15px; padding:4px; border-radius:6px; transition:color .2s; flex-shrink:0; }
+        .admin-srv-ojo:hover { color:#1a2744; }
+        /* ── Slider modal detalle servicio NR ─────── */
+        .srv-slider-nr { position:relative; border-radius:10px 10px 0 0; overflow:hidden; height:200px; background:#f3f4f6; }
+        .srv-slides-nr { position:relative; width:100%; height:200px; }
+        .srv-slide-img-nr { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .3s; }
+        .srv-slide-img-nr.active { opacity:1; }
+        .srv-slide-btn-nr { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,.45); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; z-index:2; }
+        .srv-slide-btn-nr.prev { left:8px; }
+        .srv-slide-btn-nr.next { right:8px; }
+        .srv-dots-nr { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); display:flex; gap:5px; z-index:2; }
+        .srv-dot-nr { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.5); cursor:pointer; transition:background .2s; }
+        .srv-dot-nr.active { background:#fff; }
+
         /* ── RESERVA VISTA COMPLETA ──────────────── */
         .reserva-layout {
             display: grid;
@@ -2688,73 +2722,145 @@
             } catch(e) { console.error('Error cargando paquetes:', e); }
         }
 
+        let _serviciosNRCache = [];
+
         async function cargarServiciosNR() {
             const lista = $('nr-servicios-lista');
             lista.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">Cargando servicios...</div>';
             try {
                 const data = await fetch(`${API_URL}/servicios?soloActivos=true`).then(r => r.json());
                 const servicios = Array.isArray(data) ? data : [];
+                _serviciosNRCache = servicios;
                 if (!servicios.length) {
                     lista.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No hay servicios disponibles</div>';
                     return;
                 }
                 lista.innerHTML = servicios.map(s => {
-                    const costoIva = Math.round(s.Costo * 1.19);
+                    const costoIva = Math.round(Number(s.Costo || 0) * 1.19);
                     const maxP = s.CantidadMaximaPersonas ? Number(s.CantidadMaximaPersonas) : '';
-                    const imgSrc = s.Imagen
+                    const imgUrl = s.Imagen
                         ? (s.Imagen.split(/[,\n]|(?=https?:\/\/)/).map(u => u.trim()).filter(u => u.startsWith('http'))[0] || '')
                         : '';
                     return `
-                    <label class="servicio-item">
-                        <input type="checkbox" class="nr-servicio-check"
-                            data-id="${s.IDServicio}"
-                            data-costo="${costoIva}"
-                            data-nombre="${s.NombreServicio}"
-                            data-maxpersonas="${maxP}"
-                            data-cantidad="1">
-                        ${imgSrc
-                            ? `<img src="${imgSrc}" alt="${s.NombreServicio}" class="servicio-item-img" onerror="this.outerHTML='<span class=\\'servicio-item-img-placeholder\\'><i class=\\'fa-solid fa-concierge-bell\\'></i></span>'">`
-                            : `<span class="servicio-item-img-placeholder"><i class="fa-solid fa-concierge-bell"></i></span>`
+                    <div class="admin-srv-card"
+                         data-id="${s.IDServicio}"
+                         data-precio="${costoIva}"
+                         data-cantidad="1"
+                         data-maxpersonas="${maxP}">
+                        ${imgUrl
+                            ? `<img src="${imgUrl}" alt="${s.NombreServicio}" class="admin-srv-img" onerror="this.outerHTML='<span class=\\'admin-srv-img-ph\\'><i class=\\'fa-solid fa-concierge-bell\\'></i></span>'">`
+                            : `<span class="admin-srv-img-ph"><i class="fa-solid fa-concierge-bell"></i></span>`
                         }
-                        <div class="servicio-item-info">
-                            <div class="servicio-item-name">${s.NombreServicio}</div>
-                            ${s.Descripcion ? `<div class="servicio-item-desc">${s.Descripcion}</div>` : ''}
-                            <div class="servicio-item-chips">
-                                ${s.Duracion ? `<span class="servicio-item-duracion"><i class="fa-regular fa-clock"></i> ${s.Duracion} min</span>` : ''}
-                                ${maxP ? `<span class="servicio-item-maxp"><i class="fa-solid fa-users"></i> Máx. ${maxP}</span>` : ''}
-                                ${s.Horario ? `<span class="servicio-item-horario"><i class="fa-regular fa-calendar"></i> ${s.Horario}</span>` : ''}
+                        <div class="admin-srv-info">
+                            <div class="admin-srv-name">${s.NombreServicio}</div>
+                            ${s.Descripcion ? `<div class="admin-srv-desc">${s.Descripcion}</div>` : ''}
+                            <div class="admin-srv-chips">
+                                ${s.Duracion ? `<span class="admin-srv-dur"><i class="fa-regular fa-clock"></i> ${s.Duracion} min</span>` : ''}
+                                ${maxP ? `<span class="admin-srv-maxp"><i class="fa-solid fa-users"></i> Máx. ${maxP}</span>` : ''}
+                                ${s.Horario ? `<span class="admin-srv-horario"><i class="fa-regular fa-calendar"></i> ${s.Horario}</span>` : ''}
                             </div>
                         </div>
-                        <div class="servicio-item-right">
-                            <div class="servicio-item-precio">$${fmt(costoIva)}</div>
-                            <div class="nr-srv-qty">
-                                <button type="button" class="nr-srv-qty-btn" onclick="ajustarCantNR(event,${s.IDServicio},-1)">−</button>
-                                <span class="nr-srv-qty-display" id="nr-srv-qty-${s.IDServicio}">1</span>
-                                <button type="button" class="nr-srv-qty-btn" onclick="ajustarCantNR(event,${s.IDServicio},1)">+</button>
+                        <div class="admin-srv-right">
+                            <div class="admin-srv-qty">
+                                <button type="button" class="admin-srv-qty-btn" onclick="event.stopPropagation();cambiarCantidadSrvNR(this,-1)">−</button>
+                                <span class="admin-srv-qty-display">1</span>
+                                <button type="button" class="admin-srv-qty-btn" onclick="event.stopPropagation();cambiarCantidadSrvNR(this,1)">+</button>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:5px;">
+                                <span class="admin-srv-precio">$${fmt(costoIva)}</span>
+                                <button class="admin-srv-ojo" type="button" title="Ver detalle" onclick="event.stopPropagation();abrirDetalleServicioNR(${s.IDServicio})">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
                             </div>
                         </div>
-                    </label>
+                    </div>
                 `}).join('');
-                lista.querySelectorAll('.nr-servicio-check').forEach(cb => cb.addEventListener('change', actualizarResumen));
+
+                lista.querySelectorAll('.admin-srv-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        card.classList.toggle('seleccionado');
+                        actualizarResumen();
+                    });
+                });
             } catch(e) {
                 lista.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No se pudieron cargar los servicios</div>';
             }
         }
 
-        function ajustarCantNR(event, idServicio, delta) {
-            event.preventDefault();
-            event.stopPropagation();
-            const cb = document.querySelector(`.nr-servicio-check[data-id="${idServicio}"]`);
-            if (!cb) return;
-            const maxP = parseInt(cb.dataset.maxpersonas) || 20;
-            let val = parseInt(cb.dataset.cantidad || '1') + delta;
+        function cambiarCantidadSrvNR(btn, delta) {
+            const card = btn.closest('.admin-srv-card');
+            if (!card) return;
+            const display = card.querySelector('.admin-srv-qty-display');
+            const maxP = parseInt(card.dataset.maxpersonas) || 20;
+            let val = parseInt(card.dataset.cantidad || '1') + delta;
             if (val < 1) val = 1;
             if (val > maxP) val = maxP;
-            cb.dataset.cantidad = val;
-            const display = document.getElementById(`nr-srv-qty-${idServicio}`);
+            card.dataset.cantidad = val;
             if (display) display.textContent = val;
             actualizarResumen();
         }
+
+        function abrirDetalleServicioNR(idServicio) {
+            const s = _serviciosNRCache.find(x => String(x.IDServicio) === String(idServicio));
+            if (!s) return;
+            const imgs = s.Imagen
+                ? s.Imagen.split(/[,\n]|(?=https?:\/\/)/).map(u => u.trim()).filter(u => u.startsWith('http'))
+                : [];
+            const costoIva = Math.round(Number(s.Costo || 0) * 1.19);
+            const modal = $('srv-detalle-modal-nr');
+            const contenido = $('srv-detalle-contenido-nr');
+            if (!modal || !contenido) return;
+
+            const sliderHtml = imgs.length > 0 ? `
+                <div class="srv-slider-nr">
+                    <div class="srv-slides-nr">
+                        ${imgs.map((u, i) => `<img src="${u}" class="srv-slide-img-nr${i === 0 ? ' active' : ''}" onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=400'">`).join('')}
+                    </div>
+                    ${imgs.length > 1 ? `
+                    <button class="srv-slide-btn-nr prev" onclick="slideSrvNR(-1)" type="button"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="srv-slide-btn-nr next" onclick="slideSrvNR(1)" type="button"><i class="fa-solid fa-chevron-right"></i></button>
+                    <div class="srv-dots-nr">${imgs.map((_, i) => `<span class="srv-dot-nr${i === 0 ? ' active' : ''}" onclick="goSrvNR(${i})"></span>`).join('')}</div>
+                    ` : ''}
+                </div>` : '';
+
+            contenido.innerHTML = `
+                ${sliderHtml}
+                <div style="padding:0 0 4px;">
+                    <h3 style="font-size:17px;font-weight:700;color:#1a2744;margin:16px 0 6px;">${s.NombreServicio || ''}</h3>
+                    ${s.Descripcion ? `<p style="font-size:13px;color:#4b5563;line-height:1.6;margin-bottom:12px;">${s.Descripcion}</p>` : ''}
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                        ${s.Duracion ? `<span style="background:#e0f2fe;color:#1a2744;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>${s.Duracion} min</span>` : ''}
+                        ${s.CantidadMaximaPersonas ? `<span style="background:#f0fdf4;color:#166534;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;"><i class="fa-solid fa-users" style="margin-right:4px;"></i>Máx. ${s.CantidadMaximaPersonas} personas</span>` : ''}
+                        ${s.Horario ? `<span style="background:#fef3c7;color:#92400e;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;"><i class="fa-regular fa-calendar" style="margin-right:4px;"></i>${s.Horario}</span>` : ''}
+                    </div>
+                    <div style="font-size:16px;font-weight:700;color:#1a2744;">$${fmt(costoIva)} <span style="font-size:12px;font-weight:400;color:#6b7280;">IVA incl.</span></div>
+                </div>`;
+
+            window._srvSlideIdxNR = 0;
+            modal.style.display = 'flex';
+        }
+
+        window.slideSrvNR = (dir) => {
+            const imgs = document.querySelectorAll('.srv-slide-img-nr');
+            const dots = document.querySelectorAll('.srv-dot-nr');
+            if (!imgs.length) return;
+            imgs[window._srvSlideIdxNR].classList.remove('active');
+            dots[window._srvSlideIdxNR]?.classList.remove('active');
+            window._srvSlideIdxNR = (window._srvSlideIdxNR + dir + imgs.length) % imgs.length;
+            imgs[window._srvSlideIdxNR].classList.add('active');
+            dots[window._srvSlideIdxNR]?.classList.add('active');
+        };
+
+        window.goSrvNR = (i) => {
+            const imgs = document.querySelectorAll('.srv-slide-img-nr');
+            const dots = document.querySelectorAll('.srv-dot-nr');
+            if (!imgs.length) return;
+            imgs[window._srvSlideIdxNR]?.classList.remove('active');
+            dots[window._srvSlideIdxNR]?.classList.remove('active');
+            window._srvSlideIdxNR = i;
+            imgs[i]?.classList.add('active');
+            dots[i]?.classList.add('active');
+        };
 
         function actualizarResumen() {
             const sel = $('nr-habitacion');
@@ -2763,8 +2869,8 @@
             const inicio = $('nr-fecha-inicio')?.value || '';
             const fin    = $('nr-fecha-fin')?.value    || '';
 
-            const costoServicios = Array.from(document.querySelectorAll('.nr-servicio-check:checked'))
-                .reduce((sum, cb) => sum + parseFloat(cb.dataset.costo || 0) * parseInt(cb.dataset.cantidad || 1), 0);
+            const costoServicios = Array.from(document.querySelectorAll('#nr-servicios-lista .admin-srv-card.seleccionado'))
+                .reduce((sum, card) => sum + parseFloat(card.dataset.precio || 0) * parseInt(card.dataset.cantidad || 1), 0);
 
             const selPaq = $('nr-paquete');
             const paqOpt = selPaq ? selPaq.options[selPaq.selectedIndex] : null;
@@ -2891,8 +2997,8 @@
                 const perfil  = await apiFetch('/auth/me');
                 const usuario = perfil.usuario || {};
 
-                const serviciosSeleccionados = Array.from(document.querySelectorAll('.nr-servicio-check:checked'))
-                    .map(cb => ({ IDServicio: parseInt(cb.dataset.id), cantidad: parseInt(cb.dataset.cantidad || 1) }));
+                const serviciosSeleccionados = Array.from(document.querySelectorAll('#nr-servicios-lista .admin-srv-card.seleccionado'))
+                    .map(card => ({ IDServicio: parseInt(card.dataset.id), cantidad: parseInt(card.dataset.cantidad || 1) }));
 
                 const idPaquete = parseInt($('nr-paquete')?.value || 0) || null;
                 const paquetesSeleccionados = idPaquete ? [{ IDPaquete: idPaquete, cantidad: 1 }] : [];
@@ -3033,5 +3139,13 @@
     </script>
 <div id="nr-hab-preview-card" class="hab-preview-card" style="display:none"></div>
 <div id="nr-paq-preview-card" class="hab-preview-card" style="display:none"></div>
+
+<!-- Modal detalle servicio (Nueva Reserva) -->
+<div id="srv-detalle-modal-nr" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:2000;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:#fff;border-radius:14px;width:min(480px,100%);max-height:88vh;overflow-y:auto;position:relative;" onclick="event.stopPropagation()">
+        <button onclick="document.getElementById('srv-detalle-modal-nr').style.display='none'" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:#6b7280;z-index:10;">&times;</button>
+        <div id="srv-detalle-contenido-nr" style="padding:20px;"></div>
+    </div>
+</div>
 </body>
 </html>
