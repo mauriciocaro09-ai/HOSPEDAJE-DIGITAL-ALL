@@ -872,10 +872,16 @@ const guardarReservaAdmin = async (event) => {
             payload.paquetes = [{ IDPaquete: Number(paquetesSelect.value), cantidad: 1 }];
         }
 
-        // servicios seleccionados con su cantidad
-        const serviciosSeleccionados = Object.entries(_seleccionadosAdmin)
-            .map(([id, { cantidad }]) => ({ IDServicio: Number(id), cantidad }))
-            .filter(s => s.IDServicio);
+        // servicios seleccionados con su cantidad — leer del DOM
+        const serviciosSeleccionados = [];
+        const listaServGuardar = document.getElementById('servicios-visual-list');
+        if (listaServGuardar) {
+            listaServGuardar.querySelectorAll('.admin-srv-card.seleccionado').forEach(card => {
+                const id = Number(card.dataset.id);
+                const cantidad = parseInt(card.dataset.cantidad) || 1;
+                if (id) serviciosSeleccionados.push({ IDServicio: id, cantidad });
+            });
+        }
         if (serviciosSeleccionados.length) {
             payload.servicios = serviciosSeleccionados;
         }
@@ -1416,11 +1422,14 @@ const actualizarSidebarResumen = () => {
         totalPaq = Number(opt?.dataset?.precio || 0);
     }
 
-    // sumar servicios seleccionados desde estado explícito
+    // sumar servicios seleccionados directo del DOM (fuente de verdad visual)
     let totalServ = 0;
-    Object.values(_seleccionadosAdmin).forEach(({ precio, cantidad }) => {
-        totalServ += precio * cantidad;
-    });
+    const listaServSidebar = document.getElementById('servicios-visual-list');
+    if (listaServSidebar) {
+        listaServSidebar.querySelectorAll('.admin-srv-card.seleccionado').forEach(card => {
+            totalServ += Number(card.dataset.precio || 0) * (parseInt(card.dataset.cantidad) || 1);
+        });
+    }
 
     const total    = totalHab + totalPaq + totalServ - descuento;
     const subtotal = Math.round(total / 1.19);
