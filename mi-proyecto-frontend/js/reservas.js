@@ -8,6 +8,7 @@
 
     let reservasAdminCargadas = [];
     let clientesCargados = [];
+    let _errCruceFechas = false;
     let estadosReservasCargados = [];
     let metodosPagoCargados = [];
     let reservaEnEdicion = null;
@@ -606,6 +607,7 @@ const validarPasoWizard = (step) => {
 
         if (hayCruceDeFechasConReservas(habitacion, inicio, fin, reservaEnEdicion ? obtenerIdReserva(reservaEnEdicion) : null)) {
             mostrarErrorInline('reserva-admin-fecha-fin', 'La habitación ya tiene una reserva en ese rango.');
+            _errCruceFechas = true;
             return false;
         }
     }
@@ -822,8 +824,13 @@ const editarReservaAdmin = async (idReserva) => {
 const guardarReservaAdmin = async (event) => {
     if (event?.preventDefault) event.preventDefault();
 
+    _errCruceFechas = false;
     if (!validarPasoWizard(1)) {
-        Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Completa los datos del cliente, habitación y fechas.', confirmButtonColor: '#1a2744' });
+        if (_errCruceFechas) {
+            Swal.fire({ icon: 'error', title: 'Habitación no disponible', text: 'La habitación ya tiene una reserva en esas fechas. Elegí otras fechas o una habitación diferente.', confirmButtonColor: '#1a2744' });
+        } else {
+            Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Completa los datos del cliente, habitación y fechas.', confirmButtonColor: '#1a2744' });
+        }
         return;
     }
 
