@@ -871,6 +871,15 @@ const guardarReservaAdmin = async (event) => {
             payload.paquetes = [{ IDPaquete: Number(paquetesSelect.value), cantidad: 1 }];
         }
 
+        // servicios seleccionados con su cantidad
+        const serviciosSeleccionados = [...document.querySelectorAll('.admin-srv-card.servicio-tag.seleccionado')].map(tag => ({
+            IDServicio: Number(tag.dataset.id),
+            cantidad: parseInt(tag.dataset.cantidad || '1')
+        })).filter(s => s.IDServicio);
+        if (serviciosSeleccionados.length) {
+            payload.servicios = serviciosSeleccionados;
+        }
+
         const resultado = idReserva
             ? await requestJson(`/reservas/${idReserva}`, { method: 'PUT', body: payload })
             : await requestJson('/reservas', { method: 'POST', body: payload });
@@ -1407,10 +1416,11 @@ const actualizarSidebarResumen = () => {
         totalPaq = Number(opt?.dataset?.precio || 0);
     }
 
-    // sumar servicios seleccionados
+    // sumar servicios seleccionados (precio × cantidad)
     let totalServ = 0;
     document.querySelectorAll('.servicio-tag.seleccionado').forEach(tag => {
-        totalServ += Number(tag.dataset.precio || 0);
+        const cantidad = parseInt(tag.dataset.cantidad || '1');
+        totalServ += Number(tag.dataset.precio || 0) * cantidad;
     });
 
     const total    = totalHab + totalPaq + totalServ - descuento;
@@ -1496,8 +1506,13 @@ const cargarServiciosVisuales = async () => {
         lista.innerHTML = servicios.map(s => {
             const costoIva = Math.round(Number(s.Costo || 0) * 1.19);
             const imgUrl = _extraerImgsSrv(s.Imagen)[0] || '';
+            const maxP = s.CantidadMaximaPersonas ? Number(s.CantidadMaximaPersonas) : '';
             return `
-            <div class="admin-srv-card servicio-tag" data-id="${escaparHtml(String(s.IDServicio))}" data-precio="${costoIva}">
+            <div class="admin-srv-card servicio-tag"
+                 data-id="${escaparHtml(String(s.IDServicio))}"
+                 data-precio="${costoIva}"
+                 data-cantidad="1"
+                 data-maxpersonas="${maxP}">
                 ${imgUrl
                     ? `<img src="${imgUrl}" alt="${escaparHtml(s.NombreServicio || '')}" class="admin-srv-img" onerror="this.outerHTML='<span class=\\'admin-srv-img-ph\\'><i class=\\'fa-solid fa-concierge-bell\\'></i></span>'">`
                     : `<span class="admin-srv-img-ph"><i class="fa-solid fa-concierge-bell"></i></span>`
@@ -1507,13 +1522,21 @@ const cargarServiciosVisuales = async () => {
                     ${s.Descripcion ? `<div class="admin-srv-desc">${escaparHtml(s.Descripcion)}</div>` : ''}
                     <div class="admin-srv-chips">
                         ${s.Duracion ? `<span class="admin-srv-dur"><i class="fa-regular fa-clock"></i> ${escaparHtml(String(s.Duracion))} min</span>` : ''}
+                        ${maxP ? `<span class="admin-srv-maxp"><i class="fa-solid fa-users"></i> Máx. ${maxP}</span>` : ''}
                     </div>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-                    <span class="admin-srv-precio">$${fmt(costoIva)}</span>
-                    <button class="admin-srv-ojo" type="button" title="Ver detalle" onclick="event.stopPropagation();abrirDetalleServicioAdmin(${s.IDServicio})">
-                        <i class="fa-solid fa-eye"></i>
-                    </button>
+                <div class="admin-srv-right">
+                    <div class="admin-srv-qty">
+                        <button type="button" class="admin-srv-qty-btn" onclick="event.stopPropagation();cambiarCantidadSrvAdmin(this,-1)">−</button>
+                        <span class="admin-srv-qty-display">1</span>
+                        <button type="button" class="admin-srv-qty-btn" onclick="event.stopPropagation();cambiarCantidadSrvAdmin(this,1)">+</button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:5px;">
+                        <span class="admin-srv-precio">$${fmt(costoIva)}</span>
+                        <button class="admin-srv-ojo" type="button" title="Ver detalle" onclick="event.stopPropagation();abrirDetalleServicioAdmin(${s.IDServicio})">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
             </div>`;
         }).join('');
@@ -1815,6 +1838,19 @@ if (document.readyState === 'loading') {
 }
 
     // Acciones de cargos adicionales (llamadas desde onclick inline del modal)
+    window.cambiarCantidadSrvAdmin = (btn, delta) => {
+        const card = btn.closest('.admin-srv-card');
+        if (!card) return;
+        const display = card.querySelector('.admin-srv-qty-display');
+        const maxP = parseInt(card.dataset.maxpersonas) || 20;
+        let val = parseInt(card.dataset.cantidad || '1') + delta;
+        if (val < 1) val = 1;
+        if (val > maxP) val = maxP;
+        card.dataset.cantidad = val;
+        if (display) display.textContent = val;
+        actualizarSidebarResumen();
+    };
+
     window.mostrarInfoCargo = (sel) => {
         const infoDiv = document.getElementById('info-cargo-extra');
         if (!infoDiv) return;

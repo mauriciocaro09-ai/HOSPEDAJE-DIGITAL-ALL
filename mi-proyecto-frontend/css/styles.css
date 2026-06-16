@@ -20,6 +20,12 @@
 .admin-srv-precio { font-size:13px; font-weight:700; color:#1a2744; white-space:nowrap; }
 .admin-srv-ojo { background:none; border:none; cursor:pointer; color:#6b7280; font-size:15px; padding:4px; border-radius:6px; transition:color .2s; flex-shrink:0; }
 .admin-srv-ojo:hover { color:#1a2744; }
+.admin-srv-maxp { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:600; color:#065f46; background:#d1fae5; border-radius:20px; padding:2px 7px; }
+.admin-srv-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+.admin-srv-qty { display:flex; align-items:center; border:1.5px solid #e5e7eb; border-radius:7px; overflow:hidden; background:#fff; }
+.admin-srv-qty-btn { background:none; border:none; padding:3px 10px; font-size:15px; font-weight:700; cursor:pointer; color:#374151; line-height:1; transition:background .15s; }
+.admin-srv-qty-btn:hover { background:#f3f4f6; }
+.admin-srv-qty-display { min-width:24px; text-align:center; font-size:12px; font-weight:700; color:#1a2744; }
 
 /* ── Slider servicios admin modal ───────────── */
 .srv-slider-admin { position:relative; border-radius:10px 10px 0 0; overflow:hidden; height:200px; background:#f3f4f6; }
