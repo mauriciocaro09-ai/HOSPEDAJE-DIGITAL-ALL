@@ -188,8 +188,8 @@ const crear = async (req, res) => {
           const docCliente = req.body.NroDocumentoCliente || req.body.IDCliente;
           if (docCliente) {
             const [clientes] = await db.query(
-              'SELECT Telefono FROM cliente WHERE NroDocumento = ? OR IDCliente = ? LIMIT 1',
-              [docCliente, docCliente]
+              'SELECT Telefono FROM cliente WHERE NroDocumento = ? LIMIT 1',
+              [docCliente]
             );
             if (clientes && clientes[0] && clientes[0].Telefono) {
               clienteTelefono = clientes[0].Telefono;
