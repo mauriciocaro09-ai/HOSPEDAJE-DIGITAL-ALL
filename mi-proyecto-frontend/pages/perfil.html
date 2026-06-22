@@ -412,8 +412,11 @@
                             <input class="input" id="edit-telefono" type="text" maxlength="50">
                         </div>
                         <div class="field">
-                            <label class="label" for="edit-pais">País</label>
-                            <input class="input" id="edit-pais" type="text" maxlength="100">
+                            <label class="label" for="edit-pais-ac">País</label>
+                            <div class="pais-ac-wrap">
+                                <input class="input" type="text" id="edit-pais-ac" placeholder="Escribe para buscar un país..." autocomplete="off" maxlength="100">
+                                <input type="hidden" id="edit-pais">
+                            </div>
                         </div>
                         <div class="field full">
                             <label class="label" for="edit-direccion">Dirección</label>
@@ -455,6 +458,7 @@
     </main>
 
     <script src="../js/config.js"></script>
+    <script src="../js/countries.js"></script>
     <script>
         const token = sessionStorage.getItem('token') || localStorage.getItem('token');
         const API_URL = (typeof CONFIG !== 'undefined' && CONFIG.API_URL)
@@ -584,7 +588,10 @@
             }
         });
 
-        $('btn-editar').addEventListener('click', () => alternar(true));
+        $('btn-editar').addEventListener('click', () => {
+            alternar(true);
+            iniciarAutocompletePaises({ inputId: 'edit-pais-ac', hiddenId: 'edit-pais', defaultValue: estado.perfil?.pais || '' });
+        });
 
         $('btn-cancelar').addEventListener('click', () => {
             pintarPerfil(estado.perfil || {});

@@ -454,6 +454,7 @@ const abrirModalNuevaReserva = async () => {
     mostrarPasoWizard(1);
     try { await poblarSelectsReserva(); } catch {}
     try { inicializarDatepickers(); } catch {}
+    actualizarSidebarResumen();
 
     const seccion = document.getElementById('seccion-administrar-reservas');
     if (seccion) seccion.classList.remove('hidden');

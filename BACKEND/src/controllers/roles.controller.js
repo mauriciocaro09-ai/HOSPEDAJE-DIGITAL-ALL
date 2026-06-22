@@ -153,8 +153,23 @@ exports.remove = async (req, res) => {
             return res.status(403).json({ error: "No se puede eliminar un rol protegido" });
         }
 
-        await db.query("UPDATE roles SET IsActive = 0, Estado = 'Inactivo' WHERE IDRol = ?", [rolId]);
-        res.json({ mensaje: "Rol desactivado" });
+        const [[{ totalUsuarios }]] = await db.query(
+            "SELECT COUNT(*) AS totalUsuarios FROM usuarios WHERE IDRol = ?", [rolId]
+        );
+        const [[{ totalClientes }]] = await db.query(
+            "SELECT COUNT(*) AS totalClientes FROM cliente WHERE IDRol = ?", [rolId]
+        );
+        const totalEnUso = Number(totalUsuarios) + Number(totalClientes);
+        if (totalEnUso > 0) {
+            return res.status(409).json({
+                error: `No se puede eliminar: hay ${totalEnUso} usuario(s) con este rol asignado. Reasigná el rol antes de eliminar.`
+            });
+        }
+
+        await db.query("DELETE FROM rolespermisos WHERE IDRol = ?", [rolId]);
+        await db.query("DELETE FROM roles WHERE IDRol = ?", [rolId]);
+
+        res.json({ mensaje: "Rol eliminado" });
     } catch (error) {
         res.status(500).json({ error: "Error al eliminar rol", detalle: error.message });
     }

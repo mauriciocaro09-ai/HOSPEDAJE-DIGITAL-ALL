@@ -49,8 +49,11 @@
                         <input type="text" id="reg_telefono" inputmode="numeric" maxlength="15" data-filtro="numeros">
                     </div>
                     <div class="rm-field">
-                        <label for="reg_pais">País</label>
-                        <input type="text" id="reg_pais" maxlength="60" data-filtro="letras">
+                        <label for="reg_pais_ac">País</label>
+                        <div class="pais-ac-wrap">
+                            <input type="text" id="reg_pais_ac" placeholder="Escribe para buscar un país..." autocomplete="off" maxlength="100">
+                            <input type="hidden" id="reg_pais">
+                        </div>
                     </div>
                     <div class="rm-field rm-full">
                         <label for="reg_direccion">Dirección</label>
@@ -87,8 +90,12 @@
     <script src="../js/config.js"></script>
     <script src="../js/toast.js"></script>
     <script src="../js/api.js"></script>
+    <script src="../js/countries.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            // Autocomplete de países
+            iniciarAutocompletePaises({ inputId: 'reg_pais_ac', hiddenId: 'reg_pais' });
+            
             const form   = document.getElementById("registerForm");
             const errBox = document.getElementById("registerError");
             const btn    = document.getElementById("reg-submit");

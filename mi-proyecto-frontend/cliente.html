@@ -1006,6 +1006,117 @@
         .hab-preview-precio { font-size:20px; font-weight:800; color:#1a2744; }
         .hab-preview-precio span { font-size:12px; font-weight:400; color:#9ca3af; }
         .hab-preview-badge { background:#d1fae5; color:#065f46; font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px; letter-spacing:.3px; }
+
+        /* ── CAMPANA CLIENTE ─────────────────────────── */
+        #cln-notif-wrap { position: relative; }
+        #cln-notif-btn {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,.12);
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: background .2s;
+            flex-shrink: 0;
+        }
+        #cln-notif-btn:hover { background: rgba(255,255,255,.22); }
+        #cln-notif-badge {
+            position: absolute;
+            top: -4px; right: -4px;
+            background: #ef4444;
+            color: #fff;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 17px;
+            height: 17px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            line-height: 1;
+            border: 2px solid #1a2744;
+        }
+        #cln-notif-panel {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 300px;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.18);
+            border: 1px solid #e2e8f0;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        #cln-notif-panel.cln-panel-hidden { display: none; }
+        .cln-notif-header {
+            padding: 13px 16px 11px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1a2744;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #cln-notif-lista { max-height: 320px; overflow-y: auto; }
+        .cln-notif-grupo { border-bottom: 1px solid #f1f5f9; }
+        .cln-notif-grupo:last-child { border-bottom: none; }
+        .cln-notif-cabecera {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+        }
+        .cln-notif-cabecera > i { font-size: 14px; flex-shrink: 0; }
+        .cln-notif-cabecera-texto { display: flex; flex-direction: column; gap: 2px; }
+        .cln-notif-cabecera-texto strong { font-size: 13px; font-weight: 700; }
+        .cln-notif-cabecera-texto small  { font-size: 11px; opacity: .8; }
+        .cln-notif-verde    { background: #f0fdf4; color: #166534; }
+        .cln-notif-azul     { background: #eff6ff; color: #1e40af; }
+        .cln-notif-amarillo { background: #fffbeb; color: #92400e; }
+        .cln-notif-rojo     { background: #fef2f2; color: #991b1b; }
+        .cln-notif-subitems { background: #fafafa; }
+        .cln-notif-subitem {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 12px;
+            color: #374151;
+            border-bottom: 1px solid #f3f4f6;
+            text-align: left;
+            transition: background .15s;
+        }
+        .cln-notif-subitem:last-child { border-bottom: none; }
+        .cln-notif-subitem:hover { background: #f0f4ff; color: #1a2744; }
+        .cln-notif-sub-id   { font-weight: 700; color: #1a2744; white-space: nowrap; min-width: 38px; font-size: 12px; }
+        .cln-notif-sub-info { flex: 1; display: flex; flex-direction: column; gap: 1px; overflow: hidden; }
+        .cln-notif-sub-info span:first-child { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+        .cln-notif-sub-info span:last-child  { font-size: 10px; color: #9ca3af; }
+        .cln-notif-subitem > i { font-size: 10px; color: #d1d5db; flex-shrink: 0; }
+        .cln-notif-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 24px 16px;
+            font-size: 13px;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+        .cln-notif-empty i { font-size: 18px; }
     </style>
 </head>
 <body>
@@ -1065,7 +1176,23 @@
             </button>
             <span class="topbar-title" id="topbar-title">Panel de Control</span>
         </div>
-        <div class="topbar-actions"></div>
+        <div class="topbar-actions">
+            <!-- Campana de notificaciones -->
+            <div id="cln-notif-wrap">
+                <button id="cln-notif-btn" type="button" aria-label="Notificaciones">
+                    <i class="fa-solid fa-bell"></i>
+                    <span id="cln-notif-badge">0</span>
+                </button>
+                <div id="cln-notif-panel" class="cln-panel-hidden">
+                    <div class="cln-notif-header">
+                        <i class="fa-solid fa-bell"></i> Mis alertas
+                    </div>
+                    <div id="cln-notif-lista">
+                        <div class="cln-notif-empty"><i class="fa-solid fa-spinner fa-spin"></i><span>Cargando...</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </header>
 
     <!-- MAIN CONTENT -->
@@ -2797,6 +2924,7 @@
             if (val > maxP) val = maxP;
             card.dataset.cantidad = val;
             if (display) display.textContent = val;
+            if (delta > 0) card.classList.add('seleccionado');
             actualizarResumen();
         }
 
@@ -3062,11 +3190,15 @@
                 btn.innerHTML = '<i class="fa-solid fa-pen"></i> Editar';
             } else {
                 // Pre-llenar con valores actuales
+                const paisActual = $('pd-pais').textContent.replace('—','').trim();
                 $('ep-nombre').value   = $('pd-nombre').textContent  .replace('—','').trim();
                 $('ep-apellido').value = $('pd-apellido').textContent .replace('—','').trim();
                 $('ep-email').value    = $('pd-email').textContent    .replace('—','').trim();
                 $('ep-telefono').value = $('pd-telefono').textContent .replace('—','').trim();
-                $('ep-pais').value     = $('pd-pais').textContent     .replace('—','').trim();
+                $('ep-pais').value     = paisActual;
+                if (typeof iniciarAutocompletePaises === 'function') {
+                    iniciarAutocompletePaises({ inputId: 'ep-pais', defaultValue: paisActual });
+                }
                 $('ep-mensaje').textContent = '';
                 $('ep-mensaje').className = 'perfil-mensaje';
                 datos.style.display = 'none';
@@ -3137,6 +3269,8 @@
             cargarDashboard();
         });
     </script>
+<script src="js/countries.js"></script>
+<script src="js/campana-cliente.js"></script>
 <div id="nr-hab-preview-card" class="hab-preview-card" style="display:none"></div>
 <div id="nr-paq-preview-card" class="hab-preview-card" style="display:none"></div>
 
