@@ -2200,7 +2200,7 @@
                     };
                     if (cargos.length) {
                         cargosHtml = cargos.map(c => {
-                            const tieneComprobante = !!c.ComprobanteTransferencia;
+                            const tieneComprobante = !!c.TieneComprobante;
                             const pendienteSinComprobante = c.Estado === 'pendiente' && !tieneComprobante;
                             const pendienteConComprobante = c.Estado === 'pendiente' && tieneComprobante;
                             return `
@@ -2437,8 +2437,9 @@
                     body: JSON.stringify({ IDMetodoPago: idMetodo, ComprobanteTransferencia: comprobante })
                 });
                 showToast(resp.mensaje || 'Pago registrado correctamente', 'success');
+                const idReservaDetalle = _reservaIdPagar;
                 cerrarPagarCargo();
-                verDetalleReserva(_reservaIdPagar);
+                verDetalleReserva(idReservaDetalle);
             } catch(e) {
                 showToast(e.message || 'Error al procesar pago', 'error');
             }
