@@ -381,6 +381,49 @@ function limpiarErroresValidacion(contenedorId) {
     }
 }());
 
+// ============================================
+// BLOQUEAR NEGATIVOS EN type="number"
+// ============================================
+// Impide escribir '-' y 'e' (notación científica) en cualquier input numérico.
+// min="0" en el HTML solo bloquea el submit, no el tipeo.
+(function () {
+    const TECLAS_BLOQUEADAS = ['-', 'e', 'E', '+'];
+
+    function aplicarBloqueoNegativo(input) {
+        input.addEventListener('keydown', function (e) {
+            if (TECLAS_BLOQUEADAS.includes(e.key)) e.preventDefault();
+        });
+        input.addEventListener('input', function () {
+            if (this.value < 0) this.value = Math.abs(this.value);
+        });
+    }
+
+    function activarBloqueoNumericos() {
+        document.querySelectorAll('input[type="number"]').forEach(aplicarBloqueoNegativo);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', activarBloqueoNumericos);
+    } else {
+        activarBloqueoNumericos();
+    }
+
+    if (typeof MutationObserver !== 'undefined') {
+        const obs = new MutationObserver(function (mutations) {
+            mutations.forEach(function (m) {
+                m.addedNodes.forEach(function (node) {
+                    if (node.nodeType !== 1) return;
+                    if (node.matches && node.matches('input[type="number"]')) aplicarBloqueoNegativo(node);
+                    node.querySelectorAll && node.querySelectorAll('input[type="number"]').forEach(aplicarBloqueoNegativo);
+                });
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            obs.observe(document.body, { childList: true, subtree: true });
+        });
+    }
+}());
+
 // Exportar funciones
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
