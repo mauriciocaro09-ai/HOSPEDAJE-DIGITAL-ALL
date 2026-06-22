@@ -168,7 +168,6 @@ const cargarUsuarioEnFormularioAdmin = (usuario) => {
     document.getElementById('usuario-admin-nombre').value = usuario.NombreUsuario || '';
     document.getElementById('usuario-admin-apellido').value = usuario.Apellido || '';
     document.getElementById('usuario-admin-email').value = usuario.Email || '';
-    document.getElementById('usuario-admin-contrasena').value = '';
     document.getElementById('usuario-admin-documento').value = usuario.TipoDocumento || '';
     document.getElementById('usuario-admin-numero-documento').value = usuario.NumeroDocumento || '';
     document.getElementById('usuario-admin-telefono').value = usuario.Telefono || '';
@@ -189,7 +188,6 @@ const construirPayloadUsuario = () => ({
     NombreUsuario: document.getElementById('usuario-admin-nombre')?.value?.trim() || '',
     Apellido: document.getElementById('usuario-admin-apellido')?.value?.trim() || '',
     Email: document.getElementById('usuario-admin-email')?.value?.trim() || '',
-    Contrasena: document.getElementById('usuario-admin-contrasena')?.value?.trim() || '',
     TipoDocumento: document.getElementById('usuario-admin-documento')?.value?.trim() || '',
     NumeroDocumento: document.getElementById('usuario-admin-numero-documento')?.value?.trim() || '',
     Telefono: document.getElementById('usuario-admin-telefono')?.value?.trim() || '',
