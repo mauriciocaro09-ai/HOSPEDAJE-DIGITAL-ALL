@@ -2952,7 +2952,7 @@ footer {
     border-radius: 0 0 8px 8px;
     max-height: 240px;
     overflow-y: auto;
-    z-index: 500;
+    z-index: 9000;
     box-shadow: 0 8px 24px rgba(0,0,0,.12);
 }
 .hab-options-list.open { display: block; }

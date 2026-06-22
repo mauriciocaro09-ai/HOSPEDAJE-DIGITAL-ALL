@@ -2240,6 +2240,20 @@ if (document.readyState === 'loading') {
         if (!trigger || !list || !selectPaq) return;
 
         if (preview && preview.parentElement !== document.body) document.body.appendChild(preview);
+        // Mover la lista al body para escapar del stacking context creado por backdrop-filter
+        if (list.parentElement !== document.body) {
+            list.style.position = 'fixed';
+            list.style.zIndex   = '9000';
+            list.style.borderRadius = '0 0 8px 8px';
+            document.body.appendChild(list);
+        }
+
+        const posicionarLista = () => {
+            const r = trigger.getBoundingClientRect();
+            list.style.top   = r.bottom + 'px';
+            list.style.left  = r.left + 'px';
+            list.style.width = r.width + 'px';
+        };
 
         let sliderTimer = null;
 
@@ -2333,7 +2347,7 @@ if (document.readyState === 'loading') {
             trigger.dataset.paqDropdownInit = '1';
             trigger.addEventListener('click', () => {
                 const abierto = list.classList.contains('open');
-                if (abierto) { cerrar(); } else { list.classList.add('open'); trigger.classList.add('open'); }
+                if (abierto) { cerrar(); } else { posicionarLista(); list.classList.add('open'); trigger.classList.add('open'); }
             });
             document.addEventListener('click', (e) => {
                 if (!trigger.contains(e.target) && !list.contains(e.target) && e.target !== selectPaq) cerrar();
