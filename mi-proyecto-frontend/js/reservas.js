@@ -1591,7 +1591,7 @@ const cargarServiciosVisuales = async () => {
                 <div class="admin-srv-right">
                     <div class="admin-srv-qty">
                         <button type="button" class="admin-srv-qty-btn" onclick="event.stopPropagation();cambiarCantidadSrvAdmin(this,-1)">−</button>
-                        <span class="admin-srv-qty-display">1</span>
+                        <span class="admin-srv-qty-display">0</span>
                         <button type="button" class="admin-srv-qty-btn" onclick="event.stopPropagation();cambiarCantidadSrvAdmin(this,1)">+</button>
                     </div>
                     <div style="display:flex;align-items:center;gap:5px;">
@@ -1608,10 +1608,20 @@ const cargarServiciosVisuales = async () => {
             card.addEventListener('click', () => {
                 const id = card.dataset.id;
                 const precio = Number(card.dataset.precio || 0);
-                const cantidad = parseInt(card.dataset.cantidad || '1');
+                const display = card.querySelector('.admin-srv-qty-display');
                 if (card.classList.toggle('seleccionado')) {
+                    // Al seleccionar: si estaba en 0, arrancar en 1
+                    let cantidad = parseInt(card.dataset.cantidad || '0');
+                    if (cantidad === 0) {
+                        cantidad = 1;
+                        card.dataset.cantidad = 1;
+                        if (display) display.textContent = 1;
+                    }
                     _seleccionadosAdmin[id] = { precio, cantidad };
                 } else {
+                    // Al deseleccionar: resetear a 0
+                    card.dataset.cantidad = 0;
+                    if (display) display.textContent = 0;
                     delete _seleccionadosAdmin[id];
                 }
                 actualizarSidebarResumen();
@@ -1905,16 +1915,19 @@ if (document.readyState === 'loading') {
         if (!card) return;
         const display = card.querySelector('.admin-srv-qty-display');
         const maxP = parseInt(card.dataset.maxpersonas) || 20;
-        let val = parseInt(card.dataset.cantidad || '1') + delta;
+        let val = parseInt(card.dataset.cantidad || '0') + delta;
+        if (val < 0) val = 0;
         if (val > maxP) val = maxP;
 
-        if (val < 1) {
-            // − en cantidad 1 → quitar servicio del total
-            val = 1;
+        if (val === 0) {
             card.classList.remove('seleccionado');
+            delete _seleccionadosAdmin[card.dataset.id];
         } else {
-            // + → auto-seleccionar; − por encima de 1 → mantener seleccionado
-            if (delta > 0) card.classList.add('seleccionado');
+            card.classList.add('seleccionado');
+            _seleccionadosAdmin[card.dataset.id] = {
+                precio: Number(card.dataset.precio || 0),
+                cantidad: val,
+            };
         }
 
         card.dataset.cantidad = val;

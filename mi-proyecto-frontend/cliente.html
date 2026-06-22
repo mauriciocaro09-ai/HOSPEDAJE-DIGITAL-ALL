@@ -2890,7 +2890,7 @@
                         <div class="admin-srv-right">
                             <div class="admin-srv-qty">
                                 <button type="button" class="admin-srv-qty-btn" onclick="event.stopPropagation();cambiarCantidadSrvNR(this,-1)">−</button>
-                                <span class="admin-srv-qty-display">1</span>
+                                <span class="admin-srv-qty-display">0</span>
                                 <button type="button" class="admin-srv-qty-btn" onclick="event.stopPropagation();cambiarCantidadSrvNR(this,1)">+</button>
                             </div>
                             <div style="display:flex;align-items:center;gap:5px;">
@@ -2905,7 +2905,18 @@
 
                 lista.querySelectorAll('.admin-srv-card').forEach(card => {
                     card.addEventListener('click', () => {
-                        card.classList.toggle('seleccionado');
+                        const display = card.querySelector('.admin-srv-qty-display');
+                        if (card.classList.toggle('seleccionado')) {
+                            // Al seleccionar: si estaba en 0, arrancar en 1
+                            if (parseInt(card.dataset.cantidad || '0') === 0) {
+                                card.dataset.cantidad = 1;
+                                if (display) display.textContent = 1;
+                            }
+                        } else {
+                            // Al deseleccionar: resetear a 0
+                            card.dataset.cantidad = 0;
+                            if (display) display.textContent = 0;
+                        }
                         actualizarResumen();
                     });
                 });
@@ -2919,12 +2930,16 @@
             if (!card) return;
             const display = card.querySelector('.admin-srv-qty-display');
             const maxP = parseInt(card.dataset.maxpersonas) || 20;
-            let val = parseInt(card.dataset.cantidad || '1') + delta;
-            if (val < 1) val = 1;
+            let val = parseInt(card.dataset.cantidad || '0') + delta;
+            if (val < 0) val = 0;
             if (val > maxP) val = maxP;
             card.dataset.cantidad = val;
             if (display) display.textContent = val;
-            if (delta > 0) card.classList.add('seleccionado');
+            if (val === 0) {
+                card.classList.remove('seleccionado');
+            } else {
+                card.classList.add('seleccionado');
+            }
             actualizarResumen();
         }
 
