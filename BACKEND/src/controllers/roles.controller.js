@@ -88,6 +88,14 @@ exports.create = async (req, res) => {
             return res.status(400).json({ error: "El nombre del rol es obligatorio" });
         }
 
+        const [[existente]] = await db.query(
+            "SELECT IDRol FROM roles WHERE LOWER(Nombre) = LOWER(?) LIMIT 1",
+            [Nombre.trim()]
+        );
+        if (existente) {
+            return res.status(409).json({ error: `Ya existe un rol con el nombre "${Nombre}". Elegí un nombre diferente.` });
+        }
+
         const [result] = await db.query(
             "INSERT INTO roles (Nombre, Estado, IsActive) VALUES (?, ?, ?)",
             [Nombre, Estado || "Activo", IsActive === false ? 0 : 1]
@@ -115,6 +123,13 @@ exports.update = async (req, res) => {
         const valores = [];
 
         if (req.body.Nombre !== undefined && req.body.Nombre !== "") {
+            const [[duplicado]] = await db.query(
+                "SELECT IDRol FROM roles WHERE LOWER(Nombre) = LOWER(?) AND IDRol != ? LIMIT 1",
+                [req.body.Nombre.trim(), rolId]
+            );
+            if (duplicado) {
+                return res.status(409).json({ error: `Ya existe un rol con el nombre "${req.body.Nombre}". Elegí un nombre diferente.` });
+            }
             campos.push("Nombre = ?");
             valores.push(req.body.Nombre);
         }
