@@ -159,12 +159,39 @@ exports.update = async (req, res) => {
                 valores.push(req.body[campo]);
             }
         });
+        // Mantener Nombre sincronizado con NombreUsuario dentro de usuarios
+        if (req.body.NombreUsuario !== undefined && req.body.NombreUsuario !== null && req.body.NombreUsuario !== "") {
+            asignaciones.push("Nombre = ?");
+            valores.push(req.body.NombreUsuario);
+        }
         if (!asignaciones.length) {
             return res.status(400).json({ error: "No hay datos para actualizar" });
         }
         valores.push(usuarioId);
         await db.query(`UPDATE usuarios SET ${asignaciones.join(", ")} WHERE IDUsuario = ?`, valores);
         const usuario = await obtenerUsuarioBase(usuarioId);
+
+        // Sincronizar con tabla cliente
+        if (usuario && usuario.NumeroDocumento) {
+            try {
+                await db.query(
+                    `UPDATE cliente
+                     SET Nombre = ?, Apellido = ?, Email = ?, Telefono = ?, Direccion = ?
+                     WHERE NroDocumento = ?`,
+                    [
+                        usuario.NombreUsuario || null,
+                        usuario.Apellido || null,
+                        usuario.Email,
+                        usuario.Telefono || null,
+                        usuario.Direccion || null,
+                        usuario.NumeroDocumento,
+                    ]
+                );
+            } catch (syncErr) {
+                console.error('Advertencia: no se pudo sincronizar usuario a cliente:', syncErr.message);
+            }
+        }
+
         res.json({ mensaje: "Usuario actualizado", usuario: mapUsuario(usuario) });
     } catch (error) {
         res.status(500).json({ error: "Error al actualizar usuario", detalle: error.message });
