@@ -2835,7 +2835,7 @@
                                 <div class="pdi-nombre">${p.NombrePaquete}</div>
                                 <div class="pdi-desc">${p.Descripcion || 'Sin descripción'}</div>
                                 <div class="pdi-meta">
-                                    <span class="pdi-badge">$${fmt(p.PrecioPaquete)}</span>
+                                    <span class="pdi-badge">$${fmt(Math.round(p.PrecioPaquete * 1.19))}</span>
                                     <span class="pdi-badge">${p.DuracionNoches} noche${p.DuracionNoches !== 1 ? 's' : ''}</span>
                                     ${p.IncluirHabitacion ? '<span class="pdi-badge">Incluye alojamiento</span>' : ''}
                                 </div>
