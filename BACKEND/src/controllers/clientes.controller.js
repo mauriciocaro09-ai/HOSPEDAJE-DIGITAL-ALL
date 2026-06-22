@@ -115,6 +115,18 @@ exports.update = async (req, res) => {
       [Nombre, Apellido, Direccion || null, Email, Telefono || null, Estado || 1, IDRol || 3, id]
     );
 
+    // Sincronizar cambios a la tabla usuarios
+    try {
+      await db.query(
+        `UPDATE usuarios
+         SET Nombre = ?, Apellido = ?, Email = ?, Telefono = ?, Direccion = ?
+         WHERE NumeroDocumento = ?`,
+        [Nombre || null, Apellido || null, Email, Telefono || null, Direccion || null, id]
+      );
+    } catch (syncErr) {
+      console.error('Advertencia: no se pudo sincronizar cliente a usuarios:', syncErr.message);
+    }
+
     res.json({ mensaje: "Cliente actualizado" });
   } catch (error) {
     res.status(500).json({ error: "Error actualizando cliente", detalle: error.message });
