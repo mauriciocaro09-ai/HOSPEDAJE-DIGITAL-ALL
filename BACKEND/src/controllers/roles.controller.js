@@ -156,15 +156,14 @@ exports.remove = async (req, res) => {
         const [[{ totalUsuarios }]] = await db.query(
             "SELECT COUNT(*) AS totalUsuarios FROM usuarios WHERE IDRol = ?", [rolId]
         );
-        const [[{ totalClientes }]] = await db.query(
-            "SELECT COUNT(*) AS totalClientes FROM cliente WHERE IDRol = ?", [rolId]
-        );
-        const totalEnUso = Number(totalUsuarios) + Number(totalClientes);
-        if (totalEnUso > 0) {
+        if (Number(totalUsuarios) > 0) {
             return res.status(409).json({
-                error: `No se puede eliminar: hay ${totalEnUso} usuario(s) con este rol asignado. Reasigná el rol antes de eliminar.`
+                error: `No se puede eliminar: hay ${totalUsuarios} usuario(s) del sistema con este rol asignado. Reasigná el rol antes de eliminar.`
             });
         }
+
+        // Clientes del portal con este rol: limpiar la referencia antes de borrar
+        await db.query("UPDATE cliente SET IDRol = NULL WHERE IDRol = ?", [rolId]);
 
         await db.query("DELETE FROM rolespermisos WHERE IDRol = ?", [rolId]);
         await db.query("DELETE FROM roles WHERE IDRol = ?", [rolId]);
