@@ -18,14 +18,15 @@
 
     function mismaFecha(f, ref) {
         if (!f) return false;
-        const d = new Date(f);
-        d.setHours(0, 0, 0, 0);
-        return d.getTime() === ref.getTime();
+        const s = typeof f === 'string' ? f.substring(0, 10) : `${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}-${String(f.getDate()).padStart(2,'0')}`;
+        const [fy, fm, fd] = s.split('-').map(Number);
+        return fy === ref.getFullYear() && fm === ref.getMonth() + 1 && fd === ref.getDate();
     }
 
     function fmtFecha(f) {
         if (!f) return '';
-        return new Date(f).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' });
+        const s = typeof f === 'string' ? f.substring(0, 10) : `${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}-${String(f.getDate()).padStart(2,'0')}`;
+        return new Date(s + 'T12:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'short' });
     }
 
     async function calcularNotificaciones() {

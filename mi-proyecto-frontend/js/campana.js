@@ -157,10 +157,10 @@
         }
     }
 
-    async function refrescar() {
+    async function refrescar(forzarRender = false) {
         const data = await obtenerAlertas();
         actualizarBadge(data ? data.total : 0);
-        renderAlertas(data);
+        if (forzarRender || panelAbierto()) renderAlertas(data);
     }
 
     function cerrarPanel() {
@@ -208,7 +208,7 @@
             if (wrap && !wrap.contains(e.target)) cerrarPanel();
         });
 
-        refrescar();
+        refrescar(true);
         setInterval(refrescar, INTERVALO_MS);
     }
 

@@ -2792,7 +2792,7 @@
                 sel.innerHTML = '<option value="">Sin paquete</option>';
                 paquetes.forEach(p => {
                     const precioIva = Math.round(p.PrecioPaquete * 1.19);
-                    sel.innerHTML += `<option value="${p.IDPaquete}" data-precio="${precioIva}">${p.NombrePaquete}</option>`;
+                    sel.innerHTML += `<option value="${p.IDPaquete}" data-precio="${precioIva}" data-incluir-habitacion="${p.IncluirHabitacion ? '1' : '0'}">${p.NombrePaquete}</option>`;
                 });
                 construirDropdownCustomNRPaquetes(paquetes);
 
@@ -2802,7 +2802,6 @@
                     const hint = $('nr-hab-paquete-hint');
 
                     const nrTrigger = $('nr-hab-custom-trigger');
-                    const nrLabel   = $('nr-hab-selected-label');
                     if (!sel.value) {
                         detalle.classList.add('hidden');
                         detalle.innerHTML = '';
@@ -2812,16 +2811,12 @@
                         return;
                     }
 
-                    // Bloquear habitación
-                    if (selHab) {
-                        selHab.value = '';
-                        selHab.disabled = true;
-                        selHab.style.opacity = '0.45';
-                        selHab.title = 'El paquete ya incluye habitación';
-                    }
-                    if (nrTrigger) { nrTrigger.style.opacity = '0.45'; nrTrigger.style.pointerEvents = 'none'; nrTrigger.title = 'El paquete ya incluye habitación'; }
-                    if (nrLabel) nrLabel.textContent = '— incluida en el paquete —';
-                    if (hint) hint.style.display = '';
+                    // Siempre dejar la habitación activa — el sistema necesita IDHabitacion.
+                    // Si el paquete incluye alojamiento, solo mostramos el hint; el costo se anula en actualizarResumen().
+                    const incluyeHab = sel.options[sel.selectedIndex]?.dataset?.incluirHabitacion === '1';
+                    if (selHab) { selHab.disabled = false; selHab.style.opacity = ''; selHab.title = ''; }
+                    if (nrTrigger) { nrTrigger.style.opacity = ''; nrTrigger.style.pointerEvents = ''; nrTrigger.title = ''; }
+                    if (hint) hint.style.display = incluyeHab ? '' : 'none';
 
                     // Cargar detalle automáticamente
                     detalle.innerHTML = '<div class="pdi-body" style="color:var(--muted);font-size:12px;">Cargando...</div>';
@@ -3009,16 +3004,17 @@
         function actualizarResumen() {
             const sel = $('nr-habitacion');
             const opt = sel ? sel.options[sel.selectedIndex] : null;
-            const costo = parseFloat(opt?.dataset?.costo || 0);
+            const selPaq = $('nr-paquete');
+            const paqOpt = selPaq ? selPaq.options[selPaq.selectedIndex] : null;
+            const incluyeHab = paqOpt?.dataset?.incluirHabitacion === '1';
+            // Si el paquete incluye alojamiento, el costo de la habitación es $0
+            const costo = incluyeHab ? 0 : parseFloat(opt?.dataset?.costo || 0);
+            const costoPaquete = parseFloat(paqOpt?.dataset?.precio || 0);
             const inicio = $('nr-fecha-inicio')?.value || '';
             const fin    = $('nr-fecha-fin')?.value    || '';
 
             const costoServicios = Array.from(document.querySelectorAll('#nr-servicios-lista .admin-srv-card.seleccionado'))
                 .reduce((sum, card) => sum + parseFloat(card.dataset.precio || 0) * parseInt(card.dataset.cantidad || 1), 0);
-
-            const selPaq = $('nr-paquete');
-            const paqOpt = selPaq ? selPaq.options[selPaq.selectedIndex] : null;
-            const costoPaquete = parseFloat(paqOpt?.dataset?.precio || 0);
 
             const fmtFecha = f => f ? new Date(f + 'T12:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }) : '--';
             $('nr-sum-entrada').textContent = fmtFecha(inicio);
@@ -3078,12 +3074,9 @@
             const inicio = $('nr-fecha-inicio').value;
             const fin    = $('nr-fecha-fin').value;
             const metodo = $('nr-metodo-pago').value;
-            const tienePaquete = !!$('nr-paquete')?.value;
 
-            if ((!idHab && !tienePaquete) || !inicio || !fin || !metodo) {
-                errBox.textContent = tienePaquete
-                    ? 'Por favor completa los campos obligatorios (fechas y método de pago).'
-                    : 'Por favor completa todos los campos obligatorios.';
+            if (!idHab || !inicio || !fin || !metodo) {
+                errBox.textContent = 'Por favor completa todos los campos obligatorios (habitación, fechas y método de pago).';
                 errBox.classList.remove('hidden');
                 errBox.scrollIntoView({ behavior: 'smooth' });
                 return;
@@ -3287,7 +3280,7 @@
     </script>
 <script src="js/countries.js"></script>
 <script src="js/validation.js"></script>
-<script src="js/campana-cliente.js"></script>
+<script src="js/campana-cliente.js?v=20260623"></script>
 <div id="nr-hab-preview-card" class="hab-preview-card" style="display:none"></div>
 <div id="nr-paq-preview-card" class="hab-preview-card" style="display:none"></div>
 
