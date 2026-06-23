@@ -65,18 +65,29 @@ const Reservas = {
     }
 
     const [rows] = await db.query(`
-      SELECT 
+      SELECT
         r.*,
         c.Nombre AS NombreCliente,
         c.Apellido AS ApellidoCliente,
         ${selectMetodoPago},
         ${selectEstado},
-        ${selectUsuario}
+        ${selectUsuario},
+        COALESCE(ca_sum.cargos_pendientes, 0)   AS cargos_pendientes,
+        COALESCE(ca_sum.cargos_verificacion, 0)  AS cargos_verificacion,
+        COALESCE(ca_sum.cargos_pagados, 0)       AS cargos_pagados
       FROM reserva r
       ${joinClientes}
       ${joinMetodoPago}
       ${joinEstado}
       ${joinUsuario}
+      LEFT JOIN (
+        SELECT IDReserva,
+               SUM(CASE WHEN Estado='pendiente' AND (ComprobanteTransferencia IS NULL OR ComprobanteTransferencia='') THEN 1 ELSE 0 END) AS cargos_pendientes,
+               SUM(CASE WHEN Estado='pendiente' AND ComprobanteTransferencia IS NOT NULL AND ComprobanteTransferencia!=''            THEN 1 ELSE 0 END) AS cargos_verificacion,
+               SUM(CASE WHEN Estado='pagado'    THEN 1 ELSE 0 END) AS cargos_pagados
+        FROM cargo_adicional
+        GROUP BY IDReserva
+      ) ca_sum ON ca_sum.IDReserva = r.IdReserva
       ORDER BY r.IdReserva DESC
     `);
 

@@ -366,7 +366,7 @@ const renderizarReservasAdmin = () => {
     renderPaginationControls('reservasAdmin', tablaWrap, paginacion.totalItems, paginacion.totalPages, paginacion.currentPage, renderizarReservasAdmin);
 
     if (!paginacion.items.length) {
-        contenedor.innerHTML = '<tr><td colspan="7" class="mensaje-vacio">No hay reservas que coincidan con el filtro actual.</td></tr>';
+        contenedor.innerHTML = '<tr><td colspan="8" class="mensaje-vacio">No hay reservas que coincidan con el filtro actual.</td></tr>';
         return;
     }
 
@@ -379,6 +379,20 @@ const renderizarReservasAdmin = () => {
         const tipo = reserva.TipoDocumentoCliente || reserva.TipoDocumento || '';
         const documento = tipo ? `${tipo} - ${nro}` : nro;
 
+        const cp = Number(reserva.cargos_pendientes   || 0);
+        const cv = Number(reserva.cargos_verificacion || 0);
+        const cg = Number(reserva.cargos_pagados      || 0);
+        let cargoBadge;
+        if (cp + cv + cg === 0) {
+            cargoBadge = '<span style="color:#9ca3af;font-size:12px;">—</span>';
+        } else {
+            const pills = [];
+            if (cp > 0) pills.push(`<span style="background:#fee2e2;color:#dc2626;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:600;white-space:nowrap;">${cp} pendiente${cp>1?'s':''}</span>`);
+            if (cv > 0) pills.push(`<span style="background:#fef3c7;color:#b45309;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:600;white-space:nowrap;">${cv} en verificación</span>`);
+            if (cg > 0) pills.push(`<span style="background:#d1fae5;color:#059669;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:600;white-space:nowrap;">${cg} pagado${cg>1?'s':''}</span>`);
+            cargoBadge = `<div style="display:flex;flex-wrap:wrap;gap:3px;">${pills.join('')}</div>`;
+        }
+
         return `
             <tr>
                 <td><strong>${escaparHtml(cliente)}</strong></td>
@@ -386,6 +400,7 @@ const renderizarReservasAdmin = () => {
                 <td>${escaparHtml(fmtFecha(reserva.FechaInicio))}</td>
                 <td>${escaparHtml(fmtFecha(reserva.FechaFinalizacion))}</td>
                 <td>${montoFormato}</td>
+                <td style="cursor:pointer;" data-accion-reserva="ver" data-id="${escaparHtml(idReserva)}" title="Ver cargos adicionales">${cargoBadge}</td>
                 <td><span class="estado-reserva estado-${estado.clase}">${estado.texto}</span></td>
                 <td>
                     <div class="crud-clientes-acciones">
