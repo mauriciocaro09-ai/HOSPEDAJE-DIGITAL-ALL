@@ -128,10 +128,9 @@ const Paquetes = {
     },
 
     eliminar: async (id) => {
-        const [result] = await db.query(
-            "DELETE FROM paquete WHERE IDPaquete=?",
-            [id]
-        );
+        await db.query("UPDATE detallereservapaquetes SET IDPaquete = NULL WHERE IDPaquete = ?", [id]);
+        await db.query("DELETE FROM paquete_servicios WHERE IDPaquete = ?", [id]);
+        const [result] = await db.query("DELETE FROM paquete WHERE IDPaquete = ?", [id]);
         return result;
     },
 

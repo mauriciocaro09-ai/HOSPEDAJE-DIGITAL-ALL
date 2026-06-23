@@ -25,7 +25,7 @@ const PaquetesService = {
 
     // Eliminar paquete (solo cambia Estado, no toca otros campos)
     eliminar: async (id) => {
-        return await Paquetes.inactivar(id);
+        return await Paquetes.eliminar(id);
     },
 
     // Agregar servicio a paquete
