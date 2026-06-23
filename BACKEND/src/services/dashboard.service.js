@@ -118,7 +118,7 @@ const DashboardService = {
             LIMIT 10
         `, [hoy]);
 
-        // Comprobantes subidos por clientes pendientes de revisión del admin
+        // Comprobantes de reservas subidos por clientes pendientes de revisión del admin
         const [[{ comprobantes }]] = await db.query(`
             SELECT COUNT(*) AS comprobantes FROM reserva r
             JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
@@ -127,7 +127,7 @@ const DashboardService = {
               AND r.ComprobanteTransferencia != ''
         `).catch(() => [[{ comprobantes: 0 }]]);
 
-        const [listaComprobantes] = await db.query(`
+        const [listaComprobantesReserva] = await db.query(`
             SELECT r.IDReserva,
                    CONCAT(c.Nombre, ' ', c.Apellido) AS NombreCliente,
                    c.Email AS EmailCliente,
@@ -142,12 +142,39 @@ const DashboardService = {
             LIMIT 10
         `).catch(() => [[]]);
 
+        // Comprobantes de cargos adicionales pendientes de aprobación
+        const [[{ cargosComprobantes }]] = await db.query(`
+            SELECT COUNT(*) AS cargosComprobantes FROM cargo_adicional
+            WHERE Estado = 'pendiente'
+              AND ComprobanteTransferencia IS NOT NULL
+              AND ComprobanteTransferencia != ''
+        `).catch(() => [[{ cargosComprobantes: 0 }]]);
+
+        const [listaCargosComprobantes] = await db.query(`
+            SELECT ca.IDReserva,
+                   CONCAT(c.Nombre, ' ', c.Apellido) AS NombreCliente,
+                   s.NombreServicio AS EmailCliente,
+                   ca.FechaCreacion AS FechaSubida
+            FROM cargo_adicional ca
+            JOIN reserva r ON ca.IDReserva = r.IdReserva
+            JOIN cliente c ON r.NroDocumentoCliente = c.NroDocumento
+            JOIN servicio s ON ca.IDServicio = s.IDServicio
+            WHERE ca.Estado = 'pendiente'
+              AND ca.ComprobanteTransferencia IS NOT NULL
+              AND ca.ComprobanteTransferencia != ''
+            ORDER BY ca.FechaCreacion DESC
+            LIMIT 10
+        `).catch(() => [[]]);
+
+        const listaComprobantes = [...listaComprobantesReserva, ...listaCargosComprobantes];
+
+        const totalComprobantes = Number(comprobantes) + Number(cargosComprobantes);
         return {
             pendientes:      Number(pendientes),
             checkins:        Number(checkins),
             checkouts:       Number(checkouts),
-            comprobantes:    Number(comprobantes),
-            total:           Number(pendientes) + Number(checkins) + Number(checkouts) + Number(comprobantes),
+            comprobantes:    totalComprobantes,
+            total:           Number(pendientes) + Number(checkins) + Number(checkouts) + totalComprobantes,
             listaPendientes,
             listaCheckins,
             listaCheckouts,

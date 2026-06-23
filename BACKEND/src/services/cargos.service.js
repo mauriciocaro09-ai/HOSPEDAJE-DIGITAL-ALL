@@ -47,6 +47,7 @@ const CargosService = {
       `SELECT ca.IDCargo, ca.IDReserva, ca.IDServicio, ca.Cantidad,
               ca.PrecioUnitario, ca.PrecioTotal, ca.Estado,
               ca.IDMetodoPago, ca.FechaCreacion, ca.FechaPago,
+              ca.ComprobanteTransferencia,
               (ca.ComprobanteTransferencia IS NOT NULL AND ca.ComprobanteTransferencia != '') AS TieneComprobante,
               s.NombreServicio, mp.NomMetodoPago
        FROM cargo_adicional ca
