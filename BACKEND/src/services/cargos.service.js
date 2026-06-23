@@ -87,6 +87,34 @@ const CargosService = {
     return { esTransferencia: !!esTransferencia };
   },
 
+  pagarLote: async (idReserva, idMetodoPago, comprobante = null) => {
+    const [cargos] = await db.query(
+      `SELECT IDCargo FROM cargo_adicional
+       WHERE IDReserva = ? AND Estado = 'pendiente'
+         AND (ComprobanteTransferencia IS NULL OR ComprobanteTransferencia = '')`,
+      [idReserva]
+    );
+    if (!cargos.length) throw { code: 'NOT_FOUND', message: 'No hay cargos pendientes de pago' };
+
+    const [[mp]] = await db.query('SELECT NomMetodoPago FROM metodopago WHERE IdMetodoPago = ? LIMIT 1', [idMetodoPago]);
+    const esTransferencia = mp && (mp.NomMetodoPago || '').toLowerCase().includes('transferencia');
+
+    for (const cargo of cargos) {
+      if (esTransferencia && comprobante) {
+        await db.query(
+          `UPDATE cargo_adicional SET IDMetodoPago = ?, ComprobanteTransferencia = ? WHERE IDCargo = ?`,
+          [idMetodoPago, comprobante, cargo.IDCargo]
+        );
+      } else {
+        await db.query(
+          `UPDATE cargo_adicional SET Estado = 'pagado', IDMetodoPago = ?, FechaPago = NOW() WHERE IDCargo = ?`,
+          [idMetodoPago, cargo.IDCargo]
+        );
+      }
+    }
+    return { esTransferencia: !!esTransferencia, cantidad: cargos.length };
+  },
+
   aprobar: async (idCargo) => {
     const [[cargo]] = await db.query(
       'SELECT * FROM cargo_adicional WHERE IDCargo = ? LIMIT 1',

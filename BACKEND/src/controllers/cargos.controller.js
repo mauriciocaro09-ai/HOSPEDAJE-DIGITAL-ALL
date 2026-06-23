@@ -43,6 +43,22 @@ const CargosController = {
     }
   },
 
+  pagarLote: async (req, res) => {
+    try {
+      const { IDMetodoPago, ComprobanteTransferencia } = req.body;
+      if (!IDMetodoPago) return res.status(400).json({ error: 'Método de pago requerido' });
+      const result = await CargosService.pagarLote(req.params.idReserva, IDMetodoPago, ComprobanteTransferencia || null);
+      const mensaje = result.esTransferencia
+        ? `Comprobante recibido para ${result.cantidad} cargo(s). Pendiente de aprobación.`
+        : `${result.cantidad} cargo(s) pagado(s) correctamente.`;
+      res.json({ mensaje });
+    } catch (error) {
+      if (error.code === 'NOT_FOUND') return res.status(404).json({ error: error.message });
+      console.error(error);
+      res.status(500).json({ error: 'Error procesando pagos' });
+    }
+  },
+
   aprobar: async (req, res) => {
     try {
       await CargosService.aprobar(req.params.id);

@@ -1315,7 +1315,7 @@
                 <div style="background:#fff;border-radius:16px;width:min(420px,100%);padding:28px;position:relative;">
                     <button onclick="cerrarPagarCargo()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#6b7280;">&times;</button>
                     <h3 style="margin:0 0 6px;font-size:17px;color:#1a2744;"><i class="fa-solid fa-credit-card" style="margin-right:6px;color:var(--primary)"></i>Registrar pago</h3>
-                    <p style="margin:0 0 18px;font-size:13px;color:var(--muted)">Seleccioná el método de pago para este cargo adicional.</p>
+                    <p style="margin:0 0 18px;font-size:13px;color:var(--muted)">Seleccioná el método de pago para todos los cargos pendientes.</p>
                     <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Método de pago</label>
                     <select id="pagar-cargo-metodo" onchange="toggleComprobanteCargoInput(this)" style="width:100%;border:1px solid #d1d5db;border-radius:8px;padding:9px 12px;font-size:14px;margin-bottom:16px;">
                         <option value="">Seleccionar...</option>
@@ -2199,6 +2199,9 @@
                         return `<span style="background:${bg};color:${c};border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;">${e}</span>`;
                     };
                     if (cargos.length) {
+                        const pendientesSinComp = cargos.filter(c => c.Estado === 'pendiente' && !c.TieneComprobante);
+                        const totalPendiente = pendientesSinComp.reduce((s, c) => s + Number(c.PrecioTotal || 0), 0);
+
                         cargosHtml = cargos.map(c => {
                             const tieneComprobante = !!c.TieneComprobante;
                             const pendienteSinComprobante = c.Estado === 'pendiente' && !tieneComprobante;
@@ -2212,11 +2215,23 @@
                                 </div>
                                 ${badgeCargo(c.Estado)}
                                 ${pendienteSinComprobante ? `
-                                    <button onclick="abrirPagarCargo(${c.IDCargo}, ${id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:600;">Pagar</button>
-                                    <button onclick="cancelarCargo(${c.IDCargo}, ${id})" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">✕</button>
+                                    <button onclick="cancelarCargo(${c.IDCargo}, ${id})" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;" title="Cancelar cargo">✕</button>
                                 ` : ''}
                             </div>`;
                         }).join('');
+
+                        if (pendientesSinComp.length > 0) {
+                            cargosHtml += `
+                            <div style="margin-top:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                                <div>
+                                    <div style="font-size:12px;color:#0369a1;font-weight:600;">${pendientesSinComp.length} cargo${pendientesSinComp.length>1?'s':''} pendiente${pendientesSinComp.length>1?'s':''} de pago</div>
+                                    <div style="font-size:16px;font-weight:700;color:#1a2744;">Total: $${fmt(totalPendiente)}</div>
+                                </div>
+                                <button onclick="abrirPagarLote(${id})" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">
+                                    <i class="fa-solid fa-credit-card" style="margin-right:6px;"></i>Pagar todo
+                                </button>
+                            </div>`;
+                        }
                     } else {
                         cargosHtml = '<p style="color:var(--muted);font-size:13px;margin:0">Sin cargos adicionales</p>';
                     }
@@ -2362,17 +2377,19 @@
             if (e.target === $('modal-agregar-servicios')) cerrarAgregarServicios();
         });
 
-        // ── PAGAR CARGO ADICIONAL ─────────────────────
-        let _cargoIdPagar = null;
+        // ── PAGAR CARGOS ADICIONALES (LOTE) ─────────────────────
         let _reservaIdPagar = null;
 
-        async function abrirPagarCargo(idCargo, idReserva) {
-            _cargoIdPagar = idCargo;
+        async function abrirPagarLote(idReserva) {
             _reservaIdPagar = idReserva;
             const modal = $('modal-pagar-cargo');
             const sel = $('pagar-cargo-metodo');
             modal.style.display = 'flex';
             sel.innerHTML = '<option value="">Cargando...</option>';
+            $('pagar-cargo-comprobante-wrap').style.display = 'none';
+            $('pagar-cargo-file').value = '';
+            $('pagar-cargo-file-name').textContent = 'Sin archivo seleccionado';
+            $('pagar-cargo-preview').style.display = 'none';
             try {
                 const metodos = await apiFetch('/reservas/metodos-pago');
                 const permitidos = ['efectivo', 'transferencia'];
@@ -2380,6 +2397,7 @@
                     .filter(m => permitidos.some(p => (m.NomMetodoPago || '').toLowerCase().includes(p)))
                     .map(m => `<option value="${m.IdMetodoPago}">${m.NomMetodoPago}</option>`)
                     .join('');
+                toggleComprobanteCargoInput(sel);
             } catch(e) {
                 sel.innerHTML = '<option value="">Error cargando métodos</option>';
             }
@@ -2432,7 +2450,7 @@
             }
 
             try {
-                const resp = await apiFetch(`/cargos/${_cargoIdPagar}/pagar`, {
+                const resp = await apiFetch(`/cargos/reserva/${_reservaIdPagar}/pagar-lote`, {
                     method: 'PUT',
                     body: JSON.stringify({ IDMetodoPago: idMetodo, ComprobanteTransferencia: comprobante })
                 });
