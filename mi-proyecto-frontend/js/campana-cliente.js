@@ -56,8 +56,16 @@
             const checkinsManana = activas.filter(r => mismaFecha(r.FechaInicio, MANANA) && (r.NombreEstadoReserva || '').toLowerCase() === 'confirmada');
             const checkoutsHoy   = activas.filter(r => mismaFecha(r.FechaFinalizacion, HOY) && (r.NombreEstadoReserva || '').toLowerCase() === 'confirmada');
 
-            const total = pendientes.length + checkinsHoy.length + checkinsManana.length + checkoutsHoy.length;
-            return { total, pendientes, checkinsHoy, checkinsManana, checkoutsHoy };
+            // Reservas con cargos adicionales pendientes de pago o en verificación
+            const conCargosPendientes    = activas.filter(r => Number(r.cargos_pendientes || 0) > 0);
+            const conCargosVerificacion  = activas.filter(r => Number(r.cargos_verificacion || 0) > 0);
+            const totalCargosPend = conCargosPendientes.reduce((s, r) => s + Number(r.cargos_pendientes || 0), 0);
+            const totalCargosVerif = conCargosVerificacion.reduce((s, r) => s + Number(r.cargos_verificacion || 0), 0);
+
+            const total = pendientes.length + checkinsHoy.length + checkinsManana.length + checkoutsHoy.length
+                        + (totalCargosPend > 0 ? 1 : 0) + (totalCargosVerif > 0 ? 1 : 0);
+            return { total, pendientes, checkinsHoy, checkinsManana, checkoutsHoy,
+                     conCargosPendientes, conCargosVerificacion, totalCargosPend, totalCargosVerif };
         } catch {
             return null;
         }
@@ -120,6 +128,24 @@
                 texto: `${data.pendientes.length} reserva${data.pendientes.length !== 1 ? 's' : ''} pendiente${data.pendientes.length !== 1 ? 's' : ''}`,
                 sub:   'En espera de confirmación',
                 items: data.pendientes
+            });
+        }
+        if (data.totalCargosPend > 0) {
+            grupos.push({
+                clase: 'amarillo',
+                icono: 'fa-concierge-bell',
+                texto: `${data.totalCargosPend} servicio${data.totalCargosPend !== 1 ? 's' : ''} adicional${data.totalCargosPend !== 1 ? 'es' : ''} por pagar`,
+                sub:   'Ingresá a la reserva para realizar el pago',
+                items: data.conCargosPendientes
+            });
+        }
+        if (data.totalCargosVerif > 0) {
+            grupos.push({
+                clase: 'azul',
+                icono: 'fa-file-invoice',
+                texto: `${data.totalCargosVerif} servicio${data.totalCargosVerif !== 1 ? 's' : ''} en verificación`,
+                sub:   'El administrador revisará tu comprobante',
+                items: data.conCargosVerificacion
             });
         }
 

@@ -103,10 +103,19 @@ const obtenerPorUsuario = async (req, res) => {
   try {
     const { idUsuario } = req.params;
     const [rows] = await db.query(
-      `SELECT r.*, e.NombreEstadoReserva, h.NombreHabitacion
+      `SELECT r.*, e.NombreEstadoReserva, h.NombreHabitacion,
+              COALESCE(ca_sum.cargos_pendientes, 0)  AS cargos_pendientes,
+              COALESCE(ca_sum.cargos_verificacion, 0) AS cargos_verificacion
        FROM reserva r
        LEFT JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
        LEFT JOIN habitacion h ON r.IDHabitacion = h.IDHabitacion
+       LEFT JOIN (
+         SELECT IDReserva,
+                SUM(CASE WHEN Estado='pendiente' AND (ComprobanteTransferencia IS NULL OR ComprobanteTransferencia='') THEN 1 ELSE 0 END) AS cargos_pendientes,
+                SUM(CASE WHEN Estado='pendiente' AND ComprobanteTransferencia IS NOT NULL AND ComprobanteTransferencia!=''            THEN 1 ELSE 0 END) AS cargos_verificacion
+         FROM cargo_adicional
+         GROUP BY IDReserva
+       ) ca_sum ON ca_sum.IDReserva = r.IdReserva
        WHERE r.id_usuario = ?
        ORDER BY r.IdReserva DESC`,
       [idUsuario]

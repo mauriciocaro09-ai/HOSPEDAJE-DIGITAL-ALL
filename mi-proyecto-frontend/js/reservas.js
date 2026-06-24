@@ -2097,6 +2097,7 @@ if (document.readyState === 'loading') {
         try {
             await requestJson(`/cargos/reserva/${idReserva}/aprobar-lote`, { method: 'PUT', body: {} });
             await renderCargosAdicionalesSection(idReserva, estadoNombre);
+            window.refrescarAlertas?.();
             Swal.fire({ icon: 'success', title: 'Cargos aprobados', timer: 1500, showConfirmButton: false });
         } catch(e) {
             Swal.fire('Error', 'No se pudo aprobar los cargos', 'error');
@@ -2117,6 +2118,7 @@ if (document.readyState === 'loading') {
         try {
             await requestJson(`/cargos/reserva/${idReserva}/rechazar-lote`, { method: 'PUT', body: {} });
             await renderCargosAdicionalesSection(idReserva, estadoNombre);
+            window.refrescarAlertas?.();
             Swal.fire({ icon: 'info', title: 'Comprobante rechazado', timer: 1500, showConfirmButton: false });
         } catch(e) {
             Swal.fire('Error', 'No se pudo rechazar los cargos', 'error');
