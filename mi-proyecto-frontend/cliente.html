@@ -2353,12 +2353,16 @@
                             <div style="font-weight:600;font-size:14px;color:#1a2744">${s.NombreServicio}</div>
                             <div style="font-size:12px;color:var(--muted)">$${fmt(Math.round(Number(s.Costo||0)*1.19))} c/u (IVA incl.)</div>
                         </div>
-                        <input type="number" min="1" max="10" value="1"
-                            id="qty-srv-${s.IDServicio}"
-                            style="width:52px;border:1px solid #d1d5db;border-radius:6px;padding:4px 6px;text-align:center;font-size:13px;">
+                        <div style="display:flex;align-items:center;gap:0;border:1px solid #d1d5db;border-radius:8px;overflow:hidden;">
+                            <button onclick="cambiarQtySrv(${s.IDServicio},-1)"
+                                style="width:30px;height:30px;background:#f3f4f6;color:#374151;border:none;font-size:16px;font-weight:700;cursor:pointer;line-height:1;">−</button>
+                            <span id="qty-srv-${s.IDServicio}" style="min-width:30px;text-align:center;font-size:13px;font-weight:600;padding:0 4px;">1</span>
+                            <button onclick="cambiarQtySrv(${s.IDServicio},1)"
+                                style="width:30px;height:30px;background:#f3f4f6;color:#374151;border:none;font-size:16px;font-weight:700;cursor:pointer;line-height:1;">+</button>
+                        </div>
                         <button onclick="confirmarAgregarServicio(${s.IDServicio})"
-                            style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">
-                            <i class="fa-solid fa-plus"></i>
+                            style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
+                            Agregar
                         </button>
                     </div>`).join('');
             } catch(e) {
@@ -2366,8 +2370,17 @@
             }
         }
 
+        function cambiarQtySrv(idServicio, delta) {
+            const el = document.getElementById(`qty-srv-${idServicio}`);
+            if (!el) return;
+            const actual = parseInt(el.textContent || '1');
+            const nuevo = Math.min(10, Math.max(1, actual + delta));
+            el.textContent = nuevo;
+        }
+
         async function confirmarAgregarServicio(idServicio) {
-            const qty = parseInt(document.getElementById(`qty-srv-${idServicio}`)?.value || '1');
+            const el = document.getElementById(`qty-srv-${idServicio}`);
+            const qty = parseInt(el?.textContent || '1');
             const reservaId = _reservaIdParaServicios;
             try {
                 await apiFetch(`/reservas/${reservaId}/servicios`, {
