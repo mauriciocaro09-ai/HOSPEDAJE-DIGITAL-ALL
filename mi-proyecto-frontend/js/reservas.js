@@ -1099,35 +1099,38 @@ const renderCargosAdicionalesSection = async (idReserva, estadoNombreOriginal) =
                     </div>`;
             }
 
-            // Bloques de referencia: un bloque por cada comprobante distinto (cada batch de pago)
+            // Bloques de referencia: un bloque por cada evento de aprobación (agrupado por FechaPago al minuto)
             const pagadosConComp = cargos.filter(c => c.Estado === 'pagado' && !!c.ComprobanteTransferencia);
             if (pagadosConComp.length > 0 && enVerificacion.length === 0) {
-                // Agrupar por comprobante único (mismo batch = misma imagen)
+                // Agrupar por FechaPago truncado al minuto — cada aprobación del admin es un evento distinto
                 const grupos = new Map();
                 for (const c of pagadosConComp) {
-                    const clave = c.ComprobanteTransferencia.substring(0, 80); // proxy de identidad
-                    if (!grupos.has(clave)) grupos.set(clave, { comp: c.ComprobanteTransferencia, items: [] });
-                    grupos.get(clave).items.push(c);
+                    const fechaMin = c.FechaPago ? String(c.FechaPago).substring(0, 16) : 'sin-fecha';
+                    if (!grupos.has(fechaMin)) grupos.set(fechaMin, { comp: c.ComprobanteTransferencia, fecha: c.FechaPago, items: [] });
+                    grupos.get(fechaMin).items.push(c);
                 }
 
-                let nGrupo = 0;
-                for (const [, g] of grupos) {
-                    nGrupo++;
-                    const esImg  = g.comp.startsWith('data:image');
+                // Ordenar del más reciente al más antiguo
+                const gruposOrdenados = [...grupos.entries()].sort((a, b) => b[0].localeCompare(a[0]));
+                const total = gruposOrdenados.length;
+
+                gruposOrdenados.forEach(([, g], idx) => {
+                    const esImg  = (g.comp || '').startsWith('data:image');
+                    const nroComp = total > 1 ? `Comprobante ${total - idx}/${total}` : 'Comprobante de transferencia';
                     const verImg = esImg
                         ? `<img src="${g.comp}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid #d1fae5;cursor:pointer;display:block;" onclick="window.open(this.src,'_blank')" title="Ver en pantalla completa">`
-                        : `<a href="${g.comp}" download="comprobante_cargos_${nGrupo}.pdf" style="font-size:12px;color:#065f46;font-weight:600;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:4px;"></i>Descargar comprobante PDF</a>`;
-                    const totalGrupo = g.items.reduce((s, c) => s + Number(c.PrecioTotal), 0);
-                    const labelItems = g.items.map(c => `${c.NombreServicio} x${c.Cantidad}`).join(', ');
-                    const titulo = grupos.size > 1 ? `Comprobante ${nGrupo}/${grupos.size}` : 'Comprobante de transferencia';
+                        : `<a href="${g.comp}" download="comprobante_cargos_${idx+1}.pdf" style="font-size:12px;color:#065f46;font-weight:600;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:4px;"></i>Descargar comprobante PDF</a>`;
+                    const totalGrupo  = g.items.reduce((s, c) => s + Number(c.PrecioTotal), 0);
+                    const labelItems  = g.items.map(c => `${c.NombreServicio} x${c.Cantidad}`).join(', ');
+                    const fechaStr    = g.fecha ? new Date(g.fecha).toLocaleString('es-CO', { dateStyle:'short', timeStyle:'short' }) : '';
                     html += `
                         <div style="margin-top:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">
-                            <p style="margin:0 0 2px;font-size:13px;font-weight:700;color:#15803d;"><i class="fa-solid fa-circle-check" style="margin-right:5px;"></i>${titulo} — ${g.items.length} cargo${g.items.length>1?'s':''} aprobado${g.items.length>1?'s':''}</p>
-                            <p style="margin:0 0 4px;font-size:11px;color:#6b7280;">${labelItems}</p>
+                            <p style="margin:0 0 2px;font-size:13px;font-weight:700;color:#15803d;"><i class="fa-solid fa-circle-check" style="margin-right:5px;"></i>${nroComp} — ${g.items.length} cargo${g.items.length>1?'s':''} aprobado${g.items.length>1?'s':''}</p>
+                            <p style="margin:0 0 2px;font-size:11px;color:#6b7280;">${labelItems}${fechaStr ? ' · ' + fechaStr : ''}</p>
                             <p style="margin:0 0 10px;font-size:12px;color:#64748b;">Total cobrado: <strong>${fmt(totalGrupo)}</strong></p>
                             ${verImg}
                         </div>`;
-                }
+                });
             }
         }
 
