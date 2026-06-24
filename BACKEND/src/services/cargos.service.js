@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const EmailService = require('./email.service');
 
 const CargosService = {
 
@@ -116,12 +117,43 @@ const CargosService = {
   },
 
   aprobarLote: async (idReserva) => {
+    // Obtener cargos ANTES de aprobar para incluirlos en el correo
+    const [cargosVerif] = await db.query(
+      `SELECT ca.Cantidad, ca.PrecioTotal, s.NombreServicio
+       FROM cargo_adicional ca
+       LEFT JOIN servicio s ON ca.IDServicio = s.IDServicio
+       WHERE ca.IDReserva = ? AND ca.Estado = 'pendiente'
+         AND ca.ComprobanteTransferencia IS NOT NULL AND ca.ComprobanteTransferencia != ''`,
+      [idReserva]
+    );
+
     await db.query(
       `UPDATE cargo_adicional SET Estado = 'pagado', FechaPago = NOW()
        WHERE IDReserva = ? AND Estado = 'pendiente'
          AND ComprobanteTransferencia IS NOT NULL AND ComprobanteTransferencia != ''`,
       [idReserva]
     );
+
+    // Enviar correo al cliente (sin bloquear la respuesta)
+    db.query(
+      `SELECT r.IdReserva, c.Nombre, c.Apellido, c.Email
+       FROM reserva r
+       LEFT JOIN cliente c ON c.NroDocumento = r.NroDocumentoCliente
+       WHERE r.IdReserva = ? LIMIT 1`,
+      [idReserva]
+    ).then(([[info]]) => {
+      if (info && info.Email && cargosVerif.length > 0) {
+        const totalCargos = cargosVerif.reduce((s, c) => s + Number(c.PrecioTotal), 0);
+        EmailService.enviarAprobacionCargosAdicionales({
+          clienteNombre: (info.Nombre || '') + ' ' + (info.Apellido || ''),
+          clienteEmail: info.Email,
+          reservaId: idReserva,
+          cargos: cargosVerif,
+          totalCargos
+        }).catch(e => console.error('Email aprobacion cargos:', e.message));
+      }
+    }).catch(e => console.error('Fetch cliente para email cargos:', e.message));
+
     return true;
   },
 
@@ -132,6 +164,24 @@ const CargosService = {
          AND ComprobanteTransferencia IS NOT NULL AND ComprobanteTransferencia != ''`,
       [idReserva]
     );
+
+    // Enviar correo al cliente avisando el rechazo
+    db.query(
+      `SELECT r.IdReserva, c.Nombre, c.Apellido, c.Email
+       FROM reserva r
+       LEFT JOIN cliente c ON c.NroDocumento = r.NroDocumentoCliente
+       WHERE r.IdReserva = ? LIMIT 1`,
+      [idReserva]
+    ).then(([[info]]) => {
+      if (info && info.Email) {
+        EmailService.enviarRechazoCargoComprobante({
+          clienteNombre: (info.Nombre || '') + ' ' + (info.Apellido || ''),
+          clienteEmail: info.Email,
+          reservaId: idReserva
+        }).catch(e => console.error('Email rechazo cargo:', e.message));
+      }
+    }).catch(e => console.error('Fetch cliente para email rechazo cargo:', e.message));
+
     return true;
   },
 

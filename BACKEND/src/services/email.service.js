@@ -337,6 +337,71 @@ const EmailService = {
     }
   },
 
+  enviarAprobacionCargosAdicionales: async ({ clienteNombre, clienteEmail, reservaId, cargos, totalCargos }) => {
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clienteEmail && clienteEmail.trim());
+    if (!emailValido) { console.warn("Correo invalido para aprobacion cargos: " + clienteEmail); return false; }
+    try {
+      const fmtCOP = (v) => "$" + Number(v || 0).toLocaleString("es-CO");
+      const filasCargos = (cargos || []).map(c =>
+        "<tr><td style=\"padding:6px 0;color:#333;\">" + (c.NombreServicio || "Servicio") + " x" + (c.Cantidad || 1) + "</td>" +
+        "<td style=\"padding:6px 0;text-align:right;font-weight:600;color:#15803d;\">" + fmtCOP(c.PrecioTotal) + "</td></tr>"
+      ).join("");
+      await enviarBrevo({
+        toEmail: clienteEmail,
+        toName: clienteNombre,
+        subject: "Servicios adicionales verificados — Reserva #" + reservaId + " - Hospedaje Digital",
+        htmlContent:
+          "<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:8px;\">" +
+          "<div style=\"background:#16a34a;padding:20px;border-radius:8px 8px 0 0;text-align:center;\"><h1 style=\"color:white;margin:0;\">Hospedaje Digital</h1></div>" +
+          "<div style=\"padding:30px;\">" +
+          "<h2 style=\"color:#15803d;\">&#10003; Pago de servicios adicionales verificado</h2>" +
+          "<p>Hola <strong>" + clienteNombre + "</strong>, hemos verificado tu comprobante de pago para los servicios adicionales de la reserva <strong>#" + reservaId + "</strong>.</p>" +
+          "<div style=\"background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:20px;margin:20px 0;\">" +
+          "<h3 style=\"color:#15803d;margin-top:0;\">Servicios aprobados</h3>" +
+          "<table style=\"width:100%;border-collapse:collapse;\">" +
+          filasCargos +
+          "<tr style=\"border-top:2px solid #bbf7d0;\"><td style=\"padding:10px 0 6px;font-weight:bold;color:#555;\">Total aprobado:</td>" +
+          "<td style=\"padding:10px 0 6px;text-align:right;font-weight:bold;font-size:18px;color:#15803d;\">" + fmtCOP(totalCargos) + "</td></tr>" +
+          "</table></div>" +
+          "<p style=\"color:#555;\">Estos servicios quedan confirmados para tu estadia. Cualquier consulta, comunicate con nosotros.</p>" +
+          "</div><div style=\"background:#f5f5f5;padding:15px;border-radius:0 0 8px 8px;text-align:center;\"><p style=\"color:#999;font-size:12px;margin:0;\">&copy; 2026 Hospedaje Digital.</p></div></div>"
+      });
+      console.log("Correo aprobacion cargos enviado a " + clienteEmail);
+      return true;
+    } catch (err) {
+      console.error("Error en EmailService.enviarAprobacionCargosAdicionales:", err.message);
+      return false;
+    }
+  },
+
+  enviarRechazoCargoComprobante: async ({ clienteNombre, clienteEmail, reservaId }) => {
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clienteEmail && clienteEmail.trim());
+    if (!emailValido) { console.warn("Correo invalido para rechazo cargo: " + clienteEmail); return false; }
+    try {
+      const frontendUrl = (process.env.FRONTEND_URL || "https://hospedaje-digital-all.vercel.app").trim();
+      await enviarBrevo({
+        toEmail: clienteEmail,
+        toName: clienteNombre,
+        subject: "Comprobante de servicios adicionales rechazado — Reserva #" + reservaId,
+        htmlContent:
+          "<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:8px;\">" +
+          "<div style=\"background:#dc2626;padding:20px;border-radius:8px 8px 0 0;text-align:center;\"><h1 style=\"color:white;margin:0;\">Hospedaje Digital</h1></div>" +
+          "<div style=\"padding:30px;\">" +
+          "<h2 style=\"color:#dc2626;\">&#10007; Comprobante de servicios adicionales no aprobado</h2>" +
+          "<p>Hola <strong>" + clienteNombre + "</strong>, revisamos el comprobante de pago de los servicios adicionales de tu reserva <strong>#" + reservaId + "</strong> y no pudimos aprobarlo.</p>" +
+          "<div style=\"background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px;margin:20px 0;\">" +
+          "<p style=\"margin:0;color:#b91c1c;\">Los cargos adicionales vuelven a estado <strong>pendiente de pago</strong>. Por favor, reingresa al portal y realizá el pago nuevamente con un comprobante valido.</p></div>" +
+          "<div style=\"text-align:center;margin:28px 0;\"><a href=\"" + frontendUrl + "/cliente.html\" style=\"background:#dc2626;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;\">Ir a Mis Reservas</a></div>" +
+          "</div><div style=\"background:#f5f5f5;padding:15px;border-radius:0 0 8px 8px;text-align:center;\"><p style=\"color:#999;font-size:12px;margin:0;\">&copy; 2026 Hospedaje Digital.</p></div></div>"
+      });
+      console.log("Correo rechazo cargo enviado a " + clienteEmail);
+      return true;
+    } catch (err) {
+      console.error("Error en EmailService.enviarRechazoCargoComprobante:", err.message);
+      return false;
+    }
+  },
+
   enviarBienvenida: async ({ usuarioNombre, usuarioEmail }) => {
     const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usuarioEmail && usuarioEmail.trim());
     if (!emailValido) { console.warn("Correo invalido para bienvenida: " + usuarioEmail); return false; }
