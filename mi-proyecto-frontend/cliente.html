@@ -2420,8 +2420,15 @@
             try {
                 const metodos = await apiFetch('/reservas/metodos-pago');
                 const permitidos = ['efectivo', 'transferencia'];
+                const vistos = new Set();
                 sel.innerHTML = metodos
-                    .filter(m => permitidos.some(p => (m.NomMetodoPago || '').toLowerCase().includes(p)))
+                    .filter(m => {
+                        const nom = (m.NomMetodoPago || '').toLowerCase();
+                        if (!permitidos.some(p => nom.includes(p))) return false;
+                        if (vistos.has(nom)) return false;
+                        vistos.add(nom);
+                        return true;
+                    })
                     .map(m => `<option value="${m.IdMetodoPago}">${m.NomMetodoPago}</option>`)
                     .join('');
                 toggleComprobanteCargoInput(sel);
