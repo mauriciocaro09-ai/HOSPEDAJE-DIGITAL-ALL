@@ -1046,53 +1046,57 @@ const renderCargosAdicionalesSection = async (idReserva, estadoNombreOriginal) =
         if (!cargos || !cargos.length) {
             html = '<p style="font-size:13px;color:#9ca3af;margin:0 0 10px;">Sin cargos adicionales</p>';
         } else {
+            const enVerificacion = cargos.filter(c => c.Estado === 'pendiente' && !!c.ComprobanteTransferencia);
+            const pendientesSin  = cargos.filter(c => c.Estado === 'pendiente' && !c.ComprobanteTransferencia);
+
+            // Lista limpia: nombre, monto, estado — sin comprobantes repetidos
             html = cargos.map(c => {
-                let acciones = '';
-                const tieneComprobanteCargo = !!c.ComprobanteTransferencia;
-                if (c.Estado === 'pendiente' && !tieneComprobanteCargo) {
-                    acciones = `
-                        <div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-                            <select id="metodo-cargo-${c.IDCargo}" style="font-size:11px;padding:3px 6px;border:1px solid #d1d5db;border-radius:4px;">
-                                <option value="">Método de pago...</option>
-                                ${opcionesMetodo}
-                            </select>
-                            <button onclick="pagarCargoAdicional(${idReserva}, ${c.IDCargo}, '${escaparHtml(estadoNombreOriginal)}')" style="font-size:11px;padding:3px 10px;background:#10b981;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;">Pagar</button>
-                            <button onclick="cancelarCargoAdicional(${idReserva}, ${c.IDCargo}, '${escaparHtml(estadoNombreOriginal)}')" style="font-size:11px;padding:3px 10px;background:#ef4444;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;">Cancelar</button>
-                        </div>`;
-                } else if (c.Estado === 'pendiente' && tieneComprobanteCargo) {
-                    const esImg = c.ComprobanteTransferencia.startsWith('data:image');
-                    acciones = `
-                        <div style="margin-top:8px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px;">
-                            <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#0369a1;"><i class="fa-solid fa-file-check"></i> Comprobante de transferencia recibido</p>
-                            ${esImg
-                                ? `<img src="${c.ComprobanteTransferencia}" style="max-width:100%;max-height:160px;border-radius:6px;border:1px solid #e2e8f0;cursor:pointer;display:block;margin-bottom:8px;" onclick="window.open(this.src,'_blank')" title="Ver comprobante">`
-                                : `<a href="${c.ComprobanteTransferencia}" download="comprobante_cargo_${c.IDCargo}.pdf" style="font-size:12px;color:#1a2744;font-weight:600;display:block;margin-bottom:8px;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:4px;"></i>Descargar PDF</a>`
-                            }
-                            <div style="display:flex;gap:6px;">
-                                <button onclick="aprobarCargoAdicional(${idReserva}, ${c.IDCargo}, '${escaparHtml(estadoNombreOriginal)}')" style="font-size:11px;padding:4px 12px;background:#10b981;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;"><i class="fa-solid fa-check"></i> Aprobar</button>
-                                <button onclick="rechazarCargoAdicional(${idReserva}, ${c.IDCargo}, '${escaparHtml(estadoNombreOriginal)}')" style="font-size:11px;padding:4px 12px;background:#ef4444;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;"><i class="fa-solid fa-xmark"></i> Rechazar</button>
-                            </div>
-                        </div>`;
-                }
+                const esPendSin = c.Estado === 'pendiente' && !c.ComprobanteTransferencia;
+                const esPendCon = c.Estado === 'pendiente' && !!c.ComprobanteTransferencia;
+                const badgeTxt  = esPendCon ? 'en verificación' : c.Estado;
+                const badgeClr  = esPendCon ? '#b45309' : (badgeColor[c.Estado] || '#9ca3af');
+                const badgeBg   = esPendCon ? '#fef3c7'  : (badgeColor[c.Estado] || '#9ca3af') + '20';
+                const cancelBtn = esPendSin
+                    ? `<button onclick="cancelarCargoAdicional(${idReserva}, ${c.IDCargo}, '${escaparHtml(estadoNombreOriginal)}')" style="font-size:10px;padding:2px 8px;background:#fee2e2;color:#dc2626;border:none;border-radius:4px;cursor:pointer;">Cancelar</button>`
+                    : '';
                 return `
-                    <div style="padding:8px 0;border-bottom:1px solid #f3f4f6;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                            <div>
-                                <span style="font-size:13px;font-weight:600;">${escaparHtml(c.NombreServicio || '')} x${c.Cantidad}</span>
-                                <span style="font-size:11px;color:#6b7280;margin-left:6px;">${c.NomMetodoPago ? '· ' + escaparHtml(c.NomMetodoPago) : ''}</span>
-                            </div>
-                            <div style="display:flex;align-items:center;gap:8px;">
-                                <strong style="font-size:13px;">${fmt(c.PrecioTotal)}</strong>
-                                <span style="background:${badgeColor[c.Estado] || '#9ca3af'}20;color:${badgeColor[c.Estado] || '#9ca3af'};border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;">${c.Estado}</span>
-                            </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f3f4f6;gap:8px;">
+                        <div>
+                            <span style="font-size:13px;font-weight:600;">${escaparHtml(c.NombreServicio || '')} <span style="font-weight:400;color:#6b7280;">x${c.Cantidad}</span></span>
+                            ${c.NomMetodoPago ? `<span style="font-size:11px;color:#9ca3af;margin-left:4px;">· ${escaparHtml(c.NomMetodoPago)}</span>` : ''}
                         </div>
-                        ${acciones}
+                        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                            <strong style="font-size:13px;">${fmt(c.PrecioTotal)}</strong>
+                            <span style="background:${badgeBg};color:${badgeClr};border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;white-space:nowrap;">${badgeTxt}</span>
+                            ${cancelBtn}
+                        </div>
                     </div>`;
             }).join('');
 
+            // Totales de resumen
             const totalPagado = cargos.filter(c => c.Estado === 'pagado').reduce((s, c) => s + Number(c.PrecioTotal), 0);
+            const totalVerif  = enVerificacion.reduce((s, c) => s + Number(c.PrecioTotal), 0);
             if (totalPagado > 0) {
                 html += `<p style="text-align:right;font-size:12px;margin-top:6px;color:#6b7280;">Total pagado en extras: <strong>${fmt(totalPagado)}</strong></p>`;
+            }
+
+            // Bloque único de aprobación si hay cargos en verificación
+            if (enVerificacion.length > 0) {
+                const comp    = enVerificacion[0].ComprobanteTransferencia;
+                const esImg   = comp.startsWith('data:image');
+                const verImag = esImg
+                    ? `<img src="${comp}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;display:block;margin-bottom:10px;" onclick="window.open(this.src,'_blank')" title="Ver en pantalla completa">`
+                    : `<a href="${comp}" download="comprobante_cargos.pdf" style="font-size:12px;color:#1a2744;font-weight:600;display:block;margin-bottom:10px;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:4px;"></i>Descargar PDF</a>`;
+                html += `
+                    <div style="margin-top:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;">
+                        <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#0369a1;"><i class="fa-solid fa-file-check" style="margin-right:5px;"></i>Comprobante recibido — ${enVerificacion.length} cargo${enVerificacion.length>1?'s':''} en verificación</p>
+                        <p style="margin:0 0 10px;font-size:12px;color:#64748b;">Total a aprobar: <strong>${fmt(totalVerif)}</strong></p>
+                        ${verImag}
+                        <div style="display:flex;gap:8px;">
+                            <button onclick="aprobarLoteCargos(${idReserva}, '${escaparHtml(estadoNombreOriginal)}')" style="flex:1;padding:7px 0;background:#10b981;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;"><i class="fa-solid fa-check" style="margin-right:5px;"></i>Aprobar todo</button>
+                            <button onclick="rechazarLoteCargos(${idReserva}, '${escaparHtml(estadoNombreOriginal)}')" style="flex:1;padding:7px 0;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;"><i class="fa-solid fa-xmark" style="margin-right:5px;"></i>Rechazar todo</button>
+                        </div>
+                    </div>`;
             }
         }
 
@@ -2042,6 +2046,46 @@ if (document.readyState === 'loading') {
             Swal.fire({ icon: 'info', title: 'Comprobante rechazado', timer: 1500, showConfirmButton: false });
         } catch(e) {
             Swal.fire('Error', 'No se pudo rechazar el cargo', 'error');
+        }
+    };
+
+    window.aprobarLoteCargos = async (idReserva, estadoNombre) => {
+        const result = await Swal.fire({
+            title: '¿Aprobar todos los cargos?',
+            text: 'Se aprobarán todos los cargos en verificación y quedarán marcados como pagados.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, aprobar todo',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#10b981'
+        });
+        if (!result.isConfirmed) return;
+        try {
+            await requestJson(`/cargos/reserva/${idReserva}/aprobar-lote`, { method: 'PUT', body: {} });
+            await renderCargosAdicionalesSection(idReserva, estadoNombre);
+            Swal.fire({ icon: 'success', title: 'Cargos aprobados', timer: 1500, showConfirmButton: false });
+        } catch(e) {
+            Swal.fire('Error', 'No se pudo aprobar los cargos', 'error');
+        }
+    };
+
+    window.rechazarLoteCargos = async (idReserva, estadoNombre) => {
+        const result = await Swal.fire({
+            title: 'Rechazar comprobante',
+            text: 'El comprobante será eliminado y todos los cargos en verificación volverán a pendiente de pago.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, rechazar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#ef4444'
+        });
+        if (!result.isConfirmed) return;
+        try {
+            await requestJson(`/cargos/reserva/${idReserva}/rechazar-lote`, { method: 'PUT', body: {} });
+            await renderCargosAdicionalesSection(idReserva, estadoNombre);
+            Swal.fire({ icon: 'info', title: 'Comprobante rechazado', timer: 1500, showConfirmButton: false });
+        } catch(e) {
+            Swal.fire('Error', 'No se pudo rechazar los cargos', 'error');
         }
     };
 

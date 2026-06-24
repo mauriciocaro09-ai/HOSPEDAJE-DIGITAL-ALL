@@ -8,6 +8,8 @@ router.use(verificarToken);
 router.post('/reserva/:idReserva', CargosController.crear);
 router.get('/reserva/:idReserva', CargosController.obtenerPorReserva);
 router.put('/reserva/:idReserva/pagar-lote', CargosController.pagarLote);
+router.put('/reserva/:idReserva/aprobar-lote', CargosController.aprobarLote);
+router.put('/reserva/:idReserva/rechazar-lote', CargosController.rechazarLote);
 router.put('/:id/pagar', CargosController.pagar);
 router.put('/:id/aprobar', CargosController.aprobar);
 router.put('/:id/rechazar', CargosController.rechazar);

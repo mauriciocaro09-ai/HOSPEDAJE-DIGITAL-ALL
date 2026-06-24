@@ -115,6 +115,26 @@ const CargosService = {
     return { esTransferencia: !!esTransferencia, cantidad: cargos.length };
   },
 
+  aprobarLote: async (idReserva) => {
+    await db.query(
+      `UPDATE cargo_adicional SET Estado = 'pagado', FechaPago = NOW()
+       WHERE IDReserva = ? AND Estado = 'pendiente'
+         AND ComprobanteTransferencia IS NOT NULL AND ComprobanteTransferencia != ''`,
+      [idReserva]
+    );
+    return true;
+  },
+
+  rechazarLote: async (idReserva) => {
+    await db.query(
+      `UPDATE cargo_adicional SET ComprobanteTransferencia = NULL, IDMetodoPago = NULL
+       WHERE IDReserva = ? AND Estado = 'pendiente'
+         AND ComprobanteTransferencia IS NOT NULL AND ComprobanteTransferencia != ''`,
+      [idReserva]
+    );
+    return true;
+  },
+
   aprobar: async (idCargo) => {
     const [[cargo]] = await db.query(
       'SELECT * FROM cargo_adicional WHERE IDCargo = ? LIMIT 1',

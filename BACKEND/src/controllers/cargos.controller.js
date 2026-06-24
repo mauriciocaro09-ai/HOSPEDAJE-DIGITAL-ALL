@@ -59,6 +59,26 @@ const CargosController = {
     }
   },
 
+  aprobarLote: async (req, res) => {
+    try {
+      await CargosService.aprobarLote(req.params.idReserva);
+      res.json({ mensaje: 'Todos los cargos aprobados y marcados como pagados' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error aprobando cargos' });
+    }
+  },
+
+  rechazarLote: async (req, res) => {
+    try {
+      await CargosService.rechazarLote(req.params.idReserva);
+      res.json({ mensaje: 'Comprobante rechazado. Los cargos vuelven a pendiente de pago.' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error rechazando cargos' });
+    }
+  },
+
   aprobar: async (req, res) => {
     try {
       await CargosService.aprobar(req.params.id);
