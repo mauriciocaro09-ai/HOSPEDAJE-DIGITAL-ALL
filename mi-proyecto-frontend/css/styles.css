@@ -740,6 +740,15 @@ header nav a:hover {
 }
 .crud-modal-content::-webkit-scrollbar { display: none; }
 
+/* Ocultar scrollbar en todos los paneles con scroll del sistema */
+.reserva-main-panel,
+.reserva-sidebar-panel {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.reserva-main-panel::-webkit-scrollbar,
+.reserva-sidebar-panel::-webkit-scrollbar { display: none; }
+
 .crud-modal-content .crud-habitaciones-mensaje,
 .crud-modal-content .crud-servicios-mensaje {
     margin: 0.75rem 0 0.25rem;

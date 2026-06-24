@@ -587,6 +587,19 @@
         }
         .modal-box::-webkit-scrollbar { display: none; }
 
+        /* Ocultar scrollbar en modales con overflow-y:auto inline */
+        #modal-detalle-reserva > div,
+        #modal-agregar-servicios > div,
+        #modal-pagar-cargo > div,
+        #srv-detalle-modal-nr > div {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        #modal-detalle-reserva > div::-webkit-scrollbar,
+        #modal-agregar-servicios > div::-webkit-scrollbar,
+        #modal-pagar-cargo > div::-webkit-scrollbar,
+        #srv-detalle-modal-nr > div::-webkit-scrollbar { display: none; }
+
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -1065,7 +1078,8 @@
             align-items: center;
             gap: 8px;
         }
-        #cln-notif-lista { max-height: 320px; overflow-y: auto; }
+        #cln-notif-lista { max-height: 320px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+        #cln-notif-lista::-webkit-scrollbar { display: none; }
         .cln-notif-grupo { border-bottom: 1px solid #f1f5f9; }
         .cln-notif-grupo:last-child { border-bottom: none; }
         .cln-notif-cabecera {

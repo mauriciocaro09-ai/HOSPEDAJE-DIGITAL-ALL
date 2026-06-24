@@ -795,6 +795,8 @@
     --reserva-form-left: 80px;
 }
 
+body.reserva-form-activa #form-reserva-admin::-webkit-scrollbar { display: none !important; }
+
 /* El formulario mismo es el overlay fullscreen, no la sección */
 body.reserva-form-activa #form-reserva-admin {
     position: fixed !important;
@@ -803,6 +805,8 @@ body.reserva-form-activa #form-reserva-admin {
     right: 0 !important;
     bottom: 0 !important;
     overflow-y: auto !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
     z-index: 300 !important;
     background: #f1f5f9 !important;
     padding: 24px 28px !important;
