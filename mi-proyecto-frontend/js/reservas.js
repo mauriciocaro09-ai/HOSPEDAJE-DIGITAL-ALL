@@ -1098,6 +1098,23 @@ const renderCargosAdicionalesSection = async (idReserva, estadoNombreOriginal) =
                         </div>
                     </div>`;
             }
+
+            // Bloque de referencia: comprobante de cargos ya pagados por transferencia
+            const pagadosConComp = cargos.filter(c => c.Estado === 'pagado' && !!c.ComprobanteTransferencia);
+            if (pagadosConComp.length > 0 && enVerificacion.length === 0) {
+                const comp   = pagadosConComp[0].ComprobanteTransferencia;
+                const esImg  = comp.startsWith('data:image');
+                const verImg = esImg
+                    ? `<img src="${comp}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid #d1fae5;cursor:pointer;display:block;" onclick="window.open(this.src,'_blank')" title="Ver en pantalla completa">`
+                    : `<a href="${comp}" download="comprobante_cargos.pdf" style="font-size:12px;color:#065f46;font-weight:600;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:4px;"></i>Descargar comprobante PDF</a>`;
+                const totalAprobado = pagadosConComp.reduce((s, c) => s + Number(c.PrecioTotal), 0);
+                html += `
+                    <div style="margin-top:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">
+                        <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#15803d;"><i class="fa-solid fa-circle-check" style="margin-right:5px;"></i>Comprobante de transferencia — ${pagadosConComp.length} cargo${pagadosConComp.length>1?'s':''} aprobado${pagadosConComp.length>1?'s':''}</p>
+                        <p style="margin:0 0 10px;font-size:12px;color:#64748b;">Total cobrado: <strong>${fmt(totalAprobado)}</strong></p>
+                        ${verImg}
+                    </div>`;
+            }
         }
 
         if (puedeAgregar) {
