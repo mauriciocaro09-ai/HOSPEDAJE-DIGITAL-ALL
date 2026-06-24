@@ -1099,21 +1099,35 @@ const renderCargosAdicionalesSection = async (idReserva, estadoNombreOriginal) =
                     </div>`;
             }
 
-            // Bloque de referencia: comprobante de cargos ya pagados por transferencia
+            // Bloques de referencia: un bloque por cada comprobante distinto (cada batch de pago)
             const pagadosConComp = cargos.filter(c => c.Estado === 'pagado' && !!c.ComprobanteTransferencia);
             if (pagadosConComp.length > 0 && enVerificacion.length === 0) {
-                const comp   = pagadosConComp[0].ComprobanteTransferencia;
-                const esImg  = comp.startsWith('data:image');
-                const verImg = esImg
-                    ? `<img src="${comp}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid #d1fae5;cursor:pointer;display:block;" onclick="window.open(this.src,'_blank')" title="Ver en pantalla completa">`
-                    : `<a href="${comp}" download="comprobante_cargos.pdf" style="font-size:12px;color:#065f46;font-weight:600;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:4px;"></i>Descargar comprobante PDF</a>`;
-                const totalAprobado = pagadosConComp.reduce((s, c) => s + Number(c.PrecioTotal), 0);
-                html += `
-                    <div style="margin-top:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">
-                        <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#15803d;"><i class="fa-solid fa-circle-check" style="margin-right:5px;"></i>Comprobante de transferencia — ${pagadosConComp.length} cargo${pagadosConComp.length>1?'s':''} aprobado${pagadosConComp.length>1?'s':''}</p>
-                        <p style="margin:0 0 10px;font-size:12px;color:#64748b;">Total cobrado: <strong>${fmt(totalAprobado)}</strong></p>
-                        ${verImg}
-                    </div>`;
+                // Agrupar por comprobante único (mismo batch = misma imagen)
+                const grupos = new Map();
+                for (const c of pagadosConComp) {
+                    const clave = c.ComprobanteTransferencia.substring(0, 80); // proxy de identidad
+                    if (!grupos.has(clave)) grupos.set(clave, { comp: c.ComprobanteTransferencia, items: [] });
+                    grupos.get(clave).items.push(c);
+                }
+
+                let nGrupo = 0;
+                for (const [, g] of grupos) {
+                    nGrupo++;
+                    const esImg  = g.comp.startsWith('data:image');
+                    const verImg = esImg
+                        ? `<img src="${g.comp}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid #d1fae5;cursor:pointer;display:block;" onclick="window.open(this.src,'_blank')" title="Ver en pantalla completa">`
+                        : `<a href="${g.comp}" download="comprobante_cargos_${nGrupo}.pdf" style="font-size:12px;color:#065f46;font-weight:600;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;margin-right:4px;"></i>Descargar comprobante PDF</a>`;
+                    const totalGrupo = g.items.reduce((s, c) => s + Number(c.PrecioTotal), 0);
+                    const labelItems = g.items.map(c => `${c.NombreServicio} x${c.Cantidad}`).join(', ');
+                    const titulo = grupos.size > 1 ? `Comprobante ${nGrupo}/${grupos.size}` : 'Comprobante de transferencia';
+                    html += `
+                        <div style="margin-top:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">
+                            <p style="margin:0 0 2px;font-size:13px;font-weight:700;color:#15803d;"><i class="fa-solid fa-circle-check" style="margin-right:5px;"></i>${titulo} — ${g.items.length} cargo${g.items.length>1?'s':''} aprobado${g.items.length>1?'s':''}</p>
+                            <p style="margin:0 0 4px;font-size:11px;color:#6b7280;">${labelItems}</p>
+                            <p style="margin:0 0 10px;font-size:12px;color:#64748b;">Total cobrado: <strong>${fmt(totalGrupo)}</strong></p>
+                            ${verImg}
+                        </div>`;
+                }
             }
         }
 
