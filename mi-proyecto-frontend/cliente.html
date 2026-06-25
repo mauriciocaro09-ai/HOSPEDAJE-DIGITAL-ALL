@@ -3295,6 +3295,9 @@
                 const idPaquete = parseInt($('nr-paquete')?.value || 0) || null;
                 const paquetesSeleccionados = idPaquete ? [{ IDPaquete: idPaquete, cantidad: 1 }] : [];
 
+                const metodoPagoTexto = ($('nr-metodo-pago').selectedOptions[0]?.text || '').toLowerCase();
+                const esTransferencia = metodoPagoTexto.includes('transferencia');
+
                 await apiFetch('/reservas', {
                     method: 'POST',
                     body: JSON.stringify({
@@ -3306,7 +3309,6 @@
                         Monto_Total:         calculado.total,
                         Descuento:           0,
                         MetodoPago:          parseInt(metodo),
-                        IdEstadoReserva:     1,
                         id_usuario:          usuarioActual?.id,
                         NroDocumentoCliente: usuario.numeroDocumento || '',
                         TipoDocumentoCliente:usuario.tipoDocumento   || '',
@@ -3323,10 +3325,15 @@
                 cargarDashboard();
 
                 const toast = document.createElement('div');
-                toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#16a34a;color:#fff;padding:14px 20px;border-radius:10px;font-weight:700;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);display:flex;align-items:center;gap:12px;';
-                toast.innerHTML = '<i class="fa-solid fa-circle-check"></i> ¡Reserva creada exitosamente! <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1;padding:0;opacity:0.8;">×</button>';
+                if (esTransferencia) {
+                    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#d97706;color:#fff;padding:14px 20px;border-radius:10px;font-weight:700;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);display:flex;align-items:center;gap:12px;max-width:360px;';
+                    toast.innerHTML = '<i class="fa-solid fa-clock"></i> <span>Reserva creada. Tu pago está <strong>pendiente de aprobación</strong>. Subí el comprobante de transferencia desde Mis Reservas.</span> <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1;padding:0;opacity:0.8;">×</button>';
+                } else {
+                    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#16a34a;color:#fff;padding:14px 20px;border-radius:10px;font-weight:700;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);display:flex;align-items:center;gap:12px;';
+                    toast.innerHTML = '<i class="fa-solid fa-circle-check"></i> ¡Reserva confirmada exitosamente! <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1;padding:0;opacity:0.8;">×</button>';
+                }
                 document.body.appendChild(toast);
-                setTimeout(() => { if (toast.isConnected) toast.remove(); }, 5000);
+                setTimeout(() => { if (toast.isConnected) toast.remove(); }, 7000);
             } catch(err) {
                 const msg = err?.message || '';
                 const esPendiente = msg.toLowerCase().includes('pendiente de confirmacion');

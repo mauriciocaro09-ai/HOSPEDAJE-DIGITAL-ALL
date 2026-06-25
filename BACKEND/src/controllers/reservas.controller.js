@@ -174,6 +174,25 @@ const crear = async (req, res) => {
       }
     }
 
+    // Asignar estado según método de pago:
+    // efectivo → Confirmada automáticamente; transferencia → Pendiente (espera comprobante)
+    const idMetodo = req.body.MetodoPago || req.body.IdMetodoPago;
+    if (idMetodo) {
+      try {
+        const [[mp]] = await db.query('SELECT NomMetodoPago FROM metodopago WHERE IdMetodoPago = ? LIMIT 1', [idMetodo]);
+        const nombreMetodo = (mp?.NomMetodoPago || '').toLowerCase();
+        if (nombreMetodo.includes('efectivo')) {
+          const [[estadoConf]] = await db.query(
+            "SELECT IdEstadoReserva FROM estadosreserva WHERE LOWER(NombreEstadoReserva) LIKE '%confirmad%' LIMIT 1"
+          );
+          if (estadoConf) req.body.IdEstadoReserva = estadoConf.IdEstadoReserva;
+        }
+        // transferencia: no se cambia → queda en Pendiente (default del modelo)
+      } catch (e) {
+        console.error('No se pudo determinar estado por método de pago:', e.message);
+      }
+    }
+
     const result = await ReservasService.create(req.body);
     const reservaId = result.insertId;
 
