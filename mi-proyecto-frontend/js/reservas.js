@@ -865,7 +865,10 @@ const guardarReservaAdmin = async (event) => {
     _errCruceFechas = false;
     if (!validarPasoWizard(1)) {
         if (_errCruceFechas) {
-            Swal.fire({ icon: 'error', title: 'Habitación no disponible', text: 'La habitación ya tiene una reserva en esas fechas. Elegí otras fechas o una habitación diferente.', confirmButtonColor: '#1a2744' });
+            // Leer el mensaje específico del error inline (incluye el nombre de la habitación conflictiva)
+            const msgEspecifico = document.getElementById('reserva-admin-fecha-fin-error')?.textContent?.trim()
+                || 'La habitación ya tiene una reserva en esas fechas. Elegí otras fechas o una habitación diferente.';
+            Swal.fire({ icon: 'error', title: 'Habitación no disponible', text: msgEspecifico, confirmButtonColor: '#1a2744' });
         } else {
             Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Completa los datos del cliente, habitación y fechas.', confirmButtonColor: '#1a2744' });
         }
