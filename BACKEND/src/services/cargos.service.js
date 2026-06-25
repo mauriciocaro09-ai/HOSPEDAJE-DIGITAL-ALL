@@ -50,7 +50,8 @@ const CargosService = {
               ca.IDMetodoPago, ca.FechaCreacion, ca.FechaPago,
               ca.ComprobanteTransferencia,
               (ca.ComprobanteTransferencia IS NOT NULL AND ca.ComprobanteTransferencia != '') AS TieneComprobante,
-              s.NombreServicio, mp.NomMetodoPago
+              COALESCE(s.NombreServicio, ca.NombreCargo, 'Cargo adicional') AS NombreServicio,
+              mp.NomMetodoPago
        FROM cargo_adicional ca
        LEFT JOIN servicio s ON ca.IDServicio = s.IDServicio
        LEFT JOIN metodopago mp ON ca.IDMetodoPago = mp.IdMetodoPago

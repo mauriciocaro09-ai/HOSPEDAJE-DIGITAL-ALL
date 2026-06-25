@@ -319,7 +319,48 @@ const ReservasService = {
 
   /* ── Extender días ──────────────────────────── */
   extender: async (id, diasExtra) => {
-    return await Reservas.extender(id, diasExtra);
+    // Guardar fecha fin original antes de extender
+    const reservaAntes = await Reservas.obtenerPorId(id);
+    if (!reservaAntes) return null;
+    const fechaFinAnterior = (reservaAntes.FechaFinalizacion instanceof Date
+      ? reservaAntes.FechaFinalizacion.toISOString()
+      : String(reservaAntes.FechaFinalizacion)).split('T')[0];
+
+    const resultado = await Reservas.extender(id, diasExtra);
+    if (!resultado) return null;
+
+    // Crear cargo adicional por los días extra
+    const nombreCargo = `Extensión de estadía — ${diasExtra} día(s): ${fechaFinAnterior} → ${resultado.nuevaFechaFin}`;
+    await db.query(
+      `INSERT INTO cargo_adicional (IDReserva, IDServicio, NombreCargo, Cantidad, PrecioUnitario, PrecioTotal, Estado)
+       VALUES (?, NULL, ?, ?, ?, ?, 'pendiente')`,
+      [id, nombreCargo, diasExtra, resultado.costoBase / diasExtra, Math.round(resultado.costoTotal * 100) / 100]
+    ).catch(e => console.error('Error creando cargo extensión:', e.message));
+
+    // Enviar email al cliente (sin bloquear la respuesta)
+    db.query(
+      `SELECT r.IdReserva, c.Nombre, c.Apellido, c.Email, h.NombreHabitacion
+       FROM reserva r
+       LEFT JOIN cliente c ON c.NroDocumento = r.NroDocumentoCliente
+       LEFT JOIN habitacion h ON r.IDHabitacion = h.IDHabitacion
+       WHERE r.IdReserva = ? LIMIT 1`,
+      [id]
+    ).then(([[info]]) => {
+      if (info && info.Email) {
+        EmailService.enviarExtensionReserva({
+          clienteNombre: (info.Nombre || '') + ' ' + (info.Apellido || ''),
+          clienteEmail: info.Email,
+          reservaId: id,
+          habitacion: info.NombreHabitacion || '—',
+          diasExtra,
+          fechaFinAnterior,
+          nuevaFechaFin: resultado.nuevaFechaFin,
+          costoExtra: resultado.costoTotal
+        }).catch(e => console.error('Error enviando email extension:', e.message));
+      }
+    }).catch(e => console.error('Error fetch cliente para email extension:', e.message));
+
+    return resultado;
   },
 
   /* ── Eliminar ───────────────────────────────── */

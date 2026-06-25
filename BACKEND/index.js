@@ -100,6 +100,14 @@ const crearTablasDetalle = async () => {
             console.log('Columna ComprobanteTransferencia agregada a cargo_adicional.');
         }
 
+        // Soporte para cargos sin servicio (ej: extensión de estadía)
+        const [colsNombreCargo] = await db.query(`SHOW COLUMNS FROM cargo_adicional LIKE 'NombreCargo'`);
+        if (colsNombreCargo.length === 0) {
+            await db.query(`ALTER TABLE cargo_adicional ADD COLUMN NombreCargo VARCHAR(200) NULL DEFAULT NULL`);
+            console.log('Columna NombreCargo agregada a cargo_adicional.');
+        }
+        await db.query(`ALTER TABLE cargo_adicional MODIFY COLUMN IDServicio INT NULL`).catch(() => {});
+
         console.log('Tablas de detalle verificadas.');
     } catch (err) {
         console.warn('No se pudieron crear tablas de detalle:', err.message);

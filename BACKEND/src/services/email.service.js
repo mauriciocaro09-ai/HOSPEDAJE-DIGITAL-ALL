@@ -425,7 +425,43 @@ const EmailService = {
       console.error("Error en EmailService.enviarBienvenida:", err.message);
       return false;
     }
-  }
+  },
+
+  enviarExtensionReserva: async ({ clienteNombre, clienteEmail, reservaId, habitacion, diasExtra, fechaFinAnterior, nuevaFechaFin, costoExtra }) => {
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clienteEmail && clienteEmail.trim());
+    if (!emailValido) { console.warn("Correo invalido para extension reserva: " + clienteEmail); return false; }
+    try {
+      const fmtCOP = (v) => "$" + Number(v || 0).toLocaleString("es-CO");
+      const frontendUrl = (process.env.FRONTEND_URL || "https://hospedaje-digital-all.vercel.app").trim();
+      await enviarBrevo({
+        toEmail: clienteEmail,
+        toName: clienteNombre,
+        subject: "Reserva extendida — " + diasExtra + " día(s) adicional(es) · Hospedaje Digital",
+        htmlContent:
+          "<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:8px;\">" +
+          "<div style=\"background:#0284c7;padding:20px;border-radius:8px 8px 0 0;text-align:center;\"><h1 style=\"color:white;margin:0;\">Hospedaje Digital</h1></div>" +
+          "<div style=\"padding:30px;\">" +
+          "<h2 style=\"color:#0284c7;\">&#128197; Tu reserva fue extendida</h2>" +
+          "<p>Hola <strong>" + clienteNombre + "</strong>, tu reserva <strong>#" + reservaId + "</strong> ha sido extendida <strong>" + diasExtra + " día(s)</strong> adicional(es).</p>" +
+          "<div style=\"background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:20px;margin:20px 0;\">" +
+          "<table style=\"width:100%;border-collapse:collapse;\">" +
+          "<tr><td style=\"padding:6px 0;color:#555;\">Habitación:</td><td style=\"padding:6px 0;font-weight:600;color:#0c4a6e;\">" + (habitacion || "—") + "</td></tr>" +
+          "<tr><td style=\"padding:6px 0;color:#555;\">Salida anterior:</td><td style=\"padding:6px 0;color:#374151;\">" + fechaFinAnterior + "</td></tr>" +
+          "<tr><td style=\"padding:6px 0;color:#555;\">Nueva fecha de salida:</td><td style=\"padding:6px 0;font-weight:700;color:#0284c7;font-size:16px;\">" + nuevaFechaFin + "</td></tr>" +
+          "<tr style=\"border-top:1px solid #bae6fd;\"><td style=\"padding:10px 0 6px;color:#555;\">Cargo adicional (IVA incl.):</td>" +
+          "<td style=\"padding:10px 0 6px;font-weight:700;font-size:16px;color:#0c4a6e;\">" + fmtCOP(costoExtra) + "</td></tr>" +
+          "</table></div>" +
+          "<p style=\"color:#555;\">Este cargo quedará pendiente de pago en tu portal. Podés abonarlo cuando quieras desde <strong>Mis Reservas</strong>.</p>" +
+          "<div style=\"text-align:center;margin:28px 0;\"><a href=\"" + frontendUrl + "/cliente.html\" style=\"background:#0284c7;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;\">Ver mis reservas</a></div>" +
+          "</div><div style=\"background:#f5f5f5;padding:15px;border-radius:0 0 8px 8px;text-align:center;\"><p style=\"color:#999;font-size:12px;margin:0;\">&copy; 2026 Hospedaje Digital.</p></div></div>"
+      });
+      console.log("Correo extension reserva enviado a " + clienteEmail);
+      return true;
+    } catch (err) {
+      console.error("Error en EmailService.enviarExtensionReserva:", err.message);
+      return false;
+    }
+  },
 };
 
 module.exports = EmailService;
