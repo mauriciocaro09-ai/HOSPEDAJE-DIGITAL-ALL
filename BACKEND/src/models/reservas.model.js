@@ -388,15 +388,10 @@ const Reservas = {
       throw err;
     }
 
-    // Calcular nueva fecha de fin (sin problemas de zona horaria)
-    const partes = reserva.FechaFinalizacion.toString().split('T')[0].split('-');
-    const d = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
-    d.setDate(d.getDate() + diasExtra);
-    const nuevaFechaFin = [
-      d.getFullYear(),
-      String(d.getMonth() + 1).padStart(2, '0'),
-      String(d.getDate()).padStart(2, '0'),
-    ].join('-');
+    // Calcular nueva fecha de fin — FechaFinalizacion llega como Date object de mysql2
+    const d = new Date(reserva.FechaFinalizacion);
+    d.setUTCDate(d.getUTCDate() + diasExtra);
+    const nuevaFechaFin = d.toISOString().split('T')[0];
 
     // Verificar conflictos con otras reservas activas de la misma habitación
     const [conflictos] = await db.query(`
