@@ -1400,6 +1400,12 @@
                                         </div>
                                         <div id="nr-hab-options-list" class="hab-options-list"></div>
                                     </div>
+                                    <div id="nr-habitaciones-extra-container"></div>
+                                    <div id="nr-btn-agregar-hab-wrap" style="display:none;margin-top:6px;">
+                                        <button type="button" onclick="nrAgregarHabitacionExtra()" style="background:none;border:1px dashed #0284c7;color:#0284c7;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer;width:100%;text-align:center;">
+                                            <i class="fa-solid fa-plus"></i> Agregar otra habitación
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group" style="margin-bottom:0;">
@@ -1613,6 +1619,7 @@
         let habitacionesDisponibles = [];
         let misReservas = [];
         let _paqueteSeleccionadoNR = null;
+        let _nrHabitacionesExtra = []; // [{id, nombre, costo}] — habitaciones 2 y 3
 
         // ── PROTECCIÓN: si no hay token o es admin, redirigir ─
         (function () {
@@ -2669,9 +2676,14 @@
             const idPreselecc = _nrIdPreselecc;
             _nrIdPreselecc = null;
             _paqueteSeleccionadoNR = null;
+            _nrHabitacionesExtra = [];
 
             $('form-nueva-reserva').reset();
             $('nr-error').classList.add('hidden');
+            const nrExtraContainer = $('nr-habitaciones-extra-container');
+            if (nrExtraContainer) nrExtraContainer.innerHTML = '';
+            const nrBtnWrap = $('nr-btn-agregar-hab-wrap');
+            if (nrBtnWrap) nrBtnWrap.style.display = 'none';
             actualizarResumen();
 
             const hoy = new Date().toISOString().split('T')[0];
@@ -2731,6 +2743,7 @@
                 if (labelSpan) labelSpan.textContent = nombre;
                 selectHab.dispatchEvent(new Event('change'));
                 list.querySelectorAll('.hab-option').forEach(o => o.classList.toggle('selected', o.dataset.id === String(idHab)));
+                nrRenderHabitacionesExtra();
             };
 
             const mostrarPreview = (hab, targetEl) => {
@@ -2808,6 +2821,70 @@
                     if (!trigger.contains(e.target) && !list.contains(e.target) && e.target !== selectHab) cerrar();
                 }, true);
             }
+        }
+
+        function nrRenderHabitacionesExtra() {
+            const container = $('nr-habitaciones-extra-container');
+            const btnWrap   = $('nr-btn-agregar-hab-wrap');
+            if (!container) return;
+
+            const primaryId = $('nr-habitacion')?.value || '';
+            const selectedIds = [primaryId, ..._nrHabitacionesExtra.map(h => String(h.id))].filter(Boolean);
+            const disponibles = habitacionesDisponibles.filter(h => !selectedIds.includes(String(h.IDHabitacion)));
+
+            container.innerHTML = _nrHabitacionesExtra.map((hab, idx) => `
+                <div style="display:flex;align-items:center;gap:8px;margin-top:6px;padding:8px 10px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
+                    <i class="fa-solid fa-bed" style="color:#0284c7;font-size:13px;flex-shrink:0;"></i>
+                    <span style="flex:1;font-size:13px;font-weight:600;color:#0c4a6e;">${String(hab.nombre || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+                    <span style="font-size:12px;color:#0284c7;white-space:nowrap;">$${fmt(Math.round(Number(hab.costo || 0) * 1.19))}/noche</span>
+                    <button type="button" onclick="nrQuitarHabitacionExtra(${idx})" style="background:none;border:none;cursor:pointer;color:#6b7280;padding:2px 6px;font-size:14px;line-height:1;" title="Quitar">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>`).join('');
+
+            const mostrarBtn = primaryId && _nrHabitacionesExtra.length < 2 && disponibles.length > 0;
+            if (btnWrap) btnWrap.style.display = mostrarBtn ? '' : 'none';
+            actualizarResumen();
+        }
+
+        function nrAgregarHabitacionExtra() {
+            const primaryId = $('nr-habitacion')?.value || '';
+            const selectedIds = [primaryId, ..._nrHabitacionesExtra.map(h => String(h.id))].filter(Boolean);
+            const disponibles = habitacionesDisponibles.filter(h => !selectedIds.includes(String(h.IDHabitacion)));
+
+            if (!disponibles.length) {
+                Swal.fire({ icon: 'info', title: 'Sin habitaciones disponibles', text: 'No hay más habitaciones disponibles.', confirmButtonColor: '#1a2744' });
+                return;
+            }
+
+            const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            Swal.fire({
+                title: 'Agregar habitación',
+                html: `<select id="swal-nr-hab-extra" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;margin-top:4px;">
+                    <option value="">-- Selecciona --</option>
+                    ${disponibles.map(h => `<option value="${h.IDHabitacion}" data-nombre="${esc(h.NombreHabitacion || h.Nombre || '')}" data-costo="${h.Costo || 0}">${esc(h.NombreHabitacion || h.Nombre || 'Habitación')} — $${fmt(Math.round(Number(h.Costo || 0) * 1.19))}/noche</option>`).join('')}
+                </select>`,
+                confirmButtonText: 'Agregar',
+                confirmButtonColor: '#0284c7',
+                cancelButtonText: 'Cancelar',
+                showCancelButton: true,
+                preConfirm: () => {
+                    const sel = document.getElementById('swal-nr-hab-extra');
+                    if (!sel?.value) { Swal.showValidationMessage('Selecciona una habitación'); return false; }
+                    const opt = sel.options[sel.selectedIndex];
+                    return { id: sel.value, nombre: opt.dataset.nombre, costo: opt.dataset.costo };
+                }
+            }).then(result => {
+                if (result.isConfirmed && result.value) {
+                    _nrHabitacionesExtra.push(result.value);
+                    nrRenderHabitacionesExtra();
+                }
+            });
+        }
+
+        function nrQuitarHabitacionExtra(idx) {
+            _nrHabitacionesExtra.splice(idx, 1);
+            nrRenderHabitacionesExtra();
         }
 
         function construirDropdownCustomNRPaquetes(paquetes) {
@@ -3244,14 +3321,18 @@
                         // Sin paquete con habitación: flujo original
                         const sel = $('nr-habitacion');
                         const opt = sel ? sel.options[sel.selectedIndex] : null;
-                        const costoHabIva = parseFloat(opt?.dataset?.costo || 0);
+                        let costoHabIva = parseFloat(opt?.dataset?.costo || 0);
+                        // Sumar habitaciones extra
+                        for (const habExtra of _nrHabitacionesExtra) {
+                            costoHabIva += Math.round(Number(habExtra.costo || 0) * 1.19);
+                        }
                         const selPaq = $('nr-paquete');
                         const paqOpt = selPaq ? selPaq.options[selPaq.selectedIndex] : null;
                         const costoPaqIva = parseFloat(paqOpt?.dataset?.precio || 0);
 
                         if (rowPaquete) rowPaquete.style.display = costoPaqIva > 0 ? '' : 'none';
                         if (rowExtra)   rowExtra.style.display = 'none';
-                        if (labelHabResumen) labelHabResumen.textContent = 'Habitación';
+                        if (labelHabResumen) labelHabResumen.textContent = _nrHabitacionesExtra.length > 0 ? 'Habitaciones' : 'Habitación';
 
                         const totalConIva = noches * costoHabIva + costoServicios + costoPaqIva;
                         const subTotal    = Math.round(totalConIva / 1.19);
@@ -3390,10 +3471,16 @@
                 const metodoPagoTexto = ($('nr-metodo-pago').selectedOptions[0]?.text || '').toLowerCase();
                 const esTransferencia = metodoPagoTexto.includes('transferencia');
 
+                const primaryHabIdNR = parseInt(idHab) || null;
+                const habitacionesNR = primaryHabIdNR
+                    ? [primaryHabIdNR, ..._nrHabitacionesExtra.map(h => parseInt(h.id)).filter(Boolean)]
+                    : [];
+
                 await apiFetch('/reservas', {
                     method: 'POST',
                     body: JSON.stringify({
-                        IDHabitacion:        parseInt(idHab),
+                        IDHabitacion:        primaryHabIdNR,
+                        habitaciones:        habitacionesNR,
                         FechaInicio:         inicio,
                         FechaFinalizacion:   fin,
                         Sub_Total:           calculado.subTotal,
@@ -3413,6 +3500,7 @@
                     })
                 });
 
+                _nrHabitacionesExtra = [];
                 mostrarSeccion('reservas', null);
                 cargarDashboard();
 

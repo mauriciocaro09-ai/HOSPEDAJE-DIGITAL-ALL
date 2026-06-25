@@ -624,10 +624,18 @@ const validarPasoWizard = (step) => {
             return false;
         }
 
-        if (hayCruceDeFechasConReservas(habitacion, inicio, fin, reservaEnEdicion ? obtenerIdReserva(reservaEnEdicion) : null)) {
+        const ignorarId = reservaEnEdicion ? obtenerIdReserva(reservaEnEdicion) : null;
+        if (hayCruceDeFechasConReservas(habitacion, inicio, fin, ignorarId)) {
             mostrarErrorInline('reserva-admin-fecha-fin', 'La habitación ya tiene una reserva en ese rango.');
             _errCruceFechas = true;
             return false;
+        }
+        for (const habExtra of _habitacionesExtra) {
+            if (hayCruceDeFechasConReservas(habExtra.id, inicio, fin, ignorarId)) {
+                mostrarErrorInline('reserva-admin-fecha-fin', `La habitación "${habExtra.nombre}" ya tiene una reserva en ese rango.`);
+                _errCruceFechas = true;
+                return false;
+            }
         }
     }
 
@@ -810,6 +818,17 @@ const editarReservaAdmin = async (idReserva) => {
                     selectHab.value = reserva.IDHabitacion || '';
                     if (reserva.IDHabitacion) window.sincronizarLabelHabDropdown && window.sincronizarLabelHabDropdown(reserva.IDHabitacion);
                 }
+                // restaurar habitaciones extra (2 y 3)
+                _habitacionesExtra = [];
+                if (Array.isArray(reserva.habitaciones) && reserva.habitaciones.length > 1) {
+                    _habitacionesExtra = reserva.habitaciones.slice(1).map(h => ({
+                        id: String(h.IDHabitacion),
+                        nombre: h.NombreHabitacion || 'Habitación',
+                        costo: String(h.Costo || 0)
+                    }));
+                }
+                // Renderizar después de que el dropdown esté construido
+                setTimeout(renderHabitacionesExtra, 150);
                 // seleccionar paquetes si vienen en la reserva
                 const selectPaq = document.getElementById('reserva-admin-paquetes');
                 if (selectPaq && Array.isArray(reserva.paquetes) && reserva.paquetes.length) {
@@ -877,6 +896,12 @@ const guardarReservaAdmin = async (event) => {
     const estado = document.getElementById('reserva-admin-estado')?.value;
 
     try {
+        const primaryHabId = Number(document.getElementById('reserva-admin-habitacion')?.value) ||
+            Number(document.getElementById('hab-custom-trigger')?.dataset?.idSeleccionado) || null;
+        const habitacionesPayload = primaryHabId
+            ? [primaryHabId, ..._habitacionesExtra.map(h => Number(h.id)).filter(Boolean)]
+            : [];
+
         const payload = {
             TipoDocumentoCliente: tipoDocumento,
             NroDocumentoCliente: nroDocumento,
@@ -884,8 +909,8 @@ const guardarReservaAdmin = async (event) => {
             EmailCliente: email || null,
             PaisCliente: pais || null,
             FechaReserva: fechaReserva || null,
-            IDHabitacion: Number(document.getElementById('reserva-admin-habitacion')?.value) ||
-                Number(document.getElementById('hab-custom-trigger')?.dataset?.idSeleccionado) || null,
+            IDHabitacion: primaryHabId,
+            habitaciones: habitacionesPayload,
             FechaInicio: fechaInicio,
             FechaFinalizacion: fechaFin,
             Sub_Total: parseFloat(subtotal),
@@ -977,9 +1002,13 @@ const abrirExtenderReserva = async (idReserva) => {
         return;
     }
 
-    const costoNoche = Number(r.CostoHabitacion || 0);
+    const costoNoche = r.habitaciones && r.habitaciones.length > 0
+        ? r.habitaciones.reduce((s, h) => s + Number(h.Costo || 0), 0)
+        : Number(r.CostoHabitacion || 0);
     const fechaFinActual = (r.FechaFinalizacion || '').toString().split('T')[0];
-    const nombreHab = r.NombreHabitacion || 'Habitación';
+    const nombreHab = r.habitaciones && r.habitaciones.length > 1
+        ? r.habitaciones.map(h => h.NombreHabitacion || '—').join(' + ')
+        : (r.NombreHabitacion || 'Habitación');
     const estado = (r.NombreEstadoReserva || '').toLowerCase();
 
     if (estado.includes('cancelad')) {
@@ -1114,6 +1143,12 @@ const cerrarModalReservaAdmin = () => {
     const btnGuardar = document.getElementById('wizard-submit');
     if (btnGuardar) btnGuardar.textContent = 'Guardar reserva';
     reservaEnEdicion = null;
+    // Limpiar habitaciones extra
+    _habitacionesExtra = [];
+    const extraContainer = document.getElementById('habitaciones-extra-container');
+    if (extraContainer) extraContainer.innerHTML = '';
+    const btnAgWrap = document.getElementById('btn-agregar-hab-wrap');
+    if (btnAgWrap) btnAgWrap.style.display = 'none';
     mostrarVistaTabla();
     mostrarPasoWizard(1);
     limpiarErroresInlineReserva();
@@ -1309,8 +1344,10 @@ const verDetalleReserva = async (idReserva) => {
                 <p class="detalle-valor muted">${escaparHtml(r.TelefonoCliente || r.Telefono || '—')}</p>
             </div>
             <div class="detalle-reserva-seccion">
-                <p class="detalle-label">Habitación</p>
-                <p class="detalle-valor">${escaparHtml(r.NombreHabitacion || '—')}</p>
+                <p class="detalle-label">Habitación${r.habitaciones && r.habitaciones.length > 1 ? 'es' : ''}</p>
+                ${r.habitaciones && r.habitaciones.length > 1
+                    ? r.habitaciones.map(h => `<p class="detalle-valor">${escaparHtml(h.NombreHabitacion || '—')}</p>`).join('')
+                    : `<p class="detalle-valor">${escaparHtml(r.NombreHabitacion || '—')}</p>`}
             </div>
             <div class="detalle-reserva-seccion">
                 <p class="detalle-label">Fechas</p>
@@ -1598,7 +1635,92 @@ const cancelarConPoliticaAdmin = async (idReserva) => {
 // ============================================
 
 let _habitacionesCache = [];
+let _habitacionesExtra = []; // [{id, nombre, costo}] — habitaciones 2 y 3 de la reserva
 let _paquetesCache = [];
+
+// ============================================
+// MULTI-HABITACIÓN — habitaciones extra (2 y 3)
+// ============================================
+
+const renderHabitacionesExtra = () => {
+    const container = document.getElementById('habitaciones-extra-container');
+    const btnWrap   = document.getElementById('btn-agregar-hab-wrap');
+    if (!container) return;
+
+    const inicio    = document.getElementById('reserva-admin-fecha-inicio')?.value;
+    const fin       = document.getElementById('reserva-admin-fecha-fin')?.value;
+    const ignorarId = reservaEnEdicion ? obtenerIdReserva(reservaEnEdicion) : null;
+    const primaryId = String(document.getElementById('reserva-admin-habitacion')?.value ||
+        document.getElementById('hab-custom-trigger')?.dataset?.idSeleccionado || '');
+
+    const selectedIds = [primaryId, ..._habitacionesExtra.map(h => String(h.id))].filter(Boolean);
+    const disponibles = _habitacionesCache.filter(h =>
+        !selectedIds.includes(String(h.IDHabitacion)) &&
+        (!inicio || !fin || !hayCruceDeFechasConReservas(h.IDHabitacion, inicio, fin, ignorarId))
+    );
+
+    container.innerHTML = _habitacionesExtra.map((hab, idx) => `
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px;padding:8px 10px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
+            <i class="fa-solid fa-bed" style="color:#0284c7;font-size:13px;flex-shrink:0;"></i>
+            <span style="flex:1;font-size:13px;font-weight:600;color:#0c4a6e;">${escaparHtml(String(hab.nombre || ''))}</span>
+            <span style="font-size:12px;color:#0284c7;white-space:nowrap;">${fmt(Math.round(Number(hab.costo || 0) * 1.19))}/noche</span>
+            <button type="button" onclick="quitarHabitacionExtra(${idx})" style="background:none;border:none;cursor:pointer;color:#6b7280;padding:2px 6px;font-size:14px;line-height:1;" title="Quitar">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>`).join('');
+
+    const mostrarBtn = primaryId && _habitacionesExtra.length < 2 && disponibles.length > 0;
+    if (btnWrap) btnWrap.style.display = mostrarBtn ? '' : 'none';
+
+    actualizarSidebarResumen();
+};
+
+const agregarHabitacionExtra = () => {
+    const inicio    = document.getElementById('reserva-admin-fecha-inicio')?.value;
+    const fin       = document.getElementById('reserva-admin-fecha-fin')?.value;
+    const ignorarId = reservaEnEdicion ? obtenerIdReserva(reservaEnEdicion) : null;
+    const primaryId = String(document.getElementById('reserva-admin-habitacion')?.value ||
+        document.getElementById('hab-custom-trigger')?.dataset?.idSeleccionado || '');
+
+    const selectedIds = [primaryId, ..._habitacionesExtra.map(h => String(h.id))].filter(Boolean);
+    const disponibles = _habitacionesCache.filter(h =>
+        !selectedIds.includes(String(h.IDHabitacion)) &&
+        (!inicio || !fin || !hayCruceDeFechasConReservas(h.IDHabitacion, inicio, fin, ignorarId))
+    );
+
+    if (!disponibles.length) {
+        Swal.fire({ icon: 'info', title: 'Sin habitaciones disponibles', text: 'No hay más habitaciones disponibles para esas fechas.', confirmButtonColor: '#1a2744' });
+        return;
+    }
+
+    Swal.fire({
+        title: 'Agregar habitación',
+        html: `<select id="swal-hab-extra" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;margin-top:4px;">
+            <option value="">-- Selecciona --</option>
+            ${disponibles.map(h => `<option value="${escaparHtml(String(h.IDHabitacion))}" data-nombre="${escaparHtml(h.NombreHabitacion || h.Nombre || '')}" data-costo="${h.Costo || 0}">${escaparHtml(h.NombreHabitacion || h.Nombre || 'Habitación')} — ${fmt(Math.round(Number(h.Costo || 0) * 1.19))}/noche</option>`).join('')}
+        </select>`,
+        confirmButtonText: 'Agregar',
+        confirmButtonColor: '#0284c7',
+        cancelButtonText: 'Cancelar',
+        showCancelButton: true,
+        preConfirm: () => {
+            const sel = document.getElementById('swal-hab-extra');
+            if (!sel?.value) { Swal.showValidationMessage('Selecciona una habitación'); return false; }
+            const opt = sel.options[sel.selectedIndex];
+            return { id: sel.value, nombre: opt.dataset.nombre, costo: opt.dataset.costo };
+        }
+    }).then(result => {
+        if (result.isConfirmed && result.value) {
+            _habitacionesExtra.push(result.value);
+            renderHabitacionesExtra();
+        }
+    });
+};
+
+const quitarHabitacionExtra = (idx) => {
+    _habitacionesExtra.splice(idx, 1);
+    renderHabitacionesExtra();
+};
 
 const actualizarSidebarResumen = () => {
     const habSelect = document.getElementById('reserva-admin-habitacion');
@@ -1638,6 +1760,10 @@ const actualizarSidebarResumen = () => {
     if (!costoHabIva && habId) {
         const hab = _habitacionesCache.find(h => String(h.IDHabitacion) === String(habId));
         costoHabIva = hab ? Math.round(Number(hab.Costo || 0) * 1.19) : 0;
+    }
+    // Sumar habitaciones extra (2 y 3)
+    for (const habExtra of _habitacionesExtra) {
+        costoHabIva += Math.round(Number(habExtra.costo || 0) * 1.19);
     }
     const totalHab = costoHabIva * noches;
 
@@ -2272,6 +2398,8 @@ if (document.readyState === 'loading') {
     window.guardarReservaAdmin = guardarReservaAdmin;
     window.verDetalleReserva = verDetalleReserva;
     window.abrirExtenderReserva = abrirExtenderReserva;
+    window.agregarHabitacionExtra = agregarHabitacionExtra;
+    window.quitarHabitacionExtra = quitarHabitacionExtra;
 
     // onchange del select de paquetes — muestra detalle inline automáticamente
     window.adminPaqueteOnChange = async (val) => {
@@ -2368,6 +2496,8 @@ if (document.readyState === 'loading') {
             list.querySelectorAll('.hab-option').forEach(o => {
                 o.classList.toggle('selected', o.dataset.id === String(idHab));
             });
+            // Mostrar botón "Agregar otra habitación" al seleccionar una habitación principal
+            renderHabitacionesExtra();
         };
 
         const mostrarPreview = (hab, targetEl) => {

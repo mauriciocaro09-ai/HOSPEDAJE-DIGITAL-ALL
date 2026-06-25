@@ -100,6 +100,16 @@ const crearTablasDetalle = async () => {
             console.log('Columna ComprobanteTransferencia agregada a cargo_adicional.');
         }
 
+        // Tabla para múltiples habitaciones por reserva
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS reservahabitacion (
+                IDReservaHabitacion INT AUTO_INCREMENT PRIMARY KEY,
+                IDReserva INT NOT NULL,
+                IDHabitacion INT NOT NULL,
+                UNIQUE KEY uk_res_hab (IDReserva, IDHabitacion)
+            )
+        `);
+
         // Soporte para cargos sin servicio (ej: extensión de estadía)
         const [colsNombreCargo] = await db.query(`SHOW COLUMNS FROM cargo_adicional LIKE 'NombreCargo'`);
         if (colsNombreCargo.length === 0) {

@@ -179,6 +179,30 @@ const Reservas = {
       reserva.paquetes = [];
     }
 
+    try {
+      const [habRows] = await db.query(`
+        SELECT rh.IDHabitacion, h.NombreHabitacion, h.Costo, h.ImagenHabitacion
+        FROM reservahabitacion rh
+        JOIN habitacion h ON rh.IDHabitacion = h.IDHabitacion
+        WHERE rh.IDReserva = ?
+        ORDER BY rh.IDReservaHabitacion
+      `, [id]);
+      if (habRows.length > 0) {
+        reserva.habitaciones = habRows;
+      } else if (reserva.IDHabitacion) {
+        reserva.habitaciones = [{
+          IDHabitacion: reserva.IDHabitacion,
+          NombreHabitacion: reserva.NombreHabitacion || null,
+          Costo: reserva.CostoHabitacion || null
+        }];
+      } else {
+        reserva.habitaciones = [];
+      }
+    } catch (e) {
+      console.error('reservahabitacion query error:', e.message);
+      reserva.habitaciones = [];
+    }
+
     return reserva;
   },
 
@@ -319,6 +343,18 @@ const Reservas = {
     `;
 
     const [result] = await db.query(sql, params);
+
+    // Registrar todas las habitaciones en tabla junction
+    const habitacionesList = Array.isArray(reserva.habitaciones) && reserva.habitaciones.length
+      ? reserva.habitaciones.map(Number).filter(Boolean)
+      : IDHabitacion ? [IDHabitacion] : [];
+    for (const idHab of habitacionesList) {
+      await db.query(
+        'INSERT IGNORE INTO reservahabitacion (IDReserva, IDHabitacion) VALUES (?, ?)',
+        [result.insertId, idHab]
+      ).catch(e => console.error('Error insert reservahabitacion:', e.message));
+    }
+
     return result;
   },
 
@@ -393,24 +429,40 @@ const Reservas = {
     d.setUTCDate(d.getUTCDate() + diasExtra);
     const nuevaFechaFin = d.toISOString().split('T')[0];
 
-    // Verificar conflictos con otras reservas activas de la misma habitación
-    const [conflictos] = await db.query(`
-      SELECT r2.IdReserva FROM reserva r2
-      LEFT JOIN estadosreserva er2 ON r2.IdEstadoReserva = er2.IdEstadoReserva
-      WHERE r2.IDHabitacion = ?
-        AND r2.IdReserva != ?
-        AND (er2.NombreEstadoReserva IS NULL OR LOWER(er2.NombreEstadoReserva) NOT LIKE '%cancelad%')
-        AND r2.FechaInicio < ? AND r2.FechaFinalizacion > ?
-    `, [reserva.IDHabitacion, id, nuevaFechaFin, reserva.FechaFinalizacion]);
+    // Obtener todas las habitaciones de esta reserva (incluyendo multi-hab)
+    const [habsReserva] = await db.query(
+      `SELECT rh.IDHabitacion, h.Costo FROM reservahabitacion rh
+       JOIN habitacion h ON rh.IDHabitacion = h.IDHabitacion
+       WHERE rh.IDReserva = ?`,
+      [id]
+    );
+    const habIdsToCheck = habsReserva.length > 0
+      ? habsReserva.map(h => h.IDHabitacion)
+      : (reserva.IDHabitacion ? [reserva.IDHabitacion] : []);
 
-    if (conflictos.length) {
-      const err = new Error('Las fechas extendidas se cruzan con otra reserva activa en la misma habitación');
-      err.code = 'CONFLICTO_FECHAS';
-      throw err;
+    // Verificar conflictos para cada habitación
+    for (const habId of habIdsToCheck) {
+      const [conf] = await db.query(`
+        SELECT r2.IdReserva FROM reserva r2
+        LEFT JOIN estadosreserva er2 ON r2.IdEstadoReserva = er2.IdEstadoReserva
+        LEFT JOIN reservahabitacion rh2 ON rh2.IDReserva = r2.IdReserva
+        WHERE (r2.IDHabitacion = ? OR rh2.IDHabitacion = ?)
+          AND r2.IdReserva != ?
+          AND (er2.NombreEstadoReserva IS NULL OR LOWER(er2.NombreEstadoReserva) NOT LIKE '%cancelad%')
+          AND r2.FechaInicio < ? AND r2.FechaFinalizacion > ?
+        LIMIT 1
+      `, [habId, habId, id, nuevaFechaFin, reserva.FechaFinalizacion]);
+      if (conf.length) {
+        const err = new Error('Las fechas extendidas se cruzan con otra reserva activa en la misma habitación');
+        err.code = 'CONFLICTO_FECHAS';
+        throw err;
+      }
     }
 
-    // Calcular costos extras
-    const costoHab = Number(reserva.CostoHabitacion) || 0;
+    // Calcular costos extras — suma de todas las habitaciones
+    const costoHab = habsReserva.length > 0
+      ? habsReserva.reduce((s, h) => s + Number(h.Costo || 0), 0)
+      : (Number(reserva.CostoHabitacion) || 0);
     const costoBase = diasExtra * costoHab;
     const ivaExtra = Math.round(costoBase * 0.19 * 100) / 100;
 

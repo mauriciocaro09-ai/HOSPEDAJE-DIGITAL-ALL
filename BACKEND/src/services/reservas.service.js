@@ -48,18 +48,27 @@ const ReservasService = {
 
   /* ── Crear ─────────────────────────────────── */
   create: async (data) => {
-    // Validar bloqueo por reserva Pendiente (habitación o paquete con habitación)
-    if (data.IDHabitacion) {
+    // Construir lista de habitaciones a verificar
+    const habitacionesList = Array.isArray(data.habitaciones) && data.habitaciones.length
+      ? data.habitaciones.map(Number).filter(Boolean)
+      : data.IDHabitacion ? [Number(data.IDHabitacion)] : [];
+
+    // Garantizar que IDHabitacion sea la primera habitación (columna de la tabla reserva)
+    if (habitacionesList.length > 0) data.IDHabitacion = habitacionesList[0];
+
+    // Validar bloqueo por reserva Pendiente para cada habitación
+    for (const idHab of habitacionesList) {
       const [bloqueadas] = await db.query(`
         SELECT r.IDReserva FROM reserva r
+        LEFT JOIN reservahabitacion rh ON rh.IDReserva = r.IDReserva
         JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
-        WHERE r.IDHabitacion = ?
+        WHERE (r.IDHabitacion = ? OR rh.IDHabitacion = ?)
           AND LOWER(e.NombreEstadoReserva) LIKE '%pendiente%'
           AND r.FechaInicio < ? AND r.FechaFinalizacion > ?
         LIMIT 1
-      `, [data.IDHabitacion, data.FechaFinalizacion, data.FechaInicio]);
+      `, [idHab, idHab, data.FechaFinalizacion, data.FechaInicio]);
       if (bloqueadas.length > 0) {
-        const err = new Error('Esta habitacion tiene una reserva pendiente de confirmacion de pago para esas fechas. Por favor elige otra habitacion o intenta mas tarde.');
+        const err = new Error('Una de las habitaciones seleccionadas tiene una reserva pendiente para esas fechas. Por favor elige otra habitacion o intenta mas tarde.');
         err.statusCode = 409;
         throw err;
       }
