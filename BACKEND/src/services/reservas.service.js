@@ -317,6 +317,11 @@ const ReservasService = {
     }
   },
 
+  /* ── Extender días ──────────────────────────── */
+  extender: async (id, diasExtra) => {
+    return await Reservas.extender(id, diasExtra);
+  },
+
   /* ── Eliminar ───────────────────────────────── */
   eliminar: async (id) => {
     const result = await Reservas.eliminar(id);

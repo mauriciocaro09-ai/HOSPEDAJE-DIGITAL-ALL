@@ -407,6 +407,9 @@ const renderizarReservasAdmin = () => {
                         ${!['cancelada','completada'].includes(estado.clase) ? `
                         <button type="button" class="btn-mini btn-mini-icon btn-mini-editar" data-accion-reserva="editar" data-id="${escaparHtml(idReserva)}" title="Editar">
                             <i class="fa-solid fa-pencil"></i>
+                        </button>
+                        <button type="button" class="btn-mini btn-mini-icon" data-accion-reserva="extender" data-id="${escaparHtml(idReserva)}" title="Agregar días" style="background:#0284c7;color:#fff;border-color:#0284c7;">
+                            <i class="fa-solid fa-calendar-plus"></i>
                         </button>` : ''}
                         <button type="button" class="btn-mini btn-mini-icon" data-accion-reserva="estado" data-id="${escaparHtml(idReserva)}" title="Cambiar estado" style="background:#6c757d;color:#fff;border-color:#6c757d;">
                             <i class="fa-solid fa-rotate"></i>
@@ -963,6 +966,109 @@ const eliminarReservaAdmin = async (idReserva) => {
     }
 };
 
+const abrirExtenderReserva = async (idReserva) => {
+    let r;
+    try {
+        Swal.fire({ title: 'Cargando...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
+        r = await requestJson(`/reservas/${idReserva}`);
+        Swal.close();
+    } catch(e) {
+        Swal.fire('Error', 'No se pudo cargar la reserva', 'error');
+        return;
+    }
+
+    const costoNoche = Number(r.CostoHabitacion || 0);
+    const fechaFinActual = (r.FechaFinalizacion || '').toString().split('T')[0];
+    const nombreHab = r.NombreHabitacion || 'Habitación';
+    const estado = (r.NombreEstadoReserva || '').toLowerCase();
+
+    if (estado.includes('cancelad')) {
+        Swal.fire('No permitido', 'No se puede extender una reserva cancelada.', 'warning');
+        return;
+    }
+
+    const { value: diasExtra, isConfirmed } = await Swal.fire({
+        title: 'Agregar días a la reserva',
+        html: `
+            <div style="text-align:left;font-size:14px;">
+                <p style="margin:0 0 10px;color:#6b7280;">
+                    Reserva <strong>#${idReserva}</strong> — ${nombreHab}
+                </p>
+                <p style="margin:0 0 14px;color:#374151;font-size:13px;">
+                    Salida actual: <strong>${fechaFinActual}</strong>
+                </p>
+                <label style="display:block;font-weight:600;margin-bottom:6px;color:#1a2744;">Días a agregar</label>
+                <input id="swal-dias-extra" type="number" min="1" max="365" value="1"
+                    style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:15px;font-weight:700;box-sizing:border-box;text-align:center;">
+                <div id="swal-ext-preview" style="margin-top:12px;min-height:44px;"></div>
+            </div>`,
+        didOpen: () => {
+            const input = document.getElementById('swal-dias-extra');
+            const preview = document.getElementById('swal-ext-preview');
+            input.focus();
+            input.select();
+
+            const actualizar = () => {
+                const dias = parseInt(input.value) || 0;
+                if (dias < 1) { preview.innerHTML = ''; return; }
+                const partes = fechaFinActual.split('-');
+                const d = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+                d.setDate(d.getDate() + dias);
+                const nuevaFecha = [
+                    d.getFullYear(),
+                    String(d.getMonth() + 1).padStart(2, '0'),
+                    String(d.getDate()).padStart(2, '0'),
+                ].join('-');
+                let html = `<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px 14px;font-size:13px;color:#0369a1;">
+                    <div>Nueva fecha de salida: <strong>${nuevaFecha}</strong></div>`;
+                if (costoNoche > 0) {
+                    const base = dias * costoNoche;
+                    const iva  = Math.round(base * 0.19 * 100) / 100;
+                    html += `<div style="margin-top:4px;">Costo adicional: ${fmt(base)} + ${fmt(iva)} IVA = <strong>${fmt(base + iva)}</strong></div>`;
+                }
+                html += '</div>';
+                preview.innerHTML = html;
+            };
+
+            input.addEventListener('input', actualizar);
+            actualizar();
+        },
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa-solid fa-calendar-plus"></i> Confirmar extensión',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#0284c7',
+        cancelButtonColor: '#6b7280',
+        preConfirm: () => {
+            const dias = parseInt(document.getElementById('swal-dias-extra').value);
+            if (!dias || dias < 1 || dias > 365) {
+                Swal.showValidationMessage('Ingresá entre 1 y 365 días');
+                return false;
+            }
+            return dias;
+        }
+    });
+
+    if (!isConfirmed || !diasExtra) return;
+
+    try {
+        const resp = await requestJson(`/reservas/${idReserva}/extender`, {
+            method: 'PUT',
+            body: JSON.stringify({ diasExtra })
+        });
+        await Swal.fire({
+            title: '¡Reserva extendida!',
+            html: `La reserva <strong>#${idReserva}</strong> fue extendida <strong>${diasExtra} día${diasExtra > 1 ? 's' : ''}</strong>.<br>
+                   Nueva fecha de salida: <strong>${resp.nuevaFechaFin}</strong>
+                   ${resp.costoTotal > 0 ? `<br>Costo adicional cobrado: <strong>${fmt(resp.costoTotal)}</strong>` : ''}`,
+            icon: 'success',
+            confirmButtonColor: '#0284c7',
+        });
+        cargarReservasAdmin();
+    } catch (err) {
+        Swal.fire('Error', err.message || 'No se pudo extender la reserva', 'error');
+    }
+};
+
 const cancelarReservaAdmin = async (idReserva) => {
     const resultado = await Swal.fire({
         title: 'Anular reserva',
@@ -1273,6 +1379,19 @@ const verDetalleReserva = async (idReserva) => {
                 cerrarDetalleReserva();
                 editarReservaAdmin(idReserva);
             };
+        }
+
+        const btnExtenderDetalle = document.getElementById('btn-detalle-extender');
+        if (btnExtenderDetalle) {
+            const estadoNom = (r.NombreEstadoReserva || '').toLowerCase();
+            const puedeExtender = !estadoNom.includes('cancelad') && !estadoNom.includes('complet');
+            btnExtenderDetalle.style.display = puedeExtender ? '' : 'none';
+            if (puedeExtender) {
+                btnExtenderDetalle.onclick = () => {
+                    cerrarDetalleReserva();
+                    abrirExtenderReserva(idReserva);
+                };
+            }
         }
     } catch (err) {
         console.error('Error al cargar detalle:', err);
@@ -1912,11 +2031,13 @@ function inicializarReservasAdmin() {
         const btnEliminar = e.target.closest('[data-accion-reserva="eliminar"]');
         const btnVer = e.target.closest('[data-accion-reserva="ver"]');
         const btnCancelar = e.target.closest('[data-accion-reserva="cancelar"]');
+        const btnExtender = e.target.closest('[data-accion-reserva="extender"]');
 
         if (btnEditar) editarReservaAdmin(btnEditar.dataset.id);
         if (btnEliminar) eliminarReservaAdmin(btnEliminar.dataset.id);
         if (btnVer && btnVer.dataset.id) verDetalleReserva(btnVer.dataset.id);
         if (btnCancelar && btnCancelar.dataset.id) cancelarReservaAdmin(btnCancelar.dataset.id);
+        if (btnExtender && btnExtender.dataset.id) abrirExtenderReserva(btnExtender.dataset.id);
 
         const btnEstado = e.target.closest('[data-accion-reserva="estado"]');
         if (btnEstado && btnEstado.dataset.id) abrirModalCambioEstado(btnEstado.dataset.id);
@@ -2150,6 +2271,7 @@ if (document.readyState === 'loading') {
     window.cerrarModalReservaAdmin = cerrarModalReservaAdmin;
     window.guardarReservaAdmin = guardarReservaAdmin;
     window.verDetalleReserva = verDetalleReserva;
+    window.abrirExtenderReserva = abrirExtenderReserva;
 
     // onchange del select de paquetes — muestra detalle inline automáticamente
     window.adminPaqueteOnChange = async (val) => {

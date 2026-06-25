@@ -49,6 +49,9 @@ router.put("/:id/comprobante", reservasController.subirComprobante);
 router.put("/:id/aprobar", reservasController.aprobarComprobante);
 router.put("/:id/rechazar", reservasController.rechazarComprobante);
 
+// Extender días de una reserva
+router.put("/:id/extender", reservasController.extenderDias);
+
 // Agregar servicios a reserva existente
 router.post("/:id/servicios", reservasController.agregarServicios);
 

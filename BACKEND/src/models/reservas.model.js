@@ -359,6 +359,83 @@ const Reservas = {
     return result;
   },
 
+  extender: async (id, diasExtra) => {
+    const cols = await getReservaCols();
+
+    const subTotalCol = cols.has('Sub_Total') ? 'Sub_Total' : (cols.has('SubTotal') ? 'SubTotal' : null);
+    const montoTotalCol = cols.has('Monto_Total') ? 'Monto_Total' : (cols.has('MontoTotal') ? 'MontoTotal' : null);
+
+    const [rows] = await db.query(`
+      SELECT r.IdReserva, r.FechaInicio, r.FechaFinalizacion, r.IDHabitacion,
+             ${subTotalCol ? `r.${subTotalCol}` : '0'} AS Sub_Total,
+             ${cols.has('IVA') ? 'r.IVA' : '0'} AS IVA,
+             ${montoTotalCol ? `r.${montoTotalCol}` : '0'} AS Monto_Total,
+             h.Costo AS CostoHabitacion,
+             er.NombreEstadoReserva
+      FROM reserva r
+      LEFT JOIN habitacion h ON r.IDHabitacion = h.IDHabitacion
+      LEFT JOIN estadosreserva er ON r.IdEstadoReserva = er.IdEstadoReserva
+      WHERE r.IdReserva = ?
+    `, [id]);
+
+    if (!rows.length) return null;
+    const reserva = rows[0];
+
+    const estadoNom = (reserva.NombreEstadoReserva || '').toLowerCase();
+    if (estadoNom.includes('cancelad')) {
+      const err = new Error('No se puede extender una reserva cancelada');
+      err.code = 'ESTADO_INVALIDO';
+      throw err;
+    }
+
+    // Calcular nueva fecha de fin (sin problemas de zona horaria)
+    const partes = reserva.FechaFinalizacion.toString().split('T')[0].split('-');
+    const d = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+    d.setDate(d.getDate() + diasExtra);
+    const nuevaFechaFin = [
+      d.getFullYear(),
+      String(d.getMonth() + 1).padStart(2, '0'),
+      String(d.getDate()).padStart(2, '0'),
+    ].join('-');
+
+    // Verificar conflictos con otras reservas activas de la misma habitación
+    const [conflictos] = await db.query(`
+      SELECT r2.IdReserva FROM reserva r2
+      LEFT JOIN estadosreserva er2 ON r2.IdEstadoReserva = er2.IdEstadoReserva
+      WHERE r2.IDHabitacion = ?
+        AND r2.IdReserva != ?
+        AND (er2.NombreEstadoReserva IS NULL OR LOWER(er2.NombreEstadoReserva) NOT LIKE '%cancelad%')
+        AND r2.FechaInicio < ? AND r2.FechaFinalizacion > ?
+    `, [reserva.IDHabitacion, id, nuevaFechaFin, reserva.FechaFinalizacion]);
+
+    if (conflictos.length) {
+      const err = new Error('Las fechas extendidas se cruzan con otra reserva activa en la misma habitación');
+      err.code = 'CONFLICTO_FECHAS';
+      throw err;
+    }
+
+    // Calcular costos extras
+    const costoHab = Number(reserva.CostoHabitacion) || 0;
+    const costoBase = diasExtra * costoHab;
+    const ivaExtra = Math.round(costoBase * 0.19 * 100) / 100;
+
+    const newSubTotal = Number(reserva.Sub_Total || 0) + costoBase;
+    const newIVA = Number(reserva.IVA || 0) + ivaExtra;
+    const newTotal = Number(reserva.Monto_Total || 0) + costoBase + ivaExtra;
+
+    const updateParts = ['FechaFinalizacion = ?'];
+    const updateParams = [nuevaFechaFin];
+
+    if (subTotalCol) { updateParts.push(`${subTotalCol} = ?`); updateParams.push(newSubTotal); }
+    if (cols.has('IVA')) { updateParts.push('IVA = ?'); updateParams.push(newIVA); }
+    if (montoTotalCol) { updateParts.push(`${montoTotalCol} = ?`); updateParams.push(newTotal); }
+
+    updateParams.push(id);
+    await db.query(`UPDATE reserva SET ${updateParts.join(', ')} WHERE IdReserva = ?`, updateParams);
+
+    return { nuevaFechaFin, costoBase, ivaExtra, costoTotal: costoBase + ivaExtra, newSubTotal, newIVA, newTotal };
+  },
+
   eliminar: async (id) => {
     const [result] = await db.query("DELETE FROM reserva WHERE IdReserva=?", [id]);
     return result;

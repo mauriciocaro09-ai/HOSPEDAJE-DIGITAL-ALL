@@ -379,6 +379,26 @@ const agregarServicios = async (req, res) => {
   }
 };
 
+/* ================= EXTENDER DÍAS ================= */
+
+const extenderDias = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const diasExtra = parseInt(req.body?.diasExtra, 10);
+    if (!diasExtra || diasExtra < 1 || diasExtra > 365) {
+      return res.status(400).json({ error: 'diasExtra debe ser un número entre 1 y 365' });
+    }
+    const resultado = await ReservasService.extender(id, diasExtra);
+    if (!resultado) return res.status(404).json({ error: 'Reserva no encontrada' });
+    return res.status(200).json({ mensaje: 'Reserva extendida correctamente', ...resultado });
+  } catch (error) {
+    if (error.code === 'ESTADO_INVALIDO') return res.status(400).json({ error: error.message });
+    if (error.code === 'CONFLICTO_FECHAS') return res.status(409).json({ error: error.message });
+    console.error('RESERVAS ERROR:', error);
+    return res.status(500).json({ error: 'Error al extender la reserva', detalle: error.message });
+  }
+};
+
 /* ================= ELIMINAR ================= */
 
 const eliminar = async (req, res) => {
@@ -408,6 +428,7 @@ module.exports = {
   cancelar,
   aprobarComprobante,
   rechazarComprobante,
+  extenderDias,
   eliminar,
   agregarServicios,
   subirComprobante,
