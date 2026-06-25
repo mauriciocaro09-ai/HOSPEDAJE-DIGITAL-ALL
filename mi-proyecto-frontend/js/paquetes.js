@@ -129,6 +129,30 @@ const obtenerServiciosPaquetes = async () => {
 };
 
 // ============================================
+// CARGAR HABITACIONES DISPONIBLES PARA MODAL
+// ============================================
+
+const cargarHabitacionesEnModal = async (idSeleccionado = null) => {
+    const select = document.getElementById('paquete-habitacion');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">-- Selecciona una habitación --</option>';
+    try {
+        const habitaciones = await requestJson('/habitaciones');
+        const lista = Array.isArray(habitaciones) ? habitaciones : [];
+        lista.forEach(h => {
+            const opt = document.createElement('option');
+            opt.value = h.IDHabitacion;
+            opt.textContent = `${h.NombreHabitacion} — $${Number(h.Costo).toLocaleString('es-CO')}`;
+            if (idSeleccionado && Number(h.IDHabitacion) === Number(idSeleccionado)) opt.selected = true;
+            select.appendChild(opt);
+        });
+    } catch (error) {
+        console.error('Error cargando habitaciones en modal paquete:', error);
+    }
+};
+
+// ============================================
 // RENDERIZAR LISTA DE SERVICIOS EN MODAL
 // ============================================
 
@@ -254,9 +278,12 @@ const renderizarTablapaquetes = () => {
                         <img src="${escaparHtml(primerUrlPaquete(paquete.Imagen) || placeholderImagenPaquete)}" alt="${escaparHtml(paquete.NombrePaquete || 'Paquete')}" onerror="this.onerror=null;this.src='${placeholderImagenPaquete}'">
                     </div>
                 </td>
-                <td class="td-nombre"><strong class="paquete-nombre">${escaparHtml(paquete.NombrePaquete || 'Sin nombre')}</strong></td>
+                <td class="td-nombre">
+                    <strong class="paquete-nombre">${escaparHtml(paquete.NombrePaquete || 'Sin nombre')}</strong>
+                    ${paquete.NombreHabitacion ? `<br><small style="color:#1e40af;"><i class="fa-solid fa-bed"></i> ${escaparHtml(paquete.NombreHabitacion)}</small>` : '<br><small style="color:#f59e0b;">Sin habitación asignada</small>'}
+                </td>
                 <td class="td-descripcion paquete-descripcion">${escaparHtml((paquete.Descripcion || '').substring(0, 120))}${paquete.Descripcion && paquete.Descripcion.length > 120 ? '...' : ''}</td>
-                <td class="td-costo"><strong>$${precioFormato}</strong></td>
+                <td class="td-costo"><strong>$${precioFormato}</strong><br><small style="color:var(--muted)">todo incl.</small></td>
                 <td class="td-duracion">${paquete.DuracionNoches} noche${paquete.DuracionNoches !== 1 ? 's' : ''}</td>
                 <td class="td-estado">
                     <label class="switch" title="Estado del paquete">
@@ -318,10 +345,10 @@ const renderizarTablapaquetes = () => {
 // ABRIR MODAL - CREAR
 // ============================================
 
-const abrirModalCrear = () => {
+const abrirModalCrear = async () => {
     cerrarModalesPaquete();
     paqueteEnEdicion = null;
-    
+
     const modal = document.getElementById('modal-paquete');
     const titulo = document.getElementById('modal-paquete-titulo');
     const formulario = document.getElementById('formulario-paquete');
@@ -332,7 +359,8 @@ const abrirModalCrear = () => {
     if (preview) { preview.src = ''; preview.style.display = 'none'; }
 
     renderizarServiciosPaquete([]);
-    
+    await cargarHabitacionesEnModal();
+
     titulo.textContent = 'Crear nuevo paquete';
     modal.classList.remove('hidden');
     document.body.classList.add('modal-open');
@@ -364,8 +392,7 @@ const abrirModalEditar = async (id) => {
         document.getElementById('paquete-descripcion').value = paquete.Descripcion || '';
         document.getElementById('paquete-precio').value = paquete.PrecioPaquete || '';
         document.getElementById('paquete-duracion').value = paquete.DuracionNoches || 1;
-        const elIncluir = document.getElementById('paquete-incluir-habitacion');
-        if (elIncluir) elIncluir.checked = Boolean(paquete.IncluirHabitacion);
+        await cargarHabitacionesEnModal(paquete.IDHabitacion);
         document.getElementById('paquete-imagen').value = paquete.Imagen || '';
 
         const preview = document.getElementById('paquete-imagen-preview');
@@ -411,8 +438,17 @@ const cargarDetallesPaquete = async (id) => {
         // Llenar modal de detalles
         document.getElementById('detalles-nombre').textContent = paquete.NombrePaquete;
         document.getElementById('detalles-descripcion').textContent = paquete.Descripcion || 'Sin descripción';
-        document.getElementById('detalles-precio').textContent = `$${Number(paquete.PrecioPaquete).toLocaleString('es-CO')}`;
+        document.getElementById('detalles-precio').textContent = `$${Number(paquete.PrecioPaquete).toLocaleString('es-CO')} todo incluido`;
         document.getElementById('detalles-duracion').textContent = `${paquete.DuracionNoches} noche${paquete.DuracionNoches !== 1 ? 's' : ''}`;
+        const elHab = document.getElementById('detalles-habitacion');
+        if (elHab) {
+            if (paquete.NombreHabitacion) {
+                elHab.textContent = `🛏 ${paquete.NombreHabitacion}`;
+                elHab.style.display = '';
+            } else {
+                elHab.style.display = 'none';
+            }
+        }
         
         const imgEl = document.getElementById('detalles-imagen');
         if (imgEl) {
@@ -454,12 +490,13 @@ const guardarPaquete = async (e) => {
     const formulario = document.getElementById('formulario-paquete');
     const datos = new FormData(formulario);
     
+    const idHab = document.getElementById('paquete-habitacion')?.value;
     const payload = {
         NombrePaquete: datos.get('NombrePaquete').trim(),
         Descripcion: datos.get('Descripcion').trim(),
         PrecioPaquete: Number(datos.get('PrecioPaquete')),
         DuracionNoches: Number(datos.get('DuracionNoches')),
-        IncluirHabitacion: document.getElementById('paquete-incluir-habitacion')?.checked ? 1 : 1,
+        IDHabitacion: idHab ? Number(idHab) : null,
         Imagen: document.getElementById('paquete-imagen').value.trim() || null,
         Estado: Number(datos.get('Estado'))
     };
@@ -477,6 +514,11 @@ const guardarPaquete = async (e) => {
 
     if (payload.PrecioPaquete <= 0) {
         mostrarMensajePaquete('El precio debe ser mayor a 0', 'error');
+        return;
+    }
+
+    if (!payload.IDHabitacion) {
+        mostrarMensajePaquete('Debes seleccionar la habitación incluida en el paquete', 'error');
         return;
     }
 

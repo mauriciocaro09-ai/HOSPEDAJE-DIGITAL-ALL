@@ -882,11 +882,12 @@
                     const allImgs = imgs.length > 0 ? imgs : [fallback];
 
                     window._paqDetalleData.push({
-                        nombre:  p.NombrePaquete  || 'Paquete',
-                        desc:    p.Descripcion    || 'Disfruta de una experiencia única e inolvidable.',
-                        precio:  '$' + Math.round(Number(p.PrecioPaquete || 0) * 1.19).toLocaleString('es-CO'),
-                        noches:  p.DuracionNoches || 1,
-                        imgs:    allImgs
+                        nombre:      p.NombrePaquete     || 'Paquete',
+                        desc:        p.Descripcion       || 'Disfruta de una experiencia única e inolvidable.',
+                        precio:      '$' + Math.round(Number(p.PrecioPaquete || 0) * 1.19).toLocaleString('es-CO'),
+                        noches:      p.DuracionNoches    || 1,
+                        habitacion:  p.NombreHabitacion  || '',
+                        imgs:        allImgs
                     });
 
                     const slidesHtml = allImgs.map((src, si) => `
@@ -909,7 +910,7 @@
                             </div>
                             <!-- Precio -->
                             <div class="absolute bottom-3 right-3 z-10 bg-primary/90 backdrop-blur text-white text-sm font-bold px-3 py-1.5 rounded-xl shadow">
-                                $${Math.round(Number(p.PrecioPaquete || 0) * 1.19).toLocaleString('es-CO')} <span class="font-normal text-white/70 text-xs">/ paquete</span>
+                                $${Math.round(Number(p.PrecioPaquete || 0) * 1.19).toLocaleString('es-CO')} <span class="font-normal text-white/70 text-xs">todo incluido</span>
                             </div>
                             <!-- Botón ver detalle -->
                             <button class="btn-ver-detalle-paq absolute top-3 right-3 z-10" data-idx="${i}" aria-label="Ver detalle">
@@ -921,6 +922,7 @@
                         </div>
                         <div class="p-6">
                             <h3 class="text-lg font-bold text-secondary mb-1">${p.NombrePaquete || 'Paquete'}</h3>
+                            ${p.NombreHabitacion ? `<p class="text-blue-600 text-xs font-semibold mb-2"><i class="fa-solid fa-bed"></i> Incluye: ${p.NombreHabitacion}</p>` : ''}
                             <p class="text-gray-400 text-sm leading-relaxed mb-5 line-clamp-2">${p.Descripcion || 'Disfruta de una experiencia única e inolvidable.'}</p>
                             <a href="../login.html"
                                class="w-full flex items-center justify-center gap-2 py-3 bg-accent text-white font-bold rounded-xl hover:bg-orange-500 transition-colors text-sm shadow hover:shadow-lg">

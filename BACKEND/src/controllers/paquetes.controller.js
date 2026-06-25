@@ -47,6 +47,58 @@ const buscar = async (req, res) => {
     }
 };
 
+/* ================= VERIFICAR DISPONIBILIDAD DE HABITACIÓN DEL PAQUETE ================= */
+
+const verificarDisponibilidad = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { fechaInicio, fechaFin } = req.query;
+
+        if (!fechaInicio || !fechaFin) {
+            return res.status(400).json({ error: "Se requieren fechaInicio y fechaFin" });
+        }
+
+        const paquete = await PaquetesService.obtener(id);
+        if (!paquete) {
+            return res.status(404).json({ error: "Paquete no encontrado" });
+        }
+
+        if (!paquete.IDHabitacion) {
+            return res.json({ disponible: true, mensaje: "Este paquete no tiene habitación asignada" });
+        }
+
+        // Verificar que no existan reservas activas que se solapen con las fechas
+        const [conflictos] = await db.query(`
+            SELECT r.IdReserva
+            FROM reserva r
+            JOIN estadosreserva e ON r.IdEstadoReserva = e.IdEstadoReserva
+            WHERE r.IDHabitacion = ?
+              AND LOWER(e.NombreEstadoReserva) NOT IN ('cancelada', 'completada', 'finalizada')
+              AND r.FechaInicio < ?
+              AND r.FechaFinalizacion > ?
+        `, [paquete.IDHabitacion, fechaFin, fechaInicio]);
+
+        if (conflictos.length > 0) {
+            return res.json({
+                disponible: false,
+                mensaje: `La habitación "${paquete.NombreHabitacion}" no está disponible para las fechas seleccionadas`
+            });
+        }
+
+        res.json({
+            disponible: true,
+            mensaje: `La habitación "${paquete.NombreHabitacion}" está disponible`,
+            habitacion: {
+                IDHabitacion: paquete.IDHabitacion,
+                NombreHabitacion: paquete.NombreHabitacion,
+                CostoHabitacion: paquete.CostoHabitacion
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Error verificando disponibilidad", detalle: error.message });
+    }
+};
+
 /* ================= CREAR ================= */
 
 const create = async (req, res) => {
@@ -56,7 +108,7 @@ const create = async (req, res) => {
             Descripcion,
             PrecioPaquete,
             DuracionNoches,
-            IncluirHabitacion,
+            IDHabitacion,
             Imagen,
             Estado
         } = req.body;
@@ -72,7 +124,7 @@ const create = async (req, res) => {
             Descripcion,
             PrecioPaquete,
             DuracionNoches: DuracionNoches || 1,
-            IncluirHabitacion: IncluirHabitacion !== undefined ? IncluirHabitacion : 1,
+            IDHabitacion: IDHabitacion || null,
             Imagen,
             Estado: Estado !== undefined ? Estado : 1
         });
@@ -93,12 +145,10 @@ const update = async (req, res) => {
             Descripcion,
             PrecioPaquete,
             DuracionNoches,
-            IncluirHabitacion,
+            IDHabitacion,
             Imagen,
             Estado
         } = req.body;
-
-        console.log(`[PAQUETE UPDATE] id=${id} | Imagen recibida:`, Imagen);
 
         const paquete = await PaquetesService.obtener(id);
         if (!paquete) {
@@ -106,13 +156,13 @@ const update = async (req, res) => {
         }
 
         await PaquetesService.actualizar(id, {
-            NombrePaquete: NombrePaquete || paquete.NombrePaquete,
-            Descripcion: Descripcion || paquete.Descripcion,
-            PrecioPaquete: PrecioPaquete || paquete.PrecioPaquete,
+            NombrePaquete:  NombrePaquete  || paquete.NombrePaquete,
+            Descripcion:    Descripcion    || paquete.Descripcion,
+            PrecioPaquete:  PrecioPaquete  || paquete.PrecioPaquete,
             DuracionNoches: DuracionNoches !== undefined ? DuracionNoches : paquete.DuracionNoches,
-            IncluirHabitacion: IncluirHabitacion !== undefined ? IncluirHabitacion : paquete.IncluirHabitacion,
-            Imagen: Imagen !== undefined ? Imagen : paquete.Imagen,
-            Estado: Estado !== undefined ? Estado : paquete.Estado
+            IDHabitacion:   IDHabitacion   !== undefined ? (IDHabitacion || null) : paquete.IDHabitacion,
+            Imagen:         Imagen         !== undefined ? Imagen : paquete.Imagen,
+            Estado:         Estado         !== undefined ? Estado : paquete.Estado
         });
 
         res.json({ mensaje: "Paquete actualizado correctamente" });
@@ -223,6 +273,7 @@ module.exports = {
     getAll,
     getById,
     buscar,
+    verificarDisponibilidad,
     create,
     update,
     remove,

@@ -976,7 +976,7 @@
                         </label>
                         <div class="form-row-2">
                             <label>
-                                <span>Precio <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                                <span>Precio todo incluido <span class="campo-obligatorio" aria-hidden="true">*</span></span>
                                 <input type="number" id="paquete-precio" name="PrecioPaquete" required min="0" step="1000" placeholder="0">
                             </label>
                             <label>
@@ -984,6 +984,12 @@
                                 <input type="number" id="paquete-duracion" name="DuracionNoches" required min="1" value="1">
                             </label>
                         </div>
+                        <label>
+                            <span>Habitación incluida <span class="campo-obligatorio" aria-hidden="true">*</span></span>
+                            <select id="paquete-habitacion" name="IDHabitacion" required>
+                                <option value="">-- Selecciona una habitación --</option>
+                            </select>
+                        </label>
                         <label>
                             <span>URL de Imagen</span>
                             <input type="url" id="paquete-imagen" name="Imagen" placeholder="https://...">
@@ -1028,6 +1034,7 @@
                                 <div class="detalles-meta">
                                     <span class="precio-badge" id="detalles-precio"></span>
                                     <span class="duracion-badge" id="detalles-duracion"></span>
+                                    <span class="duracion-badge" id="detalles-habitacion" style="background:#dbeafe;color:#1e40af;display:none;"></span>
                                 </div>
                             </div>
                         </div>

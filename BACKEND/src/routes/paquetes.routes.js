@@ -25,6 +25,7 @@ const upload = multer({
 // ── Lectura pública (landing page sin login) ──────────────────────────────────
 router.get("/", paquetesController.getAll);
 router.get("/buscar", paquetesController.buscar);
+router.get("/:id/disponibilidad", paquetesController.verificarDisponibilidad);
 router.get("/:id", paquetesController.getById);
 router.get("/:id/servicios", paquetesController.obtenerServicios);
 

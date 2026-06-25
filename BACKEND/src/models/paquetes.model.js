@@ -11,26 +11,35 @@ const normalizarPaquete = (p) => {
 const Paquetes = {
 
     obtenerTodos: async (soloActivos = true) => {
-        const sql = soloActivos
-            ? "SELECT * FROM paquete WHERE Estado = 1 ORDER BY IDPaquete"
-            : "SELECT * FROM paquete ORDER BY IDPaquete";
+        const where = soloActivos ? "WHERE p.Estado = 1" : "";
+        const sql = `
+            SELECT p.*, h.NombreHabitacion, h.Costo AS CostoHabitacion, h.ImagenHabitacion
+            FROM paquete p
+            LEFT JOIN habitacion h ON p.IDHabitacion = h.IDHabitacion
+            ${where}
+            ORDER BY p.IDPaquete
+        `;
         const [rows] = await db.query(sql);
         return rows.map(normalizarPaquete);
     },
 
     obtenerPorId: async (id) => {
-        const [rows] = await db.query(
-            "SELECT * FROM paquete WHERE IDPaquete = ?",
-            [id]
-        );
+        const [rows] = await db.query(`
+            SELECT p.*, h.NombreHabitacion, h.Costo AS CostoHabitacion, h.ImagenHabitacion
+            FROM paquete p
+            LEFT JOIN habitacion h ON p.IDHabitacion = h.IDHabitacion
+            WHERE p.IDPaquete = ?
+        `, [id]);
         return normalizarPaquete(rows[0]);
     },
 
     obtenerConServicios: async (id) => {
-        const [paquete] = await db.query(
-            "SELECT * FROM paquete WHERE IDPaquete = ?",
-            [id]
-        );
+        const [paquete] = await db.query(`
+            SELECT p.*, h.NombreHabitacion, h.Costo AS CostoHabitacion, h.ImagenHabitacion
+            FROM paquete p
+            LEFT JOIN habitacion h ON p.IDHabitacion = h.IDHabitacion
+            WHERE p.IDPaquete = ?
+        `, [id]);
 
         if (paquete.length === 0) return null;
 
@@ -63,15 +72,15 @@ const Paquetes = {
             Descripcion,
             PrecioPaquete,
             DuracionNoches,
-            IncluirHabitacion,
+            IDHabitacion,
             Imagen,
             Estado
         } = paquete;
 
         const sql = `
-            INSERT INTO paquete 
-            (NombrePaquete, Descripcion, PrecioPaquete, DuracionNoches, IncluirHabitacion, Imagen, Estado)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO paquete
+            (NombrePaquete, Descripcion, PrecioPaquete, DuracionNoches, IDHabitacion, IncluirHabitacion, Imagen, Estado)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const [result] = await db.query(sql, [
@@ -79,9 +88,10 @@ const Paquetes = {
             Descripcion,
             PrecioPaquete,
             DuracionNoches || 1,
-            IncluirHabitacion || 1,
+            IDHabitacion || null,
+            IDHabitacion ? 1 : 0,
             Imagen || null,
-            Estado || 1
+            Estado !== undefined ? Estado : 1
         ]);
 
         return result;
@@ -93,15 +103,15 @@ const Paquetes = {
             Descripcion,
             PrecioPaquete,
             DuracionNoches,
-            IncluirHabitacion,
+            IDHabitacion,
             Imagen,
             Estado
         } = paquete;
 
         const sql = `
             UPDATE paquete
-            SET NombrePaquete=?, Descripcion=?, PrecioPaquete=?, 
-                DuracionNoches=?, IncluirHabitacion=?, Imagen=?, Estado=?
+            SET NombrePaquete=?, Descripcion=?, PrecioPaquete=?,
+                DuracionNoches=?, IDHabitacion=?, IncluirHabitacion=?, Imagen=?, Estado=?
             WHERE IDPaquete=?
         `;
 
@@ -110,7 +120,8 @@ const Paquetes = {
             Descripcion,
             PrecioPaquete,
             DuracionNoches,
-            IncluirHabitacion,
+            IDHabitacion || null,
+            IDHabitacion ? 1 : 0,
             Imagen,
             Estado,
             id
@@ -153,7 +164,7 @@ const Paquetes = {
 
     obtenerServicios: async (idPaquete) => {
         const [rows] = await db.query(`
-            SELECT 
+            SELECT
                 ps.IDPaqueteServicio,
                 ps.IDServicio,
                 ps.Cantidad,

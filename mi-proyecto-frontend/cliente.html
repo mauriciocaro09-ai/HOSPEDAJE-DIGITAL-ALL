@@ -1467,7 +1467,9 @@
 
                             <div class="reserva-summary-block">
                                 <h4>Desglose de precio</h4>
-                                <div class="reserva-summary-row"><span>Habitación</span><strong id="nr-sum-hab">$0</strong></div>
+                                <div class="reserva-summary-row" id="nr-sum-row-paquete" style="display:none;"><span>Paquete</span><strong id="nr-sum-paq">$0</strong></div>
+                                <div class="reserva-summary-row"><span id="nr-sum-hab-label">Habitación</span><strong id="nr-sum-hab">$0</strong></div>
+                                <div class="reserva-summary-row" id="nr-sum-row-extra" style="display:none;"><span>Noches extra</span><strong id="nr-sum-extra">$0</strong></div>
                                 <div class="reserva-summary-row"><span>Servicios</span><strong id="nr-sum-serv">$0</strong></div>
                                 <div class="reserva-summary-row"><span>IVA (19%)</span><strong id="nr-sum-iva">$0</strong></div>
                             </div>
@@ -1610,6 +1612,7 @@
         let usuarioActual = null;
         let habitacionesDisponibles = [];
         let misReservas = [];
+        let _paqueteSeleccionadoNR = null;
 
         // ── PROTECCIÓN: si no hay token o es admin, redirigir ─
         (function () {
@@ -2026,11 +2029,13 @@
                         }
                         <div class="paquete-card-icon" ${p.Imagen ? 'style="display:none"' : ''}><i class="fa-solid fa-box"></i></div>
                         <h4>${p.NombrePaquete || p.nombre || 'Paquete'}</h4>
+                        ${p.NombreHabitacion ? `<p style="font-size:12px;color:#1e40af;font-weight:600;margin:0 0 4px;"><i class="fa-solid fa-bed"></i> Incluye: ${p.NombreHabitacion}</p>` : ''}
                         <p>${p.Descripcion || p.descripcion || 'Incluye una selección de servicios especiales para tu estadía.'}</p>
                         ${p.PrecioPaquete || p.Precio || p.precio
-                            ? `<div class="paquete-precio">$${fmt(p.PrecioPaquete || p.Precio || p.precio)} <span>/ paquete</span></div>`
+                            ? `<div class="paquete-precio">$${fmt(p.PrecioPaquete || p.Precio || p.precio)} <span>todo incluido</span></div>`
                             : '<div class="paquete-precio" style="color:var(--muted);font-size:13px;">Consultar precio</div>'
                         }
+                        <p style="font-size:11px;color:var(--muted);margin:4px 0 0;">${p.DuracionNoches || 1} noche${(p.DuracionNoches || 1) !== 1 ? 's' : ''}</p>
                     </div>
                 `).join('');
             } catch (e) {
@@ -2571,6 +2576,7 @@
         async function cargarFormNuevaReserva() {
             const idPreselecc = _nrIdPreselecc;
             _nrIdPreselecc = null;
+            _paqueteSeleccionadoNR = null;
 
             $('form-nueva-reserva').reset();
             $('nr-error').classList.add('hidden');
@@ -2844,54 +2850,94 @@
                 sel.innerHTML = '<option value="">Sin paquete</option>';
                 paquetes.forEach(p => {
                     const precioIva = Math.round(p.PrecioPaquete * 1.19);
-                    sel.innerHTML += `<option value="${p.IDPaquete}" data-precio="${precioIva}" data-incluir-habitacion="${p.IncluirHabitacion ? '1' : '0'}">${p.NombrePaquete}</option>`;
+                    sel.innerHTML += `<option value="${p.IDPaquete}"
+                        data-precio="${precioIva}"
+                        data-precio-base="${p.PrecioPaquete}"
+                        data-duracion="${p.DuracionNoches || 1}"
+                        data-id-habitacion="${p.IDHabitacion || ''}"
+                        data-nombre-habitacion="${p.NombreHabitacion || ''}"
+                        data-costo-habitacion="${p.CostoHabitacion || 0}"
+                    >${p.NombrePaquete}</option>`;
                 });
                 construirDropdownCustomNRPaquetes(paquetes);
 
                 sel.addEventListener('change', async () => {
-                    actualizarResumen();
-                    const selHab = $('nr-habitacion');
-                    const hint = $('nr-hab-paquete-hint');
-
+                    const selHab   = $('nr-habitacion');
+                    const hint     = $('nr-hab-paquete-hint');
                     const nrTrigger = $('nr-hab-custom-trigger');
+                    const labelHab  = $('nr-hab-selected-label');
+
                     if (!sel.value) {
+                        // Sin paquete: restablecer habitación y fechas
+                        _paqueteSeleccionadoNR = null;
                         detalle.classList.add('hidden');
                         detalle.innerHTML = '';
-                        if (selHab) { selHab.disabled = false; selHab.style.opacity = ''; selHab.title = ''; }
-                        if (nrTrigger) { nrTrigger.style.opacity = ''; nrTrigger.style.pointerEvents = ''; nrTrigger.title = ''; }
-                        if (hint) hint.style.display = 'none';
+                        if (selHab)   { selHab.disabled = false; selHab.style.opacity = ''; selHab.title = ''; }
+                        if (nrTrigger){ nrTrigger.style.opacity = ''; nrTrigger.style.pointerEvents = ''; nrTrigger.title = ''; }
+                        if (hint)     hint.style.display = 'none';
+                        actualizarResumen();
                         return;
                     }
 
-                    // Siempre dejar la habitación activa — el sistema necesita IDHabitacion.
-                    // Si el paquete incluye alojamiento, solo mostramos el hint; el costo se anula en actualizarResumen().
-                    const incluyeHab = sel.options[sel.selectedIndex]?.dataset?.incluirHabitacion === '1';
-                    if (selHab) { selHab.disabled = false; selHab.style.opacity = ''; selHab.title = ''; }
-                    if (nrTrigger) { nrTrigger.style.opacity = ''; nrTrigger.style.pointerEvents = ''; nrTrigger.title = ''; }
-                    if (hint) hint.style.display = incluyeHab ? '' : 'none';
-
-                    // Cargar detalle automáticamente
+                    // Cargar detalle completo del paquete
                     detalle.innerHTML = '<div class="pdi-body" style="color:var(--muted);font-size:12px;">Cargando...</div>';
                     detalle.classList.remove('hidden');
                     try {
                         const p = await fetch(`${API_URL}/paquetes/${sel.value}`).then(r => r.json());
+                        _paqueteSeleccionadoNR = p;
+
+                        // Auto-asignar habitación del paquete
+                        if (p.IDHabitacion) {
+                            if (selHab) {
+                                selHab.value = p.IDHabitacion;
+                                selHab.disabled = true;
+                                selHab.style.opacity = '0.6';
+                                selHab.title = 'Habitación incluida en el paquete';
+                            }
+                            if (nrTrigger) {
+                                nrTrigger.style.opacity = '0.6';
+                                nrTrigger.style.pointerEvents = 'none';
+                                nrTrigger.title = 'Habitación incluida en el paquete';
+                            }
+                            if (labelHab) labelHab.textContent = p.NombreHabitacion || 'Habitación incluida';
+                            if (hint)     hint.style.display = '';
+
+                            // Si ya hay fecha de entrada, calcular fecha de salida automáticamente
+                            const fechaInicio = $('nr-fecha-inicio').value;
+                            if (fechaInicio) {
+                                const d = new Date(fechaInicio + 'T12:00:00');
+                                d.setDate(d.getDate() + Number(p.DuracionNoches || 1));
+                                $('nr-fecha-fin').value = d.toISOString().split('T')[0];
+                            }
+                        } else {
+                            // Paquete sin habitación asignada: liberar selector
+                            if (selHab)   { selHab.disabled = false; selHab.style.opacity = ''; selHab.title = ''; }
+                            if (nrTrigger){ nrTrigger.style.opacity = ''; nrTrigger.style.pointerEvents = ''; nrTrigger.title = ''; }
+                            if (hint)     hint.style.display = 'none';
+                        }
+
                         const servicios = p.servicios && p.servicios.length
                             ? p.servicios.map(s => `<span>${s.NombreServicio}</span>`).join('')
                             : '<span>Sin servicios adicionales</span>';
+                        const habBadge = p.NombreHabitacion
+                            ? `<span class="pdi-badge" style="background:#dbeafe;color:#1e40af;"><i class="fa-solid fa-bed"></i> ${p.NombreHabitacion}</span>`
+                            : '';
                         detalle.innerHTML = `
                             <div class="pdi-body">
                                 <div class="pdi-nombre">${p.NombrePaquete}</div>
                                 <div class="pdi-desc">${p.Descripcion || 'Sin descripción'}</div>
                                 <div class="pdi-meta">
-                                    <span class="pdi-badge">$${fmt(Math.round(p.PrecioPaquete * 1.19))}</span>
+                                    <span class="pdi-badge">$${fmt(Math.round(p.PrecioPaquete * 1.19))} todo incluido</span>
                                     <span class="pdi-badge">${p.DuracionNoches} noche${p.DuracionNoches !== 1 ? 's' : ''}</span>
-                                    ${p.IncluirHabitacion ? '<span class="pdi-badge">Incluye alojamiento</span>' : ''}
+                                    ${habBadge}
                                 </div>
                                 <div class="pdi-servicios"><strong>Servicios incluidos:</strong><br>${servicios}</div>
                             </div>`;
                     } catch(e) {
+                        _paqueteSeleccionadoNR = null;
                         detalle.innerHTML = '<div class="pdi-body" style="color:var(--muted)">No se pudo cargar el detalle.</div>';
                     }
+                    actualizarResumen();
                 });
 
             } catch(e) { console.error('Error cargando paquetes:', e); }
@@ -3054,14 +3100,6 @@
         };
 
         function actualizarResumen() {
-            const sel = $('nr-habitacion');
-            const opt = sel ? sel.options[sel.selectedIndex] : null;
-            const selPaq = $('nr-paquete');
-            const paqOpt = selPaq ? selPaq.options[selPaq.selectedIndex] : null;
-            const incluyeHab = paqOpt?.dataset?.incluirHabitacion === '1';
-            // Si el paquete incluye alojamiento, el costo de la habitación es $0
-            const costo = incluyeHab ? 0 : parseFloat(opt?.dataset?.costo || 0);
-            const costoPaquete = parseFloat(paqOpt?.dataset?.precio || 0);
             const inicio = $('nr-fecha-inicio')?.value || '';
             const fin    = $('nr-fecha-fin')?.value    || '';
 
@@ -3072,35 +3110,94 @@
             $('nr-sum-entrada').textContent = fmtFecha(inicio);
             $('nr-sum-salida').textContent  = fmtFecha(fin);
 
-            if (inicio && fin && (costo || costoPaquete)) {
+            const rowPaquete = $('nr-sum-row-paquete');
+            const rowExtra   = $('nr-sum-row-extra');
+            const labelHabResumen = $('nr-sum-hab-label');
+
+            const paq = _paqueteSeleccionadoNR;
+            const tienePaqueteConHab = paq && paq.IDHabitacion;
+
+            if (inicio && fin) {
                 const d1 = new Date(inicio), d2 = new Date(fin);
                 if (d2 > d1) {
-                    const noches      = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
-                    const totalConIva = noches * costo + costoServicios + costoPaquete;
-                    const subTotal    = Math.round(totalConIva / 1.19);
-                    const iva         = totalConIva - subTotal;
-                    const habBase     = Math.round(noches * costo / 1.19);
-                    const servBase    = Math.round(costoServicios / 1.19);
-
+                    const noches = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
                     $('nr-sum-noches').textContent = noches;
-                    $('nr-sum-hab').textContent    = `$${fmt(habBase)}`;
-                    $('nr-sum-serv').textContent   = `$${fmt(servBase)}`;
-                    $('nr-sum-iva').textContent    = `$${fmt(iva)}`;
-                    $('nr-sum-total').textContent  = `$${fmt(totalConIva)}`;
-                    return { noches, totalHab: habBase, costoServicios: servBase, costoPaquete, subTotal, iva, total: totalConIva };
+
+                    if (tienePaqueteConHab) {
+                        // Opción A: paquete todo incluido + noches extra si corresponde
+                        const precioPaqIva  = Math.round(paq.PrecioPaquete * 1.19);
+                        const durBase       = Number(paq.DuracionNoches || 1);
+                        const nochesExtra   = Math.max(0, noches - durBase);
+                        const costoHabNoche = Math.round(Number(paq.CostoHabitacion || 0) * 1.19);
+                        const costoExtra    = nochesExtra * costoHabNoche;
+
+                        const totalConIva = precioPaqIva + costoExtra + costoServicios;
+                        const subTotal    = Math.round(totalConIva / 1.19);
+                        const iva         = totalConIva - subTotal;
+
+                        if (rowPaquete) rowPaquete.style.display = '';
+                        if (rowExtra)   rowExtra.style.display = nochesExtra > 0 ? '' : 'none';
+                        if (labelHabResumen) labelHabResumen.textContent = 'Habitación';
+
+                        $('nr-sum-paq').textContent   = `$${fmt(Math.round(paq.PrecioPaquete))}`;
+                        $('nr-sum-hab').textContent   = 'Incluida';
+                        if (nochesExtra > 0) $('nr-sum-extra').textContent = `$${fmt(Math.round(nochesExtra * Number(paq.CostoHabitacion || 0)))} (${nochesExtra} noche${nochesExtra !== 1 ? 's' : ''})`;
+                        $('nr-sum-serv').textContent  = `$${fmt(Math.round(costoServicios / 1.19))}`;
+                        $('nr-sum-iva').textContent   = `$${fmt(iva)}`;
+                        $('nr-sum-total').textContent = `$${fmt(totalConIva)}`;
+
+                        return { noches, nochesExtra, costoPaquete: precioPaqIva, costoExtra, costoServicios, subTotal, iva, total: totalConIva };
+
+                    } else {
+                        // Sin paquete con habitación: flujo original
+                        const sel = $('nr-habitacion');
+                        const opt = sel ? sel.options[sel.selectedIndex] : null;
+                        const costoHabIva = parseFloat(opt?.dataset?.costo || 0);
+                        const selPaq = $('nr-paquete');
+                        const paqOpt = selPaq ? selPaq.options[selPaq.selectedIndex] : null;
+                        const costoPaqIva = parseFloat(paqOpt?.dataset?.precio || 0);
+
+                        if (rowPaquete) rowPaquete.style.display = costoPaqIva > 0 ? '' : 'none';
+                        if (rowExtra)   rowExtra.style.display = 'none';
+                        if (labelHabResumen) labelHabResumen.textContent = 'Habitación';
+
+                        const totalConIva = noches * costoHabIva + costoServicios + costoPaqIva;
+                        const subTotal    = Math.round(totalConIva / 1.19);
+                        const iva         = totalConIva - subTotal;
+                        const habBase     = Math.round(noches * costoHabIva / 1.19);
+                        const servBase    = Math.round(costoServicios / 1.19);
+
+                        if (costoPaqIva > 0) $('nr-sum-paq').textContent = `$${fmt(Math.round(costoPaqIva / 1.19))}`;
+                        $('nr-sum-hab').textContent   = `$${fmt(habBase)}`;
+                        $('nr-sum-serv').textContent  = `$${fmt(servBase)}`;
+                        $('nr-sum-iva').textContent   = `$${fmt(iva)}`;
+                        $('nr-sum-total').textContent = `$${fmt(totalConIva)}`;
+
+                        return { noches, nochesExtra: 0, costoServicios: servBase, costoPaquete: costoPaqIva, subTotal, iva, total: totalConIva };
+                    }
                 }
             }
+
             $('nr-sum-noches').textContent = '--';
-            $('nr-sum-hab').textContent    = '$0';
+            $('nr-sum-hab').textContent    = tienePaqueteConHab ? 'Incluida' : '$0';
             $('nr-sum-serv').textContent   = '$0';
             $('nr-sum-iva').textContent    = '$0';
             $('nr-sum-total').textContent  = '$0';
+            if (rowPaquete) rowPaquete.style.display = 'none';
+            if (rowExtra)   rowExtra.style.display = 'none';
             return null;
         }
 
         $('nr-habitacion').addEventListener('change', actualizarResumen);
         $('nr-fecha-inicio').addEventListener('change', () => {
-            $('nr-fecha-fin').min = $('nr-fecha-inicio').value;
+            const fechaInicio = $('nr-fecha-inicio').value;
+            $('nr-fecha-fin').min = fechaInicio;
+            // Si hay paquete con habitación, calcular fecha de salida automáticamente
+            if (_paqueteSeleccionadoNR?.IDHabitacion && fechaInicio) {
+                const d = new Date(fechaInicio + 'T12:00:00');
+                d.setDate(d.getDate() + Number(_paqueteSeleccionadoNR.DuracionNoches || 1));
+                $('nr-fecha-fin').value = d.toISOString().split('T')[0];
+            }
             actualizarResumen();
         });
         $('nr-fecha-fin').addEventListener('change', () => {
@@ -3122,7 +3219,9 @@
             const errBox = $('nr-error');
             errBox.classList.add('hidden');
 
-            const idHab  = $('nr-habitacion').value;
+            const paq    = _paqueteSeleccionadoNR;
+            // Si el paquete tiene habitación, usarla; si no, usar el selector manual
+            const idHab  = (paq?.IDHabitacion) ? String(paq.IDHabitacion) : $('nr-habitacion').value;
             const inicio = $('nr-fecha-inicio').value;
             const fin    = $('nr-fecha-fin').value;
             const metodo = $('nr-metodo-pago').value;
@@ -3147,12 +3246,16 @@
                 return;
             }
 
-            // Verificar disponibilidad de la habitación en esas fechas (solo si se seleccionó habitación)
-            if (idHab)
+            // Verificar disponibilidad — si hay paquete usar su endpoint, si no usar el de habitación
             try {
-                const dispRes = await fetch(`${API_URL}/habitaciones/${idHab}/disponibilidad?fechaInicio=${inicio}&fechaFin=${fin}`);
+                const idPaq = $('nr-paquete')?.value;
+                const urlDisp = (paq?.IDHabitacion && idPaq)
+                    ? `${API_URL}/paquetes/${idPaq}/disponibilidad?fechaInicio=${inicio}&fechaFin=${fin}`
+                    : `${API_URL}/habitaciones/${idHab}/disponibilidad?fechaInicio=${inicio}&fechaFin=${fin}`;
+
+                const dispRes = await fetch(urlDisp);
                 if (!dispRes.ok) {
-                    errBox.textContent = 'No se pudo verificar la disponibilidad. Reinicia el servidor e inténtalo de nuevo.';
+                    errBox.textContent = 'No se pudo verificar la disponibilidad. Intenta de nuevo.';
                     errBox.classList.remove('hidden');
                     errBox.scrollIntoView({ behavior: 'smooth' });
                     return;
@@ -3162,7 +3265,7 @@
                     await Swal.fire({
                         icon: 'warning',
                         title: 'Fechas no disponibles',
-                        text: 'La habitación ya tiene una reserva en esas fechas. Por favor selecciona otras fechas.',
+                        text: dispData.mensaje || 'La habitación ya tiene una reserva en esas fechas. Por favor selecciona otras fechas.',
                         confirmButtonColor: '#1a2744',
                         confirmButtonText: 'Elegir otras fechas'
                     });
