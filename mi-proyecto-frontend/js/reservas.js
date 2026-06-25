@@ -626,13 +626,16 @@ const validarPasoWizard = (step) => {
 
         const ignorarId = reservaEnEdicion ? obtenerIdReserva(reservaEnEdicion) : null;
         if (hayCruceDeFechasConReservas(habitacion, inicio, fin, ignorarId)) {
-            mostrarErrorInline('reserva-admin-fecha-fin', 'La habitación ya tiene una reserva en ese rango.');
+            const nombrePrincipal = document.getElementById('hab-selected-label')?.textContent?.trim()
+                || _habitacionesCache.find(h => String(h.IDHabitacion) === String(habitacion))?.NombreHabitacion
+                || 'La habitación seleccionada';
+            mostrarErrorInline('reserva-admin-fecha-fin', `"${nombrePrincipal}" ya tiene una reserva en ese rango. Elegí otras fechas o una habitación diferente.`);
             _errCruceFechas = true;
             return false;
         }
         for (const habExtra of _habitacionesExtra) {
             if (hayCruceDeFechasConReservas(habExtra.id, inicio, fin, ignorarId)) {
-                mostrarErrorInline('reserva-admin-fecha-fin', `La habitación "${habExtra.nombre}" ya tiene una reserva en ese rango.`);
+                mostrarErrorInline('reserva-admin-fecha-fin', `"${habExtra.nombre}" ya tiene una reserva en ese rango. Quitala o elegí otras fechas.`);
                 _errCruceFechas = true;
                 return false;
             }
