@@ -1053,7 +1053,7 @@ const abrirExtenderReserva = async (idReserva) => {
     try {
         const resp = await requestJson(`/reservas/${idReserva}/extender`, {
             method: 'PUT',
-            body: JSON.stringify({ diasExtra })
+            body: { diasExtra }
         });
         await Swal.fire({
             title: '¡Reserva extendida!',
