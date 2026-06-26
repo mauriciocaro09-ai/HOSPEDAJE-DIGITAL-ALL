@@ -236,6 +236,11 @@ const iniciarAutocompletePaises = ({ inputId, hiddenId = null, defaultValue = ''
   input.dataset.acIniciado = '1';
   _inyectarEstilosAC();
 
+  // Chrome ignora autocomplete="off" en campos que detecta como "dirección".
+  // Truco estándar: nombre aleatorio + valor de autocomplete no reconocido.
+  input.setAttribute('autocomplete', 'new-password');
+  input.setAttribute('name', '_ps' + Math.random().toString(36).slice(2, 7));
+
   // Wrapper
   const parent = input.parentElement;
   let wrap;
