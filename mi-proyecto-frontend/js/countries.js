@@ -250,10 +250,13 @@ const iniciarAutocompletePaises = ({ inputId, hiddenId = null, defaultValue = ''
     wrap.appendChild(input);
   }
 
-  // Dropdown anclado a body — no lo corta ningún overflow:hidden/auto del modal
+  // El dropdown debe vivir dentro del <dialog> si el input está en uno:
+  // los dialogs usan el "top layer" del navegador y tapan cualquier elemento
+  // position:fixed anclado a document.body, sin importar el z-index.
   const dropdown = document.createElement('div');
   dropdown.className = 'pais-ac-dropdown';
-  document.body.appendChild(dropdown);
+  const parentDialog = input.closest('dialog');
+  (parentDialog || document.body).appendChild(dropdown);
 
   let allPaises = [];
   let highlightedIdx = -1;
