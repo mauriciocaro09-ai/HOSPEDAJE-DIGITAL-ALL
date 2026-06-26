@@ -1,9 +1,9 @@
 // ============================================================
-// MÓDULO: Países — datos embebidos (sin API externa)
-// Banderas via emoji unicode · sin requests CORS
+// MÓDULO: Países — datos embebidos, banderas via flagcdn.com
+// Sin API externa · sin CORS · posicionamiento inteligente
 // ============================================================
 
-// [nombre, codigo2, prefijo]
+// [nombre_en, codigo2, prefijo]
 const _PAISES_RAW = [
   ['Afghanistan','AF','+93'],['Albania','AL','+355'],['Algeria','DZ','+213'],
   ['Andorra','AD','+376'],['Angola','AO','+244'],['Antigua and Barbuda','AG','+1268'],
@@ -72,14 +72,13 @@ const _PAISES_RAW = [
   ['Vietnam','VN','+84'],['Yemen','YE','+967'],['Zambia','ZM','+260'],['Zimbabwe','ZW','+263']
 ];
 
-// Nombres en español para los países más buscados
 const _NOMBRES_ES = {
-  'Afghanistan':'Afganistán','Albania':'Albania','Algeria':'Argelia',
-  'Argentina':'Argentina','Australia':'Australia','Austria':'Austria',
-  'Belgium':'Bélgica','Bolivia':'Bolivia','Brazil':'Brasil',
-  'Canada':'Canadá','Chile':'Chile','China':'China',
-  'Colombia':'Colombia','Costa Rica':'Costa Rica','Croatia':'Croacia',
-  'Cuba':'Cuba','Czech Republic':'República Checa','Denmark':'Dinamarca',
+  'Afghanistan':'Afganistán','Algeria':'Argelia','Argentina':'Argentina',
+  'Australia':'Australia','Austria':'Austria','Belgium':'Bélgica',
+  'Bolivia':'Bolivia','Brazil':'Brasil','Canada':'Canadá',
+  'Chile':'Chile','China':'China','Colombia':'Colombia',
+  'Costa Rica':'Costa Rica','Croatia':'Croacia','Cuba':'Cuba',
+  'Czech Republic':'República Checa','Denmark':'Dinamarca',
   'Dominican Republic':'República Dominicana','Ecuador':'Ecuador',
   'Egypt':'Egipto','El Salvador':'El Salvador','Finland':'Finlandia',
   'France':'Francia','Germany':'Alemania','Greece':'Grecia',
@@ -94,17 +93,14 @@ const _NOMBRES_ES = {
   'Poland':'Polonia','Portugal':'Portugal','Romania':'Rumania',
   'Russia':'Rusia','Saudi Arabia':'Arabia Saudita','South Korea':'Corea del Sur',
   'Spain':'España','Sweden':'Suecia','Switzerland':'Suiza',
-  'Turkey':'Turquía','Ukraine':'Ucrania','United Arab Emirates':'Emiratos Árabes Unidos',
+  'Turkey':'Turquía','Ukraine':'Ucrania',
+  'United Arab Emirates':'Emiratos Árabes Unidos',
   'United Kingdom':'Reino Unido','United States':'Estados Unidos',
   'Uruguay':'Uruguay','Venezuela':'Venezuela','Vietnam':'Vietnam'
 };
 
-// Emoji de bandera desde código ISO 3166-1 alpha-2
-const _emojiFlag = (code) => {
-  try {
-    return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
-  } catch { return '🌐'; }
-};
+// URL de bandera via flagcdn.com (imágenes, sin restricción CORS para display)
+const _flagUrl = (codigo) => `https://flagcdn.com/w20/${codigo.toLowerCase()}.png`;
 
 let _countriesCache = null;
 
@@ -116,7 +112,7 @@ const cargarPaises = async () => {
       nombreEn: nombre,
       codigo,
       prefijo,
-      bandera: _emojiFlag(codigo)
+      bandera: _flagUrl(codigo)
     }))
     .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
   return _countriesCache;
@@ -130,7 +126,7 @@ const poblarSelectPaises = async (selectId, paisSeleccionado = '') => {
   paises.forEach(p => {
     const o = document.createElement('option');
     o.value = p.nombre;
-    o.textContent = `${p.bandera} ${p.nombre} (${p.prefijo})`;
+    o.textContent = `${p.nombre} (${p.prefijo})`;
     if (p.nombre === paisSeleccionado) o.selected = true;
     select.appendChild(o);
   });
@@ -152,7 +148,7 @@ const mostrarFlagEn = (wrap, pais) => {
     wrap.appendChild(badge);
   }
   badge.innerHTML =
-    `<span class="pais-flag-emoji">${pais.bandera}</span>` +
+    `<img src="${pais.bandera}" alt="${pais.codigo}" class="pais-flag-img" onerror="this.style.display='none'">` +
     (pais.prefijo ? `<span class="pais-flag-pref">${pais.prefijo}</span>` : '');
   wrap.classList.add('tiene-pais');
 };
@@ -174,33 +170,35 @@ const _inyectarEstilosAC = () => {
     .pais-ac-dropdown {
       display: none; position: fixed;
       background: #fff; border: 1px solid #c7d2fe;
-      border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto;
-      z-index: 99999; box-shadow: 0 8px 24px rgba(0,0,0,.18); scrollbar-width: thin;
+      border-radius: 8px; overflow-y: auto;
+      z-index: 99999; box-shadow: 0 8px 24px rgba(0,0,0,.18);
+      scrollbar-width: thin;
     }
     .pais-ac-dropdown.abierto { display: block; }
     .pais-ac-item {
-      padding: 8px 12px; cursor: pointer; font-size: 13px;
-      display: flex; align-items: center; gap: 8px;
+      padding: 7px 12px; cursor: pointer; font-size: 13px;
+      color: #1f2937; display: flex; align-items: center; gap: 9px;
       border-bottom: 1px solid #f3f4f6; transition: background .1s; user-select: none;
     }
     .pais-ac-item:last-child { border-bottom: none; }
     .pais-ac-item:hover, .pais-ac-item.resaltado { background: #eff6ff; color: #1a2744; }
-    .pais-ac-emoji  { font-size: 17px; flex-shrink: 0; width: 24px; text-align: center; }
-    .pais-ac-nombre { flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pais-ac-flag  { flex-shrink: 0; width: 24px; display:flex; align-items:center; }
+    .pais-ac-flag img { width: 20px; height: 14px; object-fit: cover; border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,.2); display:block; }
+    .pais-ac-nombre { flex: 1; font-weight: 500; color: #1f2937; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .pais-ac-prefijo{ font-size: 11px; color: #9ca3af; white-space: nowrap; }
     .pais-ac-empty  { padding: 14px; color: #9ca3af; font-size: 13px; text-align: center; }
-    /* Badge en el input */
+    /* Badge bandera dentro del input */
     .pais-flag-sel {
       position: absolute; left: 7px; top: 50%; transform: translateY(-50%);
-      display: flex; align-items: center; gap: 4px; pointer-events: none; z-index: 2;
+      display: flex; align-items: center; gap: 5px; pointer-events: none; z-index: 2;
     }
-    .pais-flag-emoji { font-size: 16px; line-height: 1; }
-    .pais-flag-pref  {
+    .pais-flag-img  { width: 22px; height: 15px; object-fit: cover; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,.25); display: block; }
+    .pais-flag-pref {
       font-size: 11px; font-weight: 600; color: #374151;
       background: #f3f4f6; padding: 1px 4px; border-radius: 3px; border: 1px solid #e5e7eb; white-space: nowrap;
     }
     .pais-ac-wrap.tiene-pais > input[type="text"],
-    .pais-ac-wrap.tiene-pais > input:not([type]) { padding-left: 76px !important; }
+    .pais-ac-wrap.tiene-pais > input:not([type]) { padding-left: 78px !important; }
   `;
   document.head.appendChild(s);
 };
@@ -236,8 +234,7 @@ const iniciarAutocompletePaises = ({ inputId, hiddenId = null, defaultValue = ''
   input.dataset.acIniciado = '1';
   _inyectarEstilosAC();
 
-  // Chrome ignora autocomplete="off" en campos que detecta como "dirección".
-  // Truco estándar: nombre aleatorio + valor de autocomplete no reconocido.
+  // Bloquear autofill nativo de Chrome (ignora "off" en campos de dirección)
   input.setAttribute('autocomplete', 'new-password');
   input.setAttribute('name', '_ps' + Math.random().toString(36).slice(2, 7));
 
@@ -253,7 +250,7 @@ const iniciarAutocompletePaises = ({ inputId, hiddenId = null, defaultValue = ''
     wrap.appendChild(input);
   }
 
-  // Dropdown anclado a body (evita ser cortado por overflow:hidden/auto)
+  // Dropdown anclado a body — no lo corta ningún overflow:hidden/auto del modal
   const dropdown = document.createElement('div');
   dropdown.className = 'pais-ac-dropdown';
   document.body.appendChild(dropdown);
@@ -266,6 +263,7 @@ const iniciarAutocompletePaises = ({ inputId, hiddenId = null, defaultValue = ''
     if (hiddenInput) hiddenInput.value = defaultValue;
   }
 
+  // Datos ya embebidos — se resuelve sincrónicamente en el próximo tick
   cargarPaises().then(ps => {
     allPaises = ps;
     const nombre = defaultValue || input.value.trim();
@@ -278,11 +276,29 @@ const iniciarAutocompletePaises = ({ inputId, hiddenId = null, defaultValue = ''
     }
   });
 
+  // Posicionamiento inteligente: se abre hacia arriba si hay más espacio
   const posicionar = () => {
     const r = input.getBoundingClientRect();
-    dropdown.style.top   = r.bottom + 'px';
+    const spaceBelow = window.innerHeight - r.bottom;
+    const spaceAbove = r.top;
+    const maxH = 200;
+
     dropdown.style.left  = r.left + 'px';
     dropdown.style.width = r.width + 'px';
+
+    if (spaceBelow < maxH && spaceAbove > spaceBelow) {
+      const h = Math.min(maxH, spaceAbove - 8);
+      dropdown.style.top        = 'auto';
+      dropdown.style.bottom     = (window.innerHeight - r.top) + 'px';
+      dropdown.style.maxHeight  = h + 'px';
+      dropdown.style.borderRadius = '8px 8px 0 0';
+    } else {
+      const h = Math.min(maxH, spaceBelow - 8);
+      dropdown.style.bottom     = 'auto';
+      dropdown.style.top        = r.bottom + 'px';
+      dropdown.style.maxHeight  = h + 'px';
+      dropdown.style.borderRadius = '0 0 8px 8px';
+    }
   };
 
   const cerrar = () => {
@@ -314,8 +330,8 @@ const iniciarAutocompletePaises = ({ inputId, hiddenId = null, defaultValue = ''
       return;
     }
     dropdown.innerHTML = filtrados.slice(0, 40).map(p =>
-      `<div class="pais-ac-item" data-nombre="${p.nombre.replace(/"/g,'&quot;')}">` +
-      `<span class="pais-ac-emoji">${p.bandera}</span>` +
+      `<div class="pais-ac-item" data-nombre="${p.nombre.replace(/"/g, '&quot;')}">` +
+      `<span class="pais-ac-flag"><img src="${p.bandera}" alt="${p.codigo}" onerror="this.style.display='none'"></span>` +
       `<span class="pais-ac-nombre">${p.nombre}</span>` +
       `<span class="pais-ac-prefijo">${p.prefijo}</span></div>`
     ).join('');
@@ -328,7 +344,9 @@ const iniciarAutocompletePaises = ({ inputId, hiddenId = null, defaultValue = ''
   const filtrar = (q) => {
     if (!q) return cerrar();
     const ql = q.toLowerCase();
-    const sw = allPaises.filter(p => p.nombre.toLowerCase().startsWith(ql) || p.nombreEn.toLowerCase().startsWith(ql));
+    const sw = allPaises.filter(p =>
+      p.nombre.toLowerCase().startsWith(ql) || p.nombreEn.toLowerCase().startsWith(ql)
+    );
     const co = allPaises.filter(p =>
       !p.nombre.toLowerCase().startsWith(ql) && !p.nombreEn.toLowerCase().startsWith(ql) &&
       (p.nombre.toLowerCase().includes(ql) || p.nombreEn.toLowerCase().includes(ql))
