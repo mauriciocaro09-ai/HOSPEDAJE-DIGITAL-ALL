@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -9,15 +9,24 @@
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --login-bg: linear-gradient(180deg, #f6f7fb 0%, #ffffff 100%);
-            --login-card: #15232b;
-            --login-card-border: rgba(255, 255, 255, 0.06);
-            --login-text: #0f172a;
-            --login-muted: #b7c0c8;
-            --login-accent: #ff8a3d;
-            --login-shadow: 0 18px 50px rgba(15, 23, 42, 0.18);
+            --accent: #ff8a3d;
+            --accent-hover: #f97316;
+            --dark-navy: #0d1e2c;
+            --mid-navy: #1a3351;
+            --card-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+            --input-border: #e2e8f0;
+            --input-focus: rgba(255, 138, 61, 0.18);
+            --muted: #64748b;
+            --error-color: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body.login-body {
@@ -26,43 +35,165 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: var(--font-family, Inter, Arial, sans-serif);
-            background: var(--login-bg);
-            color: var(--login-text);
+            font-family: 'Inter', Arial, sans-serif;
             padding: 24px;
+            background:
+                linear-gradient(rgba(5, 14, 24, 0.62), rgba(5, 14, 24, 0.62)),
+                url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=1920') center / cover no-repeat fixed;
         }
 
+        /* ══════════════════════════════════════
+           MAIN LOGIN CARD (split panel)
+        ══════════════════════════════════════ */
         .login-container {
             width: 100%;
-            max-width: 460px;
+            max-width: 900px;
         }
 
         .login-card {
-            background: var(--login-card);
-            color: #fff;
+            display: flex;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            min-height: 520px;
+        }
+
+        /* ── Left brand panel ── */
+        .login-brand {
+            flex: 0 0 42%;
+            background:
+                linear-gradient(160deg, rgba(13, 30, 44, 0.93) 0%, rgba(26, 51, 81, 0.90) 100%),
+                url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=600') center / cover no-repeat;
+            padding: 52px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .login-brand::before {
+            content: '';
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: rgba(255, 138, 61, 0.07);
+            top: -70px;
+            right: -70px;
+            pointer-events: none;
+        }
+
+        .login-brand::after {
+            content: '';
+            position: absolute;
+            width: 190px;
+            height: 190px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            bottom: -50px;
+            left: -55px;
+            pointer-events: none;
+        }
+
+        .brand-top {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-icon-wrap {
+            width: 64px;
+            height: 64px;
             border-radius: 18px;
-            box-shadow: var(--login-shadow);
-            border: 1px solid var(--login-card-border);
-            padding: 32px 28px 24px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 22px;
+            box-shadow: 0 8px 24px rgba(255, 138, 61, 0.38);
+        }
+
+        .brand-icon-wrap i {
+            font-size: 1.65rem;
+            color: #fff;
+        }
+
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+            margin: 0 0 10px;
+        }
+
+        .brand-tagline {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 0.875rem;
+            font-weight: 400;
+            line-height: 1.55;
+            margin: 0;
+        }
+
+        .brand-divider {
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            border-radius: 2px;
+            margin: 22px 0;
+        }
+
+        .brand-bottom {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-stars {
+            color: var(--accent);
+            font-size: 1.1rem;
+            letter-spacing: 4px;
+            margin-bottom: 14px;
+        }
+
+        .brand-quote {
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.82rem;
+            line-height: 1.6;
+            font-style: italic;
+            margin: 0;
+        }
+
+        /* ── Right form panel ── */
+        .login-form-panel {
+            flex: 1;
+            background: #ffffff;
+            padding: 52px 46px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .login-header {
-            text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 30px;
         }
 
         .login-header h1 {
-            margin: 0;
-            font-size: 2rem;
+            margin: 0 0 6px;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #0f172a;
             letter-spacing: -0.02em;
+            line-height: 1.2;
         }
 
         .login-header .subtitle {
-            margin: 10px 0 0;
-            color: var(--login-muted);
-            font-size: 1rem;
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.9rem;
         }
 
+        /* ── Form ── */
         .login-form {
             display: grid;
             gap: 18px;
@@ -70,32 +201,54 @@
 
         .field {
             display: grid;
-            gap: 8px;
+            gap: 7px;
         }
 
         .field label {
-            font-size: 0.98rem;
-            font-weight: 700;
-            color: #fff;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            letter-spacing: 0.01em;
+        }
+
+        .field-input-wrap {
+            position: relative;
+        }
+
+        .field-input-wrap i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.88rem;
+            pointer-events: none;
         }
 
         .field input {
             width: 100%;
-            padding: 14px 16px;
-            border: 0;
+            padding: 13px 14px 13px 40px;
+            border: 1.5px solid var(--input-border);
             border-radius: 10px;
-            background: #fff;
+            background: #f8fafc;
             color: #111827;
-            font-size: 1rem;
-            box-sizing: border-box;
+            font-size: 0.97rem;
+            font-family: inherit;
             outline: none;
-            transition: box-shadow 0.2s ease, transform 0.2s ease;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
         }
 
         .field input:focus {
-            box-shadow: 0 0 0 3px rgba(255, 138, 61, 0.18);
+            border-color: var(--accent);
+            background: #fff;
+            box-shadow: 0 0 0 3px var(--input-focus);
         }
 
+        .field input::placeholder {
+            color: #cbd5e1;
+        }
+
+        /* ── Button ── */
         .actions {
             padding-top: 4px;
         }
@@ -105,53 +258,44 @@
             border: 0;
             border-radius: 12px;
             padding: 14px 18px;
-            background: var(--login-accent);
-            color: #1f2937;
-            font-size: 1.05rem;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            color: #fff;
+            font-size: 0.97rem;
             font-weight: 700;
+            font-family: inherit;
             cursor: pointer;
-            transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            box-shadow: 0 6px 20px rgba(255, 138, 61, 0.38);
+            letter-spacing: 0.02em;
         }
 
         .btn-login:hover {
             transform: translateY(-1px);
-            filter: brightness(1.02);
+            box-shadow: 0 10px 28px rgba(255, 138, 61, 0.48);
         }
 
         .btn-login:disabled {
             opacity: 0.65;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
         .error-message {
             min-height: 1.2rem;
             margin: 2px 0 0;
-            color: #ffb4a0;
-            font-size: 0.95rem;
+            color: var(--error-color);
+            font-size: 0.875rem;
             text-align: center;
         }
 
+        /* ── Footer ── */
         .login-footer {
-            display: grid;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             gap: 10px;
-            justify-items: center;
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .login-footer a {
-            color: var(--login-muted);
-            text-decoration: none;
-            font-size: 0.95rem;
-        }
-
-        .login-footer a strong {
-            color: #fff;
-        }
-
-        .login-footer .link-back {
-            font-weight: 700;
+            margin-top: 24px;
         }
 
         .footer-link {
@@ -159,16 +303,75 @@
             background: transparent;
             border: 0;
             padding: 0;
-            color: var(--login-muted);
+            color: var(--muted);
             text-decoration: none;
             font: inherit;
+            font-size: 0.875rem;
             cursor: pointer;
+            transition: color 0.18s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--accent);
         }
 
         .footer-link strong {
-            color: #fff;
+            color: var(--accent);
+            font-weight: 600;
         }
 
+        /* ══════════════════════════════════════
+           RESET PASSWORD PANEL
+        ══════════════════════════════════════ */
+        #reset-panel {
+            display: none;
+        }
+
+        #reset-panel.visible {
+            display: block;
+        }
+
+        #reset-panel .login-card {
+            max-width: 460px;
+            margin: 0 auto;
+        }
+
+        .reset-title {
+            margin: 0 0 8px;
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+            text-align: center;
+        }
+
+        .reset-subtitle {
+            margin: 0 0 24px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .reset-form {
+            display: grid;
+            gap: 16px;
+        }
+
+        .reset-message {
+            min-height: 1.2rem;
+            margin: 2px 0 0;
+            font-size: 0.875rem;
+            text-align: center;
+            color: #10b981;
+        }
+
+        .reset-message.error {
+            color: var(--error-color);
+        }
+
+        /* ══════════════════════════════════════
+           MODALS
+        ══════════════════════════════════════ */
         .modal-shell {
             position: fixed;
             inset: 0;
@@ -177,8 +380,8 @@
             justify-content: center;
             padding: 16px;
             background: rgba(8, 15, 20, 0.72);
-                -webkit-backdrop-filter: blur(6px);
-                backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
             z-index: 1000;
         }
 
@@ -230,6 +433,11 @@
             font-size: 1.3rem;
             cursor: pointer;
             z-index: 2;
+            transition: background 0.18s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(21, 35, 43, 0.16);
         }
 
         .modal-iframe {
@@ -245,12 +453,14 @@
             color: #0f172a;
             font-size: 1.55rem;
             line-height: 1.2;
+            font-weight: 700;
         }
 
         .recovery-copy {
             margin: 0 0 18px;
             color: #52606d;
             line-height: 1.5;
+            font-size: 0.9rem;
         }
 
         .recovery-form {
@@ -265,24 +475,25 @@
 
         .recovery-field label {
             color: #15232b;
-            font-size: 0.98rem;
+            font-size: 0.9rem;
             font-weight: 700;
         }
 
         .recovery-field input {
             width: 100%;
             padding: 14px 16px;
-            border: 1px solid #d7e0e6;
+            border: 1.5px solid #d7e0e6;
             border-radius: 12px;
             font-size: 1rem;
             color: #0f172a;
             box-sizing: border-box;
             outline: none;
+            font-family: inherit;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .recovery-field input:focus {
-            border-color: #ff8a3d;
+            border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(255, 138, 61, 0.16);
         }
 
@@ -298,9 +509,11 @@
             border: 0;
             border-radius: 12px;
             padding: 12px 16px;
-            font-size: 0.98rem;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.18s ease, transform 0.18s ease;
         }
 
         .btn-secondary {
@@ -308,155 +521,194 @@
             color: #243746;
         }
 
+        .btn-secondary:hover {
+            opacity: 0.8;
+        }
+
         .btn-primary {
-            background: #ff8a3d;
-            color: #1f2937;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(255, 138, 61, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
         }
 
         .recovery-message {
             min-height: 1.2rem;
             margin: 4px 0 0;
             color: #0f766e;
-            font-size: 0.95rem;
+            font-size: 0.875rem;
         }
 
         .recovery-message.error {
             color: #b42318;
         }
 
-        /* ── Panel de nueva contraseña (reset desde email) ── */
-        #reset-panel {
-            display: none;
-        }
-        #reset-panel.visible {
-            display: block;
-        }
-        .reset-title {
-            margin: 0 0 8px;
-            font-size: 1.7rem;
-            letter-spacing: -0.02em;
-            text-align: center;
-        }
-        .reset-subtitle {
-            margin: 0 0 22px;
-            color: var(--login-muted);
-            font-size: 0.97rem;
-            text-align: center;
-        }
-        .reset-form {
-            display: grid;
-            gap: 16px;
-        }
-        .reset-message {
-            min-height: 1.2rem;
-            margin: 2px 0 0;
-            font-size: 0.95rem;
-            text-align: center;
-            color: #6ee7b7;
-        }
-        .reset-message.error { color: #ffb4a0; }
-
+        /* ══════════════════════════════════════
+           ANIMATION
+        ══════════════════════════════════════ */
         @keyframes modalIn {
             from {
                 opacity: 0;
                 transform: translateY(12px) scale(0.98);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
         }
 
-        @media (max-width: 520px) {
-            body.login-body {
-                padding: 16px;
+        /* ══════════════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════════════ */
+        @media (max-width: 680px) {
+            .login-brand {
+                display: none;
+            }
+
+            .login-form-panel {
+                padding: 38px 26px 30px;
+                border-radius: 22px;
             }
 
             .login-card {
-                padding: 26px 18px 20px;
-                border-radius: 16px;
+                border-radius: 20px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            body.login-body {
+                padding: 12px;
+            }
+
+            .login-form-panel {
+                padding: 30px 18px 24px;
             }
 
             .login-header h1 {
-                font-size: 1.7rem;
+                font-size: 1.5rem;
             }
         }
     </style>
 </head>
 
 <body class="login-body">
+
+    <!-- ══════════════════════════════════════
+         LOGIN PRINCIPAL
+    ══════════════════════════════════════ -->
     <div class="login-container">
-        <div class="login-card" role="dialog" aria-modal="true" aria-labelledby="login-title">
-            <header class="login-header">
-                <h1 id="login-title">Hospedaje Digital</h1>
-                <p class="subtitle">Ingresa a tu cuenta</p>
-            </header>
+        <div class="login-card" role="main">
 
-            <form class="login-form" id="login-form">
-                <div class="field">
-                    <label for="email">Correo Electrónico</label>
-                    <input type="email" id="email" name="email" placeholder="admin@hotel.com" autocomplete="username" required>
+            <!-- Panel izquierdo: branding -->
+            <div class="login-brand" aria-hidden="true">
+                <div class="brand-top">
+                    <div class="brand-icon-wrap">
+                        <i class="fa-solid fa-hotel"></i>
+                    </div>
+                    <h2 class="brand-name">Hospedaje<br>Digital</h2>
+                    <p class="brand-tagline">Tu portal de gestión hotelera,<br>siempre disponible.</p>
+                    <div class="brand-divider"></div>
                 </div>
-
-                <div class="field">
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+                <div class="brand-bottom">
+                    <div class="brand-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="brand-quote">"Cada hu&eacute;sped merece una experiencia inolvidable.<br>Administra con excelencia."</p>
                 </div>
+            </div>
 
-                <div class="actions">
-                    <button type="submit" class="btn-login" id="btn-login">Iniciar Sesión</button>
-                </div>
+            <!-- Panel derecho: formulario -->
+            <div class="login-form-panel">
+                <header class="login-header">
+                    <h1 id="login-title">Bienvenido de vuelta</h1>
+                    <p class="subtitle">Inicia sesi&oacute;n para continuar</p>
+                </header>
 
-                <p id="error" class="error-message" role="alert" aria-live="polite"></p>
-            </form>
+                <form class="login-form" id="login-form">
+                    <div class="field">
+                        <label for="email">Correo Electr&oacute;nico</label>
+                        <div class="field-input-wrap">
+                            <i class="fa-regular fa-envelope"></i>
+                            <input type="email" id="email" name="email" placeholder="admin@hotel.com" autocomplete="username" required>
+                        </div>
+                    </div>
 
-            <footer class="login-footer">
-                <button type="button" class="footer-link" id="open-register-modal">¿No tienes cuenta? <strong>Regístrate aquí</strong></button>
-                <button type="button" class="footer-link" id="open-recovery-modal">🔒 ¿Olvidaste tu contraseña?</button>
-                <a href="pages/landingpage.html" class="link-back">← Volver</a>
-            </footer>
+                    <div class="field">
+                        <label for="password">Contrase&ntilde;a</label>
+                        <div class="field-input-wrap">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="password" name="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password" required>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button type="submit" class="btn-login" id="btn-login">Iniciar Sesi&oacute;n</button>
+                    </div>
+
+                    <p id="error" class="error-message" role="alert" aria-live="polite"></p>
+                </form>
+
+                <footer class="login-footer">
+                    <button type="button" class="footer-link" id="open-register-modal">&iquest;No tienes cuenta? <strong>Reg&iacute;strate aqu&iacute;</strong></button>
+                    <button type="button" class="footer-link" id="open-recovery-modal">&#128274; &iquest;Olvidaste tu contrase&ntilde;a?</button>
+                    <a href="pages/landingpage.html" class="footer-link">&larr; Volver al inicio</a>
+                </footer>
+            </div>
+
         </div>
     </div>
 
-    <!-- PANEL: Nueva contraseña (se muestra cuando llega con ?reset-token en la URL) -->
+    <!-- ══════════════════════════════════════
+         PANEL RESET PASSWORD
+    ══════════════════════════════════════ -->
     <div class="login-container" id="reset-panel">
         <div class="login-card">
-            <h1 class="reset-title">Nueva contraseña</h1>
-            <p class="reset-subtitle">Ingresa y confirma tu nueva contraseña.</p>
-            <form class="reset-form" id="reset-form">
-                <div class="field">
-                    <label for="reset-password">Nueva contraseña</label>
-                    <input type="password" id="reset-password" placeholder="••••••••" autocomplete="new-password" required>
-                </div>
-                <div class="field">
-                    <label for="reset-password2">Confirmar contraseña</label>
-                    <input type="password" id="reset-password2" placeholder="••••••••" autocomplete="new-password" required>
-                </div>
-                <div class="actions">
-                    <button type="submit" class="btn-login" id="btn-reset">Guardar contraseña</button>
-                </div>
-                <p id="reset-message" class="reset-message" role="alert" aria-live="polite"></p>
-            </form>
+            <div class="login-form-panel" style="border-radius:22px;">
+                <h1 class="reset-title">Nueva contrase&ntilde;a</h1>
+                <p class="reset-subtitle">Ingresa y confirma tu nueva contrase&ntilde;a.</p>
+                <form class="reset-form" id="reset-form">
+                    <div class="field">
+                        <label for="reset-password">Nueva contrase&ntilde;a</label>
+                        <div class="field-input-wrap">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="reset-password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="new-password" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="reset-password2">Confirmar contrase&ntilde;a</label>
+                        <div class="field-input-wrap">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="reset-password2" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="new-password" required>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button type="submit" class="btn-login" id="btn-reset">Guardar contrase&ntilde;a</button>
+                    </div>
+                    <p id="reset-message" class="reset-message" role="alert" aria-live="polite"></p>
+                </form>
+            </div>
         </div>
     </div>
 
+    <!-- Modal: Registro -->
     <div class="modal-shell hidden" id="register-modal" aria-hidden="true">
         <div class="modal-panel modal-panel-register" role="dialog" aria-modal="true" aria-labelledby="register-modal-title">
-            <button type="button" class="modal-close" data-close-modal="register-modal" aria-label="Cerrar registro">×</button>
+            <button type="button" class="modal-close" data-close-modal="register-modal" aria-label="Cerrar registro">&times;</button>
             <iframe class="modal-iframe" id="register-frame" src="pages/register.html" title="Formulario de registro"></iframe>
         </div>
     </div>
 
+    <!-- Modal: Recuperar contrasena -->
     <div class="modal-shell hidden" id="recovery-modal" aria-hidden="true">
         <div class="modal-panel modal-panel-recovery" role="dialog" aria-modal="true" aria-labelledby="recovery-modal-title">
-            <button type="button" class="modal-close" data-close-modal="recovery-modal" aria-label="Cerrar recuperación">×</button>
-            <h2 class="recovery-title" id="recovery-modal-title">Recuperar contraseña</h2>
-                    <p class="recovery-copy">Escribe el correo asociado a tu cuenta y te enviaremos un enlace para crear una nueva contraseña. El enlace expira en 30 minutos.</p>
+            <button type="button" class="modal-close" data-close-modal="recovery-modal" aria-label="Cerrar recuperaci&oacute;n">&times;</button>
+            <h2 class="recovery-title" id="recovery-modal-title">Recuperar contrase&ntilde;a</h2>
+            <p class="recovery-copy">Escribe el correo asociado a tu cuenta y te enviaremos un enlace para crear una nueva contrase&ntilde;a. El enlace expira en 30 minutos.</p>
 
             <form class="recovery-form" id="recovery-form">
                 <div class="recovery-field">
-                    <label for="recovery-email">Correo electrónico</label>
+                    <label for="recovery-email">Correo electr&oacute;nico</label>
                     <input type="email" id="recovery-email" name="recovery-email" placeholder="admin@hotel.com" autocomplete="email" required>
                 </div>
 
@@ -504,16 +756,13 @@
                 if (!event?.data || event.data.type !== 'register-success') {
                     return;
                 }
-
                 closeModal(registerModal);
-
                 const registerFrame = document.getElementById('register-frame');
                 if (registerFrame) {
                     registerFrame.src = registerFrame.src;
                 }
-
                 if (typeof showToast === 'function') {
-                    showToast('Registro exitoso. Ya puedes iniciar sesión.', 'success');
+                    showToast('Registro exitoso. Ya puedes iniciar sesion.', 'success');
                 }
             });
 
@@ -538,28 +787,27 @@
                 }
             });
 
-                // ── Detectar token de reset en la URL ──────────────────
+            // Detectar token de reset en la URL
             const urlParams = new URLSearchParams(window.location.search);
             const resetToken = urlParams.get('reset-token');
 
             if (resetToken) {
-                // Ocultar login normal y mostrar panel de nueva contraseña
                 document.querySelector('.login-container:not(#reset-panel)')?.style.setProperty('display', 'none');
                 document.getElementById('reset-panel')?.classList.add('visible');
 
                 document.getElementById('reset-form')?.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    const msg     = document.getElementById('reset-message');
-                    const btn     = document.getElementById('btn-reset');
-                    const pass1   = document.getElementById('reset-password').value.trim();
-                    const pass2   = document.getElementById('reset-password2').value.trim();
+                    const msg   = document.getElementById('reset-message');
+                    const btn   = document.getElementById('btn-reset');
+                    const pass1 = document.getElementById('reset-password').value.trim();
+                    const pass2 = document.getElementById('reset-password2').value.trim();
 
                     msg.classList.remove('error');
                     msg.textContent = '';
 
                     if (!pass1 || !pass2) { msg.textContent = 'Completa ambos campos.'; msg.classList.add('error'); return; }
-                    if (pass1 !== pass2)  { msg.textContent = 'Las contraseñas no coinciden.'; msg.classList.add('error'); return; }
-                    if (pass1.length < 4) { msg.textContent = 'Mínimo 4 caracteres.'; msg.classList.add('error'); return; }
+                    if (pass1 !== pass2)  { msg.textContent = 'Las contrasenas no coinciden.'; msg.classList.add('error'); return; }
+                    if (pass1.length < 4) { msg.textContent = 'Minimo 4 caracteres.'; msg.classList.add('error'); return; }
 
                     btn.disabled = true;
                     btn.textContent = 'Guardando...';
@@ -573,13 +821,13 @@
                         const data = await res.json();
                         if (!res.ok) throw new Error(data.error || 'Error al restablecer');
 
-                        msg.textContent = '✓ ' + (data.mensaje || 'Contraseña actualizada. Redirigiendo...');
+                        msg.textContent = '&#10003; ' + (data.mensaje || 'Contrasena actualizada. Redirigiendo...');
                         setTimeout(() => { window.location.href = 'login.html'; }, 2500);
                     } catch (err) {
                         msg.textContent = err.message;
                         msg.classList.add('error');
                         btn.disabled = false;
-                        btn.textContent = 'Guardar contraseña';
+                        btn.textContent = 'Guardar contrasena';
                     }
                 });
             }
@@ -592,7 +840,7 @@
 
                 if (!email) {
                     if (recoveryMessage) {
-                        recoveryMessage.textContent = 'Debes escribir un correo válido.';
+                        recoveryMessage.textContent = 'Debes escribir un correo valido.';
                         recoveryMessage.classList.add('error');
                     }
                     return;
@@ -613,7 +861,7 @@
                     const data = await response.json();
 
                     if (!response.ok) {
-                        throw new Error(data.error || data.message || 'No se pudo procesar la recuperación');
+                        throw new Error(data.error || data.message || 'No se pudo procesar la recuperacion');
                     }
 
                     if (recoveryMessage) {
