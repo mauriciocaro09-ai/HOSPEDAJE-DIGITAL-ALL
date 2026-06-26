@@ -516,6 +516,7 @@
     <script src="../js/toast.js"></script>
     <script src="../js/modal.js"></script>
     <script src="../js/api.js"></script>
+    <script src="../js/countries.js"></script>
     <script src="../js/validation.js"></script>
     <script>
         const registerModal = document.getElementById('register-modal');
@@ -525,6 +526,9 @@
             if (!registerModal) return;
             registerModal.showModal();
             document.body.style.overflow = 'hidden';
+            if (typeof iniciarAutocompletePaises === 'function') {
+                iniciarAutocompletePaises({ inputId: 'rm_pais' });
+            }
         }
 
         function closeRegisterModal() {
