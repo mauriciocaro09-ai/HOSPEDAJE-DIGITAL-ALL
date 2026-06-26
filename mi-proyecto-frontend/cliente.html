@@ -2271,7 +2271,20 @@
                         <h4>Información general</h4>
                         <div class="det-fila"><span>Reserva</span><strong>#${id}</strong></div>
                         <div class="det-fila"><span>Estado</span>${badge}</div>
-                        <div class="det-fila"><span>Habitación</span><strong>${r.NombreHabitacion || '—'}</strong></div>
+                        ${(() => {
+                            const habs = Array.isArray(r.habitaciones) && r.habitaciones.length
+                                ? r.habitaciones
+                                : r.NombreHabitacion ? [{ NombreHabitacion: r.NombreHabitacion }] : [];
+                            if (habs.length <= 1) {
+                                return `<div class="det-fila"><span>Habitación</span><strong>${habs[0]?.NombreHabitacion || '—'}</strong></div>`;
+                            }
+                            return `<div class="det-fila" style="align-items:flex-start;">
+                                <span style="padding-top:3px;">Habitaciones</span>
+                                <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+                                    ${habs.map(h => `<strong>${h.NombreHabitacion}</strong>`).join('')}
+                                </div>
+                            </div>`;
+                        })()}
                         <div class="det-fila"><span>Entrada</span><strong>${fmtF(r.FechaInicio)}</strong></div>
                         <div class="det-fila"><span>Salida</span><strong>${fmtF(r.FechaFinalizacion)}</strong></div>
                         <div class="det-fila"><span>Método de pago</span><strong>${r.NomMetodoPago || '—'}</strong></div>
