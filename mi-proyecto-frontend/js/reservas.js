@@ -284,6 +284,7 @@ const inicializarDatepickers = () => {
 
     fpInicio = flatpickr('#reserva-admin-fecha-inicio', {
         dateFormat: 'Y-m-d',
+        minDate: 'today',
         disable: [fechaEnRangosReservados],
         onChange: function(selectedDates, dateStr) {
             if (selectedDates.length) {
@@ -298,6 +299,7 @@ const inicializarDatepickers = () => {
 
     fpFin = flatpickr('#reserva-admin-fecha-fin', {
         dateFormat: 'Y-m-d',
+        minDate: 'today',
         disable: [fechaEnRangosReservados],
         onChange: function(selectedDates, dateStr) {
             const inicio = document.getElementById('reserva-admin-fecha-inicio')?.value || '';

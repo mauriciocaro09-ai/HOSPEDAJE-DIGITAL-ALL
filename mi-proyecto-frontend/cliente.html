@@ -2699,7 +2699,8 @@
             if (nrBtnWrap) nrBtnWrap.style.display = 'none';
             actualizarResumen();
 
-            const hoy = new Date().toISOString().split('T')[0];
+            const _h = new Date();
+            const hoy = `${_h.getFullYear()}-${String(_h.getMonth()+1).padStart(2,'0')}-${String(_h.getDate()).padStart(2,'0')}`;
             $('nr-fecha-inicio').min = hoy;
             $('nr-fecha-fin').min    = hoy;
 
@@ -3414,6 +3415,16 @@
 
             if (!idHab || !inicio || !fin || !metodo) {
                 errBox.textContent = 'Por favor completa todos los campos obligatorios (habitación, fechas y método de pago).';
+                errBox.classList.remove('hidden');
+                errBox.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            // Validar que la fecha de entrada no sea pasada (hora local)
+            const _hv = new Date();
+            const hoyValidacion = `${_hv.getFullYear()}-${String(_hv.getMonth()+1).padStart(2,'0')}-${String(_hv.getDate()).padStart(2,'0')}`;
+            if (inicio < hoyValidacion) {
+                errBox.textContent = 'La fecha de entrada no puede ser anterior a hoy.';
                 errBox.classList.remove('hidden');
                 errBox.scrollIntoView({ behavior: 'smooth' });
                 return;
